@@ -1,5 +1,16 @@
-set cin aw ai is ts=4 sw=4 tm=50 nu noeb bg=dark ru cul
-sy on   |   im jk <esc>   |   im kj <esc>   |   no ; :
+set smartindent
+syntax on
+set tabstop=2
+set shiftwidth=2
+set number
+set smartcase
+set incsearch
+set hlsearch
+
+" optional
+set mouse=a
+set clipboard=unnamed #plus
+
 " Select region and then type :Hash to hash your selection.
 " Useful for verifying that there aren't mistypes.
 ca Hash w !cpp -dD -P -fpreprocessed \| tr -d '[:space:]' \

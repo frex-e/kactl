@@ -71,3 +71,7 @@ Presumably good will is to be assumed from other authors, though, and in many ca
 To help trace things back, sources and authors are noted in source files.
 
 Everything in `stress-tests` is implicitly CC0, except reference implementations taken from around the Internet.
+
+## Local additions
+
+Snippets taken from `mine.typ` (and which KACTL entries they replaced) are listed in [doc/mine-integration.md](./doc/mine-integration.md).

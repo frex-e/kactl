@@ -2,6 +2,12 @@
 
 \section{Fundamentals}
 	\kactlimport{BellmanFord.h}
+	\subsection{Johnson's algorithm}
+		All-pairs shortest paths with negative weights and no
+		negative cycles. Run Bellman-Ford with every vertex at
+		distance 0 (or from a virtual source); check for negative
+		cycles. Reweight $w'(u,v)=w(u,v)+h(u)-h(v)$, then Dijkstra
+		from each source.
 	\kactlimport{FloydWarshall.h}
 	\kactlimport{TopoSort.h}
 

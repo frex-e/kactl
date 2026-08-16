@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 DIR=${1:-.}
+CXX="${CXX:-g++-15}"
+export CXX
 
 # use a precompiled header for the template to improve perf
-g++ -Wall -Wextra -Wfatal-errors -Wconversion -std=c++17 -x c++-header $DIR/content/contest/template.cpp
+$CXX -Wall -Wextra -Wfatal-errors -Wconversion -std=c++17 -x c++-header $DIR/content/contest/template.cpp
 trap "rm -f $DIR/content/contest/template.cpp.gch" EXIT
 
 SCRIPT_DIR=$DIR/doc/scripts

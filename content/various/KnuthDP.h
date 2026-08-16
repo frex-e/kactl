@@ -2,9 +2,44 @@
  * Author: Simon Lindholm
  * License: CC0
  * Source: http://codeforces.com/blog/entry/8219
- * Description: When doing DP on intervals: $a[i][j] = \min_{i < k < j}(a[i][k] + a[k][j]) + f(i, j)$, where the (minimal) optimal $k$ increases with both $i$ and $j$,
- *  one can solve intervals in increasing order of length, and search $k = p[i][j]$ for $a[i][j]$ only between $p[i][j-1]$ and $p[i+1][j]$.
- *  This is known as Knuth DP. Sufficient criteria for this are if $f(b,c) \le f(a,d)$ and $f(a,c) + f(b,d) \le f(a,d) + f(b,c)$ for all $a \le b \le c \le d$.
- *  Consider also: LineContainer (ch. Data structures), monotone queues, ternary search.
+ * Description: Interval DP
+ *  $dp(i,j)=\min_{i\le k<j}(dp(i,k)+dp(k+1,j))+C(i,j)$.
+ *  Any fixed offsets from $k$ work. Let $opt(i,j)$ be an
+ *  optimal $k$. Need
+ *  $opt(i,j-1)\le opt(i,j)\le opt(i+1,j)$.
+ *  Enough if $C(b,c)\le C(a,d)$ and quadrangle
+ *  $C(a,c)+C(b,d)\le C(a,d)+C(b,c)$ for
+ *  $a\le b\le c\le d$ (``wider gets worse faster'').
+ *  Useful $C$: $C(i,j)+C(i+1,j+1)\le C(i,j+1)+C(i+1,j)$;
+ *  $C(i,j)=\sum_{k=i}^j w_k$;
+ *  $C(i,j)=g(x_j-x_i)$ with $x$ increasing, $g$ convex;
+ *  $C(i,j)=\min(A_i,B_j)$ (or max);
+ *  $C(i,j)=\max(0,x_j-x_i-\Delta)$ for $\Delta>0$.
+ *  Also consider LineContainer, Li Chao, monotone queues.
  * Time: O(N^2)
+ * Status: untested
  */
+#pragma once
+
+template<class F>
+ll knuthDP(int N, F C) {
+	vector<vector<ll>> dp(N, vector<ll>(N));
+	vector<vi> opt(N, vi(N));
+	rep(i,0,N) opt[i][i] = i; // set dp[i][i] if needed
+	for (int i = N - 2; i >= 0; i--) {
+		rep(j,i+1,N) {
+			ll mn = LLONG_MAX;
+			ll cost = C(i, j);
+			int hi = min(j - 1, opt[i + 1][j]);
+			rep(k, opt[i][j - 1], hi + 1) {
+				ll val = dp[i][k] + dp[k + 1][j] + cost;
+				if (mn >= val) {
+					opt[i][j] = k;
+					mn = val;
+				}
+			}
+			dp[i][j] = mn;
+		}
+	}
+	return dp[0][N - 1];
+}

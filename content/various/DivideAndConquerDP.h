@@ -3,7 +3,22 @@
  * License: CC0
  * Source: Codeforces
  * Description: Given $a[i] = \min_{lo(i) \le k < hi(i)}(f(i, k))$ where the (minimal)
- * optimal $k$ increases with $i$, computes $a[i]$ for $i = L..R-1$.
+ *  optimal $k$ increases with $i$, computes $a[i]$ for $i = L..R-1$.
+ *  Layered form (quadrangle on $C$ is sufficient):
+ *  $\mathrm{dp}(t,j)=\min_{0\le k\le j}\mathrm{dp}(t-1,k-1)+C(k,j)$.
+ *  See KnuthDP.h for quadrangle patterns.
+ * Usage:
+ *  Fill in the four hooks, then call solve(L, R) to fill
+ *  a[L..R-1].
+ *  lo(i), hi(i): allowed k is the half-open range [lo(i), hi(i)).
+ *  f(i, k): cost of choosing k at index i.
+ *  store(i, k, v): save a[i] = v (argmin k).
+ *  rec(L, R, LO, HI) solves i in [L, R), knowing the
+ *  optimal k lies in [LO, HI).
+ *  solve(L, R) = rec(L, R, -inf, +inf).
+ *  For the layered DP above: lo(j)=0, hi(j)=j+1,
+ *  f(j,k)=(k ? dpbefore[k-1] : 0)+C(k,j),
+ *  store into dpafter[j], then swap layers.
  * Time: O((N + (hi-lo)) \log N)
  * Status: tested on http://codeforces.com/contest/321/problem/E
  */
