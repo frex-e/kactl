@@ -241,16 +241,45 @@ def discover_files(chapter_id: str, imports: dict[str, bool]) -> list[Path]:
     return list(files.values())
 
 
+def wrap_ordo(text: str) -> str:
+    """Wrap bare O(...) in $...$, leaving surrounding prose in text mode.
+
+    Wrapping a whole Time line (e.g. Simplex.h) as math drops spaces.
+    """
+    out: list[str] = []
+    i = 0
+    in_math = False
+    while i < len(text):
+        if text[i] == "$":
+            in_math = not in_math
+            out.append("$")
+            i += 1
+            continue
+        if not in_math and text.startswith("O(", i):
+            depth = 0
+            j = i + 1
+            while j < len(text):
+                if text[j] == "(":
+                    depth += 1
+                elif text[j] == ")":
+                    depth -= 1
+                    if depth == 0:
+                        j += 1
+                        break
+                j += 1
+            out.append("$" + text[i:j] + "$")
+            i = j
+            continue
+        out.append(text[i])
+        i += 1
+    return "".join(out)
+
+
 def wrap_time(t: str) -> str:
     t = t.strip()
     if not t:
         return ""
-    if "$" in t:
-        return t
-    # Bare O(...) → math-ish for KaTeX
-    if t.startswith("O(") or t.startswith("O ("):
-        return f"${t}$"
-    return t
+    return wrap_ordo(t)
 
 
 def main():

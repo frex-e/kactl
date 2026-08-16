@@ -344,6 +344,11 @@ input {
   font-size: 0.92rem;
 }
 
+.detail-meta > div {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .meta-label {
   display: inline-block;
   margin-right: 0.4rem;

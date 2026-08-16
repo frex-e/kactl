@@ -73,7 +73,13 @@ export default function App() {
     const ms = new MiniSearch<Snippet>({
       fields: ['name', 'description', 'usage', 'code', 'id'],
       storeFields: ['id'],
-      searchOptions: { boost: { name: 4, description: 2 }, prefix: true, fuzzy: 0.15 },
+      processTerm: (term) => term.toLowerCase(),
+      searchOptions: {
+        boost: { name: 4, description: 2 },
+        prefix: true,
+        fuzzy: 0.15,
+        processTerm: (term) => term.toLowerCase(),
+      },
     })
     ms.addAll(data.snippets)
     return ms
@@ -86,13 +92,30 @@ export default function App() {
     if (!showExcluded) list = list.filter((s) => s.includedInPdf)
     const q = query.trim()
     if (q && searchEngine) {
-      const hits = new Set(searchEngine.search(q).map((h) => h.id as string))
+      const hits = new Set(
+        searchEngine
+          .search(q, { prefix: true, fuzzy: 0.15, boost: { name: 4, description: 2 } })
+          .map((h) => h.id as string),
+      )
       list = list.filter((s) => hits.has(s.id))
     }
     return list
   }, [data, chapter, showExcluded, query, searchEngine])
 
-  const selected = selectedId ? byId.get(selectedId) ?? null : null
+  useEffect(() => {
+    if (!filtered.length) return
+    if (selectedId && filtered.some((s) => s.id === selectedId)) return
+    const next = filtered[0]
+    setSelectedId(next.id)
+    setHash(next.id)
+  }, [filtered, selectedId])
+
+  const selected =
+    selectedId && filtered.some((s) => s.id === selectedId)
+      ? (byId.get(selectedId) ?? null)
+      : filtered.length
+        ? (byId.get(filtered[0].id) ?? null)
+        : null
 
   function selectSnippet(id: string) {
     setSelectedId(id)
