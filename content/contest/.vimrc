@@ -14,4 +14,5 @@ set clipboard=unnamed #plus
 " Select region and then type :Hash to hash your selection.
 " Useful for verifying that there aren't mistypes.
 ca Hash w !cpp -dD -P -fpreprocessed \| tr -d '[:space:]' \
- \| md5sum \| cut -c-6
+ \| sh -c 'if command -v md5sum >/dev/null; then md5sum; else md5 -q; fi' \
+ \| cut -c-6

@@ -1,16 +1,29 @@
 #!/usr/bin/env bash
 DIR=${1:-.}
-CXX="${CXX:-g++-15}"
-export CXX
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck source=cxx.sh
+. "$SCRIPT_DIR/cxx.sh"
+echo "Using CXX=$CXX"
 
 # use a precompiled header for the template to improve perf
 $CXX -Wall -Wextra -Wfatal-errors -Wconversion -std=c++17 -x c++-header $DIR/content/contest/template.cpp
-trap "rm -f $DIR/content/contest/template.cpp.gch" EXIT
 
-SCRIPT_DIR=$DIR/doc/scripts
-tests="$(find $DIR/content -name '*.h' | grep -vFf $SCRIPT_DIR/skip_headers)"
+SKIP_FILE=$(mktemp)
+cleanup() {
+	rm -f "$SKIP_FILE" \
+		"$DIR/content/contest/template.cpp.gch" \
+		"$DIR/content/contest/template.cpp.pch"
+}
+trap cleanup EXIT
+cat "$SCRIPT_DIR/skip_headers" > "$SKIP_FILE"
+# avx2 target pragmas only compile on x86
+if ! echo | $CXX -dM -E -x c++ - 2>/dev/null | grep -Eq '__x86_64__|__i386__'; then
+	printf 'Pragmas.h\nSIMD.h\n' >> "$SKIP_FILE"
+fi
+
+tests="$(find $DIR/content -name '*.h' | grep -vFf $SKIP_FILE)"
 echo "skipped: "
-find $DIR/content -name '*.h' | grep -Ff $SCRIPT_DIR/skip_headers
+find $DIR/content -name '*.h' | grep -Ff $SKIP_FILE
 declare -i pass=0
 declare -i fail=0
 failHeaders=""

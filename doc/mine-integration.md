@@ -47,8 +47,8 @@ Also in chapter text (no new `.h`): contest I/O notes, Johnson’s algorithm, ex
 | `content/data-structures/chapter.tex` | new trees / Li Chao / trie |
 | `content/numerical/chapter.tex` | RREF, XOR basis |
 
-Compile scripts (`doc/scripts/*.sh`) and the contest `.bashrc` alias default to `g++-15` (override with `CXX=...`).
-`Pragmas.h` and `SIMD.h` are skipped in header compile tests because `avx2` is invalid on ARM.
+Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (override with `CXX=...`). The contest `.bashrc` `c` alias stays as `g++` for Linux contest VMs.
+`Pragmas.h` and `SIMD.h` are skipped in header compile tests on non-x86 (avx2 is invalid on ARM) and compiled on x86 Linux.
 
 ## Tests
 

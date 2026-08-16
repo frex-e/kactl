@@ -1,10 +1,24 @@
 #!/usr/bin/env bash
 DIR=${1:-.}
-CXX="${CXX:-g++-15}"
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+# shellcheck source=cxx.sh
+. "$SCRIPT_DIR/cxx.sh"
+echo "Using CXX=$CXX"
 
 # use a precompiled header for the template to improve perf
 $CXX -Wall -Wfatal-errors -Wconversion -std=c++17 -O2 $DIR/stress-tests/utilities/template.h
-trap "rm -f $DIR/stress-tests/utilities/template.h.gch" EXIT
+trap "rm -f $DIR/stress-tests/utilities/template.h.gch $DIR/stress-tests/utilities/template.h.pch" EXIT
+
+now() {
+	# GNU date has %N; BSD date prints a literal N
+	local t
+	t=$(date +%s.%N 2>/dev/null) || true
+	if [[ -z $t || $t == *N* ]]; then
+		date +%s
+	else
+		echo "$t"
+	fi
+}
 
 tests="$(find $DIR/stress-tests -name '*.cpp')"
 declare -i pass=0
@@ -13,7 +27,7 @@ failTests=""
 ulimit -s 524288 # For 2-sat test
 for test in $tests; do
     echo "$(basename $test): "
-    start=`date +%s.%N`
+    start=$(now)
     $CXX -Wall -Wfatal-errors -Wconversion -std=c++17 -O2 $test && ./a.out
     retCode=$?
     if (($retCode != 0)); then
@@ -23,7 +37,7 @@ for test in $tests; do
     else
         pass+=1
     fi
-    end=`date +%s.%N`
+    end=$(now)
     runtime=$( echo "$end - $start" | bc -l )
     echo "Took $runtime seconds"
     rm -f a.out
