@@ -20,10 +20,12 @@ q_0 & d_1 & p_1 & 0 & \cdots & 0\\
 This is useful for solving problems on the type
 \[ a_i=b_ia_{i-1}+c_ia_{i+1}+d_i,\,1\leq i\leq n, \]
 where $a_0$, $a_{n+1}$, $b_i$, $c_i$ and $d_i$ are known. $a$ can then be obtained from
-\begin{align*}
+\[
+\begin{aligned}
 \{a_i\}=\textrm{tridiagonal}(&\{1,-1,-1,...,-1,1\}, \{0,c_1,c_2,\dots,c_n\},\\
 &\{b_1,b_2,\dots,b_n,0\}, \{a_0,d_1,d_2,\dots,d_n,a_{n+1}\}).
-\end{align*}
+\end{aligned}
+\]
 Fails if the solution is not unique.
 
 If $|d_i| > |p_i| + |q_{i-1}|$ for all $i$, or $|d_i| > |p_{i-1}| + |q_i|$, or the matrix is positive definite,
