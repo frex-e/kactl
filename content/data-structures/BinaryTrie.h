@@ -12,10 +12,11 @@
 #pragma once
 
 struct BinaryTrie {
+	typedef unsigned U;
 	BinaryTrie *nxt[2];
-	unsigned size = 0;
+	U size = 0;
 	BinaryTrie() { nxt[0] = nxt[1] = 0; }
-	bool insert(unsigned x, int ind = 31) {
+	bool insert(U x, int ind = 31) {
 		if (ind < 0) {
 			if (size == 0) return (size = 1);
 			return false;
@@ -26,7 +27,7 @@ struct BinaryTrie {
 		size += res;
 		return res;
 	}
-	unsigned mex(unsigned xr, unsigned cur = 0, int ind = 31) {
+	U mex(U xr, U cur = 0, int ind = 31) {
 		if (ind < 0) return cur;
 		int bit = (xr >> ind) & 1;
 		if (nxt[bit] && nxt[bit]->size == (1u << ind)) {
@@ -38,8 +39,7 @@ struct BinaryTrie {
 			return nxt[bit]->mex(xr, cur, ind - 1);
 		return cur;
 	}
-	unsigned maxxor(unsigned xr, unsigned cur = 0,
-			int ind = 31) {
+	U maxxor(U xr, U cur = 0, int ind = 31) {
 		if (ind < 0) return cur;
 		int bit = (xr >> ind) & 1;
 		if (nxt[!bit])
