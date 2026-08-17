@@ -6,8 +6,8 @@
  * Description: Eulerian undirected/directed path/cycle algorithm.
  * Input should be a vector of (dest, global edge index), where
  * for undirected graphs, forward/backward edges have the same index.
- * Returns a list of nodes in the Eulerian path/cycle with src at both start and end, or
- * empty list if no cycle/path exists.
+ * Returns a list of nodes in the Eulerian path/cycle starting at src (and ending
+ * at src if it is a cycle), or empty list if no path/cycle exists.
  * To get edge indices back, add \texttt{.second} to \texttt{s} and \texttt{ret}.
  * Time: O(V + E)
  * Status: stress-tested
