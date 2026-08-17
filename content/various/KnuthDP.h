@@ -14,7 +14,7 @@
  *  $C(i,j)=\sum_{k=i}^j w_k$ ($w\ge 0$);
  *  $C(i,j)=g(x_j-x_i)$, $x$ incr, $g$ convex nondec.;
  *  $C(i,j)=\min(A_i,B_j)$ if $A$ decreasing, $B$ increasing;
- *  $C(i,j)=\max(0,x_j-x_i-\Delta)$ for $\Delta>0$.
+ *  $C(i,j)=\max(0,x_j-x_i-\Delta)$ ($x$ incr, $\Delta>0$).
  *  Also consider LineContainer, Li Chao, monotone queues.
  * Time: O(N^2)
  * Status: stress-tested

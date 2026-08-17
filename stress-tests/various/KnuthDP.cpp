@@ -55,7 +55,7 @@ int main() {
 		auto C = [&](int i, int j) { return min(A[i], B[j]); };
 		check(N, C);
 	}
-	// C(i,j) = max(0, x_j - x_i - Delta)
+	// C(i,j) = max(0, x_j - x_i - Delta), x increasing
 	rep(it,0,50) {
 		int N = rand() % 20 + 1;
 		vector<ll> x(N);
