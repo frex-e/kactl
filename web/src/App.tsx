@@ -334,6 +334,14 @@ export default function App() {
           <p className="brand-mark">KACTL</p>
           <h1 className="brand-title">Reference</h1>
           <p className="brand-sub">Searchable contest document</p>
+          <a
+            className="pdf-link"
+            href={`${import.meta.env.BASE_URL}kactl.pdf`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Latest PDF
+          </a>
         </div>
         <nav className="chapter-nav" aria-label="Chapters">
           <button

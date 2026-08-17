@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "index": "python3 scripts/index-snippets.py",
-    "predev": "npm run index",
+    "copy-pdf": "test -f ../kactl.pdf && mkdir -p public && cp ../kactl.pdf public/kactl.pdf || true",
+    "predev": "npm run index && npm run copy-pdf",
     "dev": "vite",
-    "prebuild": "npm run index",
+    "prebuild": "npm run index && npm run copy-pdf",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "oxlint"

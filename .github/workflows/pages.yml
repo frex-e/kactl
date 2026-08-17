@@ -6,6 +6,7 @@ on:
     paths:
       - 'web/**'
       - 'content/**'
+      - 'Makefile'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -21,14 +22,26 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - name: Install pdflatex
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            texlive-latex-base \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            texlive-plain-generic \
+            texlive-fonts-recommended
+      - name: Build PDF
+        run: make web-pdf
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: web/package-lock.json
-      - name: Install and build
+      - name: Install and build site
         working-directory: web
         run: |
           npm ci
