@@ -6,7 +6,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 echo "Using CXX=$CXX"
 
 # use a precompiled header for the template to improve perf
-$CXX -Wall -Wfatal-errors -Wconversion -std=c++17 -O2 $DIR/stress-tests/utilities/template.h
+$CXX -Wall -Wfatal-errors -Wconversion -std=c++20 -O2 $DIR/stress-tests/utilities/template.h
 trap "rm -f $DIR/stress-tests/utilities/template.h.gch $DIR/stress-tests/utilities/template.h.pch" EXIT
 
 now() {
@@ -28,7 +28,7 @@ ulimit -s 524288 # For 2-sat test
 for test in $tests; do
     echo "$(basename $test): "
     start=$(now)
-    $CXX -Wall -Wfatal-errors -Wconversion -std=c++17 -O2 $test && ./a.out
+    $CXX -Wall -Wfatal-errors -Wconversion -std=c++20 -O2 $test && ./a.out
     retCode=$?
     if (($retCode != 0)); then
         echo "Failed with $retCode"

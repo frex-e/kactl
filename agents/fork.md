@@ -15,7 +15,7 @@ The snippets site is this fork’s addition (not upstream). See [web.md](web.md)
 
 [content/contest/template.cpp](../content/contest/template.cpp) defines `pb`, `fr`, `sc` and dropped `cin.exceptions`. [content/contest/.vimrc](../content/contest/.vimrc) is personal; `:Hash` is kept.
 
-Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx.sh). The contest `.bashrc` `c` alias stays `g++` for Linux contest VMs — do not “fix” that to `g++-15`.
+Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx.sh) and use `-std=c++20`. The contest `.bashrc` `c` alias stays `g++` for Linux contest VMs — do not “fix” that to `g++-15`.
 
 ## Snippet API that diverges
 
@@ -29,7 +29,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 ## Local additions (summary)
 
-Added (kept alongside related upstream files where noted): `Random.h`, `BinaryTrie.h`, implicit `SparseSegmentTree.h` / `SparseLazySegmentTree.h`, `LiChao.h` (alongside `LineContainer.h`), `LinearSieve.h` (alongside Eratosthenes), `Mobius.h`, `RREF.h`, `XORBasis.h` (alongside `SolveLinearBinary.h`), `MemoryUsage.h`, `Pragmas.h`. Extra contest I/O notes, Johnson’s algorithm notes, bit builtins; Dinic is included in the PDF.
+Added (kept alongside related upstream files where noted): `Random.h`, `Output.h`, `BinaryTrie.h`, implicit `SparseSegmentTree.h` / `SparseLazySegmentTree.h`, `LiChao.h` (alongside `LineContainer.h`), `LinearSieve.h` (alongside Eratosthenes), `Mobius.h`, `RREF.h`, `XORBasis.h` (alongside `SolveLinearBinary.h`), `MemoryUsage.h`, `Pragmas.h`. Johnson’s algorithm notes, bit builtins; Dinic is included in the PDF.
 
 Replaced/modified: contest template and vimrc; lazy tree as above; SuffixArray extras; HLD; Knuth DP and Divide-and-Conquer DP notes/code.
 

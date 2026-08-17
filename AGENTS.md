@@ -27,7 +27,7 @@ prefer those instead of duplicating them.
   `make preprocess` (`python3 -m tools.kactl preprocess`).
 - The C++ compiler is auto-detected by `doc/scripts/cxx.sh` (prefers `g++-15/14/13`, falls
   back to `g++`; rejects Apple clang). Override with `CXX=...` if needed. Build uses
-  `-std=c++17`.
+  `-std=c++20`.
 - `make kactl` (and `make web-pdf`) rewrite the committed `kactl.pdf` and copy it to
   `web/public/kactl.pdf` for the snippets site. The repo-root PDF showing as dirty is
   expected — do **not** commit that churn unless you intend to update the shipped PDF.

@@ -36,6 +36,16 @@ class TestStripAnnotations(unittest.TestCase):
         self.assertNotIn("include-line", processed.code)
         self.assertNotIn("(double *)&rt", processed.code)
 
+    def test_output_format_is_included_as_code(self):
+        path = CONTENT / "contest" / "Output.h"
+        processed = process_path(path)
+        self.assertFalse(processed.error)
+        self.assertIn('cout << format("{:06b}", b);', processed.code)
+        self.assertIn('cout << format("{:b}", b);', processed.code)
+        self.assertIn("setprecision(6)", processed.code)
+        self.assertNotIn("include-line", processed.code)
+        self.assertNotIn("bitset", processed.code)
+
     def test_keep_include_stays_in_listing(self):
         path = CONTENT / "data-structures" / "OrderStatisticTree.h"
         processed = process_path(path)
