@@ -6,18 +6,20 @@ All commands below run from the **repo root**. `make help` lists targets.
 
 | Target | What |
 |---|---|
-| `make kactl` | Two-pass `pdflatex` of `content/kactl.tex`, after `test-session.pdf`. Writes `kactl.pdf` and copies it to `web/public/kactl.pdf`. |
-| `make fast` | Single LaTeX pass (quicker, worse refs/TOC). Same install step. |
-| `make web-pdf` | Two-pass PDF **without** `test-session.pdf`. This is what GitHub Pages uses. |
+| `make preprocess` | Shared step: listings under `build/listings/`, `web/public/snippets.json`, `build/header.tmp.seed`. |
+| `make kactl` | Preprocess, `test-session.pdf`, then two-pass `pdflatex` of `content/kactl.tex`. Writes `kactl.pdf` and copies it to `web/public/kactl.pdf`. |
+| `make fast` | Preprocess plus a single LaTeX pass (quicker, worse refs/TOC). Same install step. |
+| `make web-pdf` | Preprocess plus two-pass PDF **without** `test-session.pdf`. This is what GitHub Pages uses. |
 | `make showexcluded` | Headers/sources in `content/` with no `\kactlimport`. |
+| `make test-preprocess` | Unit tests for snippet stripping, chapter parsing, and print-header. |
 
-`pdflatex` is invoked with **`-shell-escape`** (required: the package shells out to `preprocessor.py`).
+`pdflatex` is invoked with **`-shell-escape`** (required: page headers shell out to `python3 -m tools.kactl print-header`). Make copies `build/header.tmp.seed` to `build/header.tmp` before each pass; print-header is the only remaining `write18`. Snippet listings are generated *before* LaTeX, not per `\kactlimport`.
 
-TeX packages needed: `texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`, `texlive-plain-generic` (`ulem.sty`), `texlive-fonts-recommended`. Python 3 is required for the preprocessor.
+TeX packages needed: `texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`, `texlive-plain-generic` (`ulem.sty`), `texlive-fonts-recommended`. Python 3 is required for preprocess.
 
 Dirty repo-root `kactl.pdf` after a build is expected. **Do not commit it** unless the task is to update the shipped PDF. `web/public/kactl.pdf` and `web/public/snippets.json` are gitignored.
 
-Keep the notebook at **25 pages + cover**.
+Keep the notebook at **25 pages + cover**. That is an ICPC policy cap, not a CI check.
 
 ## Header compile check
 
@@ -45,7 +47,7 @@ Helpers live in `stress-tests/utilities/` (`template.h`, graph generators, etc.)
 
 ## CI
 
-- [`.github/workflows/ccpp.yml`](../.github/workflows/ccpp.yml) — on push/PR to `main`: `make kactl`, `make test-compiles`, `make test`.
-- [`.github/workflows/pages.yml`](../.github/workflows/pages.yml) — on push to `main` (paths: `web/**`, `content/**`, `Makefile`, the workflow itself): `make web-pdf`, then `npm ci && npm run build` in `web/`, deploy `web/dist`.
+- [`.github/workflows/ccpp.yml`](../.github/workflows/ccpp.yml) — on push/PR to `main`: `make kactl`, `make test-preprocess`, `make test-compiles`, `make test`.
+- [`.github/workflows/pages.yml`](../.github/workflows/pages.yml) — on push to `main` (paths: `web/**`, `content/**`, `tools/**`, `Makefile`, the workflow itself): `make web-pdf`, then `npm ci && npm run build` in `web/`, deploy `web/dist`.
 
 When changing snippets, the usual bar is: header still compiles, a stress test exists and passes if the algorithm is new/non-trivial, and the PDF still builds if `chapter.tex` or headers changed. Full `make test` takes a couple of minutes.

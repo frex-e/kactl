@@ -21,7 +21,10 @@ prefer those instead of duplicating them.
   TeX Live (`texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`,
   `texlive-plain-generic` — needed for `ulem.sty`, `texlive-fonts-recommended`), `g++`, and
   `bc`. There are no language package managers, lockfiles, or `.env`/secrets in this repo.
-- `pdflatex` is invoked with `-shell-escape` (required by the build).
+- `pdflatex` is invoked with `-shell-escape` (required: page headers shell out to
+  `python3 -m tools.kactl print-header`). Make copies `header.tmp.seed` to
+  `header.tmp` before each pass. Snippet listings are generated first by
+  `make preprocess` (`python3 -m tools.kactl preprocess`).
 - The C++ compiler is auto-detected by `doc/scripts/cxx.sh` (prefers `g++-15/14/13`, falls
   back to `g++`; rejects Apple clang). Override with `CXX=...` if needed. Build uses
   `-std=c++17`.

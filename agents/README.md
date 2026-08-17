@@ -9,8 +9,9 @@ This is a **build/test project, not a service**. There is no web server, API, da
 | Path | Role |
 |---|---|
 | `content/` | Notebook source. One subdirectory per chapter; `content/kactl.tex` is the root TeX file (team page, chapter order). |
-| `content/tex/` | LaTeX package (`kactlpkg.sty`) and [preprocessor.py](../content/tex/preprocessor.py) (snippet → listings). |
-| `web/` | Searchable snippets SPA. Indexer: [web/scripts/index-snippets.py](../web/scripts/index-snippets.py). |
+| `content/tex/` | LaTeX package (`kactlpkg.sty`). Page headers still `write18` to `python3 -m tools.kactl print-header`. |
+| `tools/kactl/` | One mill: snippet stripping, chapter parse, listings, `snippets.json`, print-header. |
+| `web/` | Searchable snippets SPA. Consumes `web/public/snippets.json` from `make preprocess`. |
 | `stress-tests/` | Stress tests (`make test`). Utilities in `stress-tests/utilities/`. |
 | `doc/scripts/` | Compile/test helpers (`compile-all.sh`, `run-all.sh`, `cxx.sh`, `skip_headers`). |
 | `.github/workflows/` | `ccpp.yml` (PDF + compiles + stress), `pages.yml` (PDF + snippets site deploy). |
@@ -18,7 +19,7 @@ This is a **build/test project, not a service**. There is no web server, API, da
 
 ## Golden rules
 
-- Use `make kactl` / `make fast` / `make web-pdf` / `make test-compiles` / `make test` from the repo root.
+- Use `make kactl` / `make fast` / `make web-pdf` / `make preprocess` / `make test-compiles` / `make test` from the repo root.
 - `make kactl` and `make web-pdf` rewrite repo-root `kactl.pdf` and copy it to `web/public/kactl.pdf`. Dirty `kactl.pdf` is expected — **do not commit that churn** unless the task is to ship an updated PDF. `web/public/kactl.pdf` and `web/public/snippets.json` are gitignored.
 - Do not treat `web/` as something that must be “served” for algorithm or PDF work. The snippets site is a static SPA; see [web.md](web.md) only when changing it.
 - Do not blindly copy [upstream KACTL](https://github.com/kth-competitive-programming/kactl). This fork has branding, snippet, and API deltas — [fork.md](fork.md).
@@ -28,5 +29,5 @@ This is a **build/test project, not a service**. There is no web server, API, da
 
 - Adding or editing a snippet / chapter TeX: [content.md](content.md)
 - Building the PDF, compiling headers, running stress tests, CI: [verify.md](verify.md)
-- Snippets site, indexer, search, copy-with-deps: [web.md](web.md)
+- Snippets site, search, copy-with-deps: [web.md](web.md)
 - How this fork differs from upstream: [fork.md](fork.md)
