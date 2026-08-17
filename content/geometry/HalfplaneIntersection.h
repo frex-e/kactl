@@ -62,5 +62,17 @@ vector<P> halfPlaneInter(vector<HP> h) {
 	vector<P> res;
 	rep(i,0,sz(dq))
 		res.push_back(hpI(dq[i], dq[(i+1)%sz(dq)]));
-	return res;
+	vector<P> out;
+	for (P p : res) {
+		if (out.empty() || (p - out.back()).dist() > 1e-6)
+			out.push_back(p);
+	}
+	if (sz(out) >= 2 && (out[0] - out.back()).dist() <= 1e-6)
+		out.pop_back();
+	if (sz(out) < 3) return {};
+	double a = 0;
+	rep(i,0,sz(out))
+		a += out[i].cross(out[(i+1)%sz(out)]);
+	if (fabs(a) < 1e-8) return {};
+	return out;
 }

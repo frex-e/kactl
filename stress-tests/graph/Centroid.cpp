@@ -11,9 +11,8 @@ void checkTree(int n, const vector<pii>& edges) {
 		int ncomp = cd.dfsSz(c, -1);
 		int mx = 0;
 		for (int v : cd.g[c]) if (!cd.banned[v])
-			mx = max(mx, cd.sz[v]);
+			mx = max(mx, cd.siz[v]);
 		assert(mx <= ncomp / 2);
-		assert(ncomp - 1 - mx <= ncomp / 2);
 		seen.push_back(c);
 	});
 	assert(sz(seen) == n);

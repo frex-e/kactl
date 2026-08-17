@@ -21,9 +21,9 @@ void testN(ll n) {
 int main() {
 	floorBlocks(0, [&](ll, ll, ll) { assert(false); });
 	rep(n,1,5000) testN(n);
-	for (ll n : {1LL, 2, 3, (ll)1e6, (ll)1e12})
+	for (ll n : {1LL, 2LL, 3LL, 1000000LL, 1000000000000LL})
 		testN(n);
-	ll n = 1e12, sum = 0;
+	ll n = 1000000000000LL, sum = 0;
 	floorBlocks(n, [&](ll l, ll r, ll q) {
 		sum += (r - l + 1) * q;
 	});

@@ -17,21 +17,21 @@
 struct Centroid {
 	vector<vi> g;
 	vector<bool> banned;
-	vi sz;
-	Centroid(int n) : g(n), banned(n), sz(n) {}
+	vi siz;
+	Centroid(int n) : g(n), banned(n), siz(n) {}
 	void ae(int a, int b) {
 		g[a].push_back(b);
 		g[b].push_back(a);
 	}
 	int dfsSz(int u, int p) {
-		sz[u] = 1;
+		siz[u] = 1;
 		for (int v : g[u]) if (v != p && !banned[v])
-			sz[u] += dfsSz(v, u);
-		return sz[u];
+			siz[u] += dfsSz(v, u);
+		return siz[u];
 	}
 	int dfsCen(int u, int p, int n) {
 		for (int v : g[u]) if (v != p && !banned[v])
-			if (sz[v] > n / 2) return dfsCen(v, u, n);
+			if (siz[v] > n / 2) return dfsCen(v, u, n);
 		return u;
 	}
 	template<class F>

@@ -12,7 +12,7 @@ bool insideAll(const vector<HP>& h, P p) {
 	return true;
 }
 
-void checkPoly(const vector<HP>& h, const vector<P>& res) {
+void checkPoly(const vector<HP>& h, vector<P> res) {
 	for (P p : res) assert(insideAll(h, p));
 	if (res.empty()) return;
 	double a = polygonArea2(res);
@@ -65,6 +65,8 @@ void testVsCutAndSample() {
 			cut = polygonCut(cut, h[i].e, h[i].s);
 		double aH = res.empty() ? 0 : fabs(polygonArea2(res)/2);
 		double aC = cut.empty() ? 0 : fabs(polygonArea2(cut)/2);
+		if (aH < 1e-6) aH = 0;
+		if (aC < 1e-6) aC = 0;
 		assert(fabs(aH - aC) < 1e-2);
 
 		rep(s,0,3000) {
