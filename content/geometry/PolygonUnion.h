@@ -5,7 +5,7 @@
  * Source: https://codeforces.com/gym/101673/submission/50481926
  * Description: Calculates the area of the union of $n$ polygons (not necessarily
  * convex). The points within each polygon must be given in CCW order.
- * (Epsilon checks may optionally be added to sideOf/sgn, but shouldn't be needed.)
+ * (Epsilon checks may optionally be added to \texttt{sideOf}/\texttt{sgn}, but shouldn't be needed.)
  * Time: $O(N^2)$, where $N$ is the total number of points
  * Status: stress-tested, Submitted on ECNA 2017 Problem A
  */

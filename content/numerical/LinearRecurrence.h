@@ -4,8 +4,8 @@
  * License: CC0
  * Source: Chinese material
  * Description: Generates the $k$'th term of an $n$-order
- * linear recurrence $S[i] = \sum_j S[i-j-1]tr[j]$,
- * given $S[0 \ldots \ge n-1]$ and $tr[0 \ldots n-1]$.
+ * linear recurrence $\texttt{S[i]} = \sum_j \texttt{S[i-j-1]}\,\texttt{tr[j]}$,
+ * given \texttt{S[0 .. >= n-1]} and \texttt{tr[0 .. n-1]}.
  * Faster than matrix multiplication.
  * Useful together with Berlekamp--Massey.
  * Usage: linearRec({0, 1}, {1, 1}, k) // k'th Fibonacci number

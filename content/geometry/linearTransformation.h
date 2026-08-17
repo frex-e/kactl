@@ -5,7 +5,7 @@
  * Source:
  * Description:\\
 \begin{minipage}{75mm}
- Apply the linear transformation (translation, rotation and scaling) which takes line p0-p1 to line q0-q1 to point r.
+ Apply the linear transformation (translation, rotation and scaling) which takes line \texttt{p0}-\texttt{p1} to line \texttt{q0}-\texttt{q1} to point \texttt{r}.
 \end{minipage}
 \begin{minipage}{15mm}
 \vspace{-8mm}

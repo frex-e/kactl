@@ -5,9 +5,9 @@
  * Source: mine.typ
  * Description: Implicit segment tree with lazy range updates.
  *  Creates children on demand. Bounds inclusive.
- *  Change $V$, $U$, $id$, $def$, $idU$, $binop$,
- *  $applyUpdate$, $mergeUpdate$. Default is range add /
- *  range max.
+ *  Change \texttt{V}, \texttt{U}, \texttt{id}, \texttt{def},
+ *  \texttt{idU}, \texttt{binop}, \texttt{applyUpdate},
+ *  \texttt{mergeUpdate}. Default is range add / range max.
  * Time: $O(\log R)$
  * Status: stress-tested
  */

@@ -4,7 +4,7 @@
  * License: CC0
  * Source:
  * Description: Class to handle points in 3D space.
- * 	T can be e.g. double or long long.
+ * 	\texttt{T} can be e.g. \texttt{double} or \texttt{long long}.
  * Usage:
  * Status: tested, except for phi and theta
  */

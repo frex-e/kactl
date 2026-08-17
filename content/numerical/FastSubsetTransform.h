@@ -4,8 +4,8 @@
  * License: GNU Free Documentation License 1.2
  * Source: csacademy
  * Description: Transform to a basis with fast convolutions of the form
- * $\displaystyle c[z] = \sum\nolimits_{z = x \oplus y} a[x] \cdot b[y]$,
- * where $\oplus$ is one of AND, OR, XOR. The size of $a$ must be a power of two.
+ * $\displaystyle \texttt{c[z]} = \sum\nolimits_{z = x \oplus y} \texttt{a[x]} \cdot \texttt{b[y]}$,
+ * where $\oplus$ is one of AND, OR, XOR. The size of \texttt{a} must be a power of two.
  * Time: O(N \log N)
  * Status: stress-tested
  */

@@ -8,7 +8,7 @@
  * for undirected graphs, forward/backward edges have the same index.
  * Returns a list of nodes in the Eulerian path/cycle with src at both start and end, or
  * empty list if no cycle/path exists.
- * To get edge indices back, add .second to s and ret.
+ * To get edge indices back, add \texttt{.second} to \texttt{s} and \texttt{ret}.
  * Time: O(V + E)
  * Status: stress-tested
  */

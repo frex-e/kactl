@@ -4,7 +4,7 @@
  * License: CC0
  * Source: own work
  * Description: Returns the smallest $x > 0$ s.t. $a^x = b \pmod m$, or
- * $-1$ if no such $x$ exists. modLog(a,1,m) can be used to
+ * $-1$ if no such $x$ exists. \texttt{modLog(a,1,m)} can be used to
  * calculate the order of $a$.
  * Time: $O(\sqrt m)$
  * Status: tested for all 0 <= a,x < 500 and 0 < m < 500.

@@ -3,7 +3,7 @@
  * Date: 2026-08-16
  * License: CC0
  * Source: mine.typ
- * Description: Fills $\mu(n)$ for $n \in [0, sz)$.
+ * Description: Fills $\mu(n)$ for $n \in [0, \texttt{sz})$.
  *  See chapter text for inversion formulas.
  * Time: $O(N \log N)$
  * Status: stress-tested

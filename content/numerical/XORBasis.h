@@ -4,8 +4,8 @@
  * License: CC0
  * Source: mine.typ
  * Description: Incremental XOR basis (span of vectors over
- *  $\mathbb F_2$). Insert online; $x$ is in the span iff it
- *  reduces to 0. Span size is $2^{|basis|}$.
+ *  $\mathbb F_2$). Insert online; \texttt{x} is in the span iff it
+ *  reduces to 0. Span size is $2^{|\texttt{basis}|}$.
  *  \texttt{XorBasis} is for ints; \texttt{BigBasis} for
  *  bitblocks. For solving $Ax=b$, see SolveLinearBinary.
  * Time: $O(B\cdot |basis|)$ per insert
