@@ -16,6 +16,19 @@
 	\kactlimport{MinCostMaxFlow.h}
 	\kactlimport{EdmondsKarp.h}
 	\kactlimport{Dinic.h}
+	\subsection{Demands and lower bounds}
+		Edge $u\to v$ with capacity in $[L,R]$: force $L$
+		units by \texttt{demand[v]+=L}, \texttt{demand[u]-=L},
+		then replace the edge by capacity $R-L$.
+		($L=0$ is an ordinary capacity-$R$ edge.)
+
+		Vertex demand $d(v)$ (positive = must receive $d$ more
+		inflow than outflow): add source $S$ and sink $T$,
+		edge $S\to v$ cap $d(v)$ if $d>0$, $v\to T$ cap
+		$-d(v)$ if $d<0$. Feasible iff $\sum d=0$ and max flow
+		$S\to T$ equals $\sum_{d>0} d(v)$. A circulation is
+		this check after the lower-bound rewrite (then
+		$d\equiv 0$ except for the forced $L$ units).
 	\kactlimport{MinCut.h}
 	\kactlimport{GlobalMinCut.h}
 	\kactlimport{GomoryHu.h}
@@ -45,6 +58,7 @@
 	\kactlimport{BinaryLifting.h}
 	\kactlimport{LCA.h}
 	\kactlimport{CompressTree.h}
+	\kactlimport{Centroid.h}
 	\kactlimport{HLD.h}
 	\kactlimport{LinkCutTree.h}
 	\kactlimport{DirectedMST.h}
