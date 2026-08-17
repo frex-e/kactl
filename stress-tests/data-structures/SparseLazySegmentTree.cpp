@@ -30,6 +30,9 @@ void testLargeDomain() {
 	const int L = 0, R = 1'000'000'000;
 	SparseLazyNode tr;
 	assert(tr.query(L, R, 0, 0) == 0);
+	tr.update(L, R, 42, 42, 9); // point update is a degenerate range
+	assert(tr.query(L, R, 42, 42) == 9);
+	assert(tr.query(L, R, 0, 41) == 0);
 	tr.update(L, R, 10, 20, 5);
 	assert(tr.query(L, R, 10, 20) == 5);
 	assert(tr.query(L, R, 0, 9) == 0);
