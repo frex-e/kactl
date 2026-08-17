@@ -9,9 +9,9 @@ This is a **build/test project, not a service**. There is no web server, API, da
 | Path | Role |
 |---|---|
 | `content/` | Notebook source. One subdirectory per chapter; `content/kactl.tex` is the root TeX file (team page, chapter order). |
-| `content/tex/` | LaTeX package (`kactlpkg.sty`) and [preprocessor.py](../content/tex/preprocessor.py) (page-header helper during `pdflatex`). |
-| `tools/kactl/` | Shared preprocess: snippet stripping, chapter parse, listings + `snippets.json`. |
-| `web/` | Searchable snippets SPA. Indexer is `python3 -m tools.kactl preprocess`. |
+| `content/tex/` | LaTeX package (`kactlpkg.sty`). Page headers still `write18` to `python3 -m tools.kactl print-header`. |
+| `tools/kactl/` | One mill: snippet stripping, chapter parse, listings, `snippets.json`, print-header. |
+| `web/` | Searchable snippets SPA. Consumes `web/public/snippets.json` from `make preprocess`. |
 | `stress-tests/` | Stress tests (`make test`). Utilities in `stress-tests/utilities/`. |
 | `doc/scripts/` | Compile/test helpers (`compile-all.sh`, `run-all.sh`, `cxx.sh`, `skip_headers`). |
 | `.github/workflows/` | `ccpp.yml` (PDF + compiles + stress), `pages.yml` (PDF + snippets site deploy). |

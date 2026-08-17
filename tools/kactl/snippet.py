@@ -266,7 +266,7 @@ def process_path(path: Path, lang_flag: str | None = None) -> ProcessedSnippet:
 
 
 def listing_tex(snippet: ProcessedSnippet) -> str:
-    """Emit the lstlisting payload previously written by preprocessor.py."""
+    """Emit the lstlisting TeX payload for a processed snippet."""
     caption = snippet.caption
     if snippet.error:
         return r"\kactlerror{%s: %s}" % (caption, snippet.error) + "\n"

@@ -4,11 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "index": "PYTHONPATH=.. python3 -m tools.kactl preprocess",
     "copy-pdf": "test -f ../kactl.pdf && mkdir -p public && cp ../kactl.pdf public/kactl.pdf || true",
-    "predev": "npm run index && npm run copy-pdf",
+    "predev": "make -C .. preprocess && npm run copy-pdf",
     "dev": "vite",
-    "prebuild": "npm run index && npm run copy-pdf",
+    "prebuild": "make -C .. preprocess && npm run copy-pdf",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "oxlint"

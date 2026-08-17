@@ -15,10 +15,10 @@ Use the Makefile from the repo root (`make help`). Agent-oriented notes: `agents
 - `make kactl` — preprocess, build `test-session.pdf`, two-pass PDF → `kactl.pdf`.
 - `make fast` — preprocess + one LaTeX pass.
 - `make web-pdf` — preprocess + two-pass PDF without test-session (GitHub Pages).
-- `make test-preprocess` — unit tests for snippet stripping / chapter parsing.
+- `make test-preprocess` — unit tests for snippet stripping, chapter parsing, and print-header.
 - `make test-compiles` / `make test` — header compile check and stress tests.
 
-`pdflatex` still needs `-shell-escape` for the running page header (`content/tex/preprocessor.py --print-header`). Snippet listings are not generated inside LaTeX.
+`pdflatex` still needs `-shell-escape` for the running page header (`python3 -m tools.kactl print-header`). Make copies `header.tmp.seed` to `header.tmp` before each pass. Snippet listings are not generated inside LaTeX.
 
 ## Adding chapters and snippets
 
