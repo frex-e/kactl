@@ -5,13 +5,14 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONTENT = REPO_ROOT / "content"
 OUT = Path(__file__).resolve().parents[1] / "public" / "snippets.json"
 
-# Match PDF chapter order; geometry is intentionally omitted from the site.
+# Match PDF chapter order (content/kactl.tex).
 CHAPTER_ORDER = [
     "contest",
     "math",
@@ -19,8 +20,8 @@ CHAPTER_ORDER = [
     "numerical",
     "number-theory",
     "combinatorial",
-    # "geometry",  # TODO: figures / minipage headers
     "graph",
+    "geometry",
     "strings",
     "various",
     "appendix",
@@ -40,7 +41,7 @@ CHAPTER_TITLES = {
     "appendix": "Techniques",
 }
 
-EXCLUDED_CHAPTERS = {"geometry", "tex", "test-session"}
+EXCLUDED_CHAPTERS = {"tex", "test-session"}
 CODE_SUFFIXES = {".h", ".hpp", ".cpp", ".cc", ".c", ".java", ".py", ".sh", ".txt"}
 KNOWN_COMMANDS = [
     "Author",
@@ -61,8 +62,22 @@ COMMENT_TYPES = [
     ('"""', '"""'),
 ]
 
+HEADING_LEVEL = {
+    "chapter": 1,
+    "section": 2,
+    "subsection": 3,
+    "subsubsection": 4,
+}
+
 IMPORT_RE = re.compile(r"^(\s*)%?\s*\\kactlimport(?:\[[^\]]*\])?\{([^}]+)\}")
+HEADING_CMD_RE = re.compile(
+    r"^\\(chapter|section|subsection|subsubsection)\*?"
+)
+IMPORT_FILE_RE = re.compile(r"^\\import\{([^}]+)\}")
 INCLUDE_RE = re.compile(r'^\s*#include\s+([<"][^>"]+[>"])')
+INCLUDEGRAPHICS_RE = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{[^}]*\}")
+BEGIN_MINIPAGE_RE = re.compile(r"\\begin\{minipage\}(?:\[[^\]]*\])?\{[^}]*\}")
+SLUG_STRIP_RE = re.compile(r"[^a-z0-9]+")
 
 
 def find_start_comment(source: str, start: int = 0):
@@ -174,7 +189,7 @@ def parse_chapter_imports(chapter_id: str) -> dict[str, bool]:
         m = IMPORT_RE.match(line)
         if not m:
             continue
-        indent, name = m.group(1), m.group(2)
+        _indent, name = m.group(1), m.group(2)
         commented = line.lstrip().startswith("%")
         # First active wins; commented only recorded if unseen.
         if name not in result or not commented:
@@ -226,10 +241,8 @@ def discover_files(chapter_id: str, imports: dict[str, bool]) -> list[Path]:
         if not path.is_file():
             continue
         if path.suffix.lower() not in CODE_SUFFIXES and path.name not in imports:
-            # allow extensionless? no
             continue
         if path.name.startswith(".") and path.name not in imports:
-            # include .bashrc / .vimrc if imported
             if path.name not in imports:
                 continue
         files[path.name] = path
@@ -282,9 +295,226 @@ def wrap_time(t: str) -> str:
     return wrap_ordo(t)
 
 
+def read_brace_group(src: str, open_idx: int) -> tuple[str, int] | None:
+    if open_idx >= len(src) or src[open_idx] != "{":
+        return None
+    depth = 0
+    i = open_idx
+    while i < len(src):
+        c = src[i]
+        if c == "\\" and i + 1 < len(src):
+            i += 2
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                return src[open_idx + 1 : i], i + 1
+        i += 1
+    return None
+
+
+def strip_tex_comment(line: str) -> str:
+    """Drop unescaped % comments, keeping \\%."""
+    out: list[str] = []
+    i = 0
+    while i < len(line):
+        if line[i] == "\\" and i + 1 < len(line):
+            out.append(line[i : i + 2])
+            i += 2
+            continue
+        if line[i] == "%":
+            break
+        out.append(line[i])
+        i += 1
+    return "".join(out).rstrip()
+
+
+def strip_figures(text: str) -> str:
+    """Drop includegraphics and unwrap minipage wrappers in snippet headers."""
+    text = INCLUDEGRAPHICS_RE.sub("", text)
+    text = BEGIN_MINIPAGE_RE.sub("\n", text)
+    text = text.replace(r"\end{minipage}", "\n")
+    text = re.sub(r"\\vspace(?:\*)?(?:\[[^\]]*\])?\{[^}]*\}", "", text)
+    text = re.sub(r"\\hspace(?:\*)?(?:\[[^\]]*\])?\{[^}]*\}", "", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = text.strip()
+    text = re.sub(r"^(?:\\\\|\s)+", "", text)
+    return text.strip()
+
+
+def latex_to_search_text(src: str) -> str:
+    """Approximate plaintext for MiniSearch from a TeX fragment."""
+    s = src
+
+    def verb_sub(m: re.Match[str]) -> str:
+        return m.group(2)
+
+    s = re.sub(r"\\verb([^a-zA-Z\s])(.*?)(\1)", verb_sub, s)
+    s = re.sub(r"\\\[(.+?)\\\]", r" \1 ", s, flags=re.DOTALL)
+    s = re.sub(r"\$\$(.+?)\$\$", r" \1 ", s, flags=re.DOTALL)
+    s = re.sub(r"\$([^$]+)\$", r" \1 ", s)
+    s = INCLUDEGRAPHICS_RE.sub(" ", s)
+    s = re.sub(r"\\begin\{[^}]+\}\[[^\]]*\]", " ", s)
+    s = re.sub(r"\\(begin|end)\{[^}]+\}", " ", s)
+    s = re.sub(r"\\item\b", " ", s)
+    s = re.sub(r"\\hline\b", " ", s)
+    for _ in range(10):
+        n = re.sub(r"\\[a-zA-Z]+\*?\{([^{}]*)\}", r" \1 ", s)
+        if n == s:
+            break
+        s = n
+    s = re.sub(r"\\[a-zA-Z]+\*?", " ", s)
+    s = re.sub(r"\\(.)", r"\1", s)
+    s = re.sub(r"[{}&%#~]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def slugify(title: str) -> str:
+    text = latex_to_search_text(title).lower()
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    text = SLUG_STRIP_RE.sub("-", text).strip("-")
+    return text or "section"
+
+
+def normalize_tex_prose(latex: str) -> str:
+    """Join TeX line-wraps; keep blank lines as paragraph breaks."""
+    latex = latex.strip()
+    if not latex:
+        return ""
+    paras = re.split(r"\n\s*\n", latex)
+    out = []
+    for p in paras:
+        out.append(re.sub(r"[ \t]*\n[ \t]*", " ", p.strip()))
+    return "\n\n".join(x for x in out if x)
+
+
+def unique_block_id(used: set[str], candidate: str) -> str:
+    if candidate not in used:
+        used.add(candidate)
+        return candidate
+    i = 2
+    while f"{candidate}-{i}" in used:
+        i += 1
+    uid = f"{candidate}-{i}"
+    used.add(uid)
+    return uid
+
+
+def parse_chapter_document(chapter_id: str) -> list[dict]:
+    """Walk chapter.tex into heading / prose / snippet blocks (PDF order)."""
+    chapter_dir = CONTENT / chapter_id
+    chapter_tex = chapter_dir / "chapter.tex"
+    if not chapter_tex.is_file():
+        return []
+
+    used_ids: set[str] = set()
+    blocks: list[dict] = []
+    prose_buf: list[str] = []
+    prose_n = 0
+
+    def flush_prose():
+        nonlocal prose_n
+        raw = normalize_tex_prose("\n".join(prose_buf))
+        prose_buf.clear()
+        if not raw:
+            return
+        search = latex_to_search_text(raw)
+        leftover = INCLUDEGRAPHICS_RE.sub("", raw)
+        leftover = re.sub(r"\\(?:begin|end)\{center\}", "", leftover).strip()
+        if not search and len(leftover) < 12:
+            return
+        prose_n += 1
+        blocks.append(
+            {
+                "type": "prose",
+                "id": unique_block_id(used_ids, f"{chapter_id}/p/{prose_n}"),
+                "chapter": chapter_id,
+                "latex": raw,
+                "searchText": search,
+            }
+        )
+
+    def append_imported_tex(name: str):
+        path = chapter_dir / name
+        if not path.is_file():
+            return
+        text = path.read_text(encoding="utf-8", errors="replace")
+        cleaned = []
+        for line in text.splitlines():
+            cleaned.append(strip_tex_comment(line))
+        prose_buf.append("\n".join(cleaned))
+
+    for line in chapter_tex.read_text(encoding="utf-8", errors="replace").splitlines():
+        raw_line = line
+        import_m = IMPORT_RE.match(raw_line)
+        if import_m:
+            flush_prose()
+            name = import_m.group(2)
+            commented = raw_line.lstrip().startswith("%")
+            sid = f"{chapter_id}/{name}"
+            used_ids.add(sid)
+            blocks.append(
+                {
+                    "type": "snippet",
+                    "id": sid,
+                    "chapter": chapter_id,
+                    "includedInPdf": not commented,
+                }
+            )
+            continue
+
+        stripped = strip_tex_comment(raw_line).strip()
+        if not stripped:
+            if prose_buf:
+                prose_buf.append("")
+            continue
+
+        heading_m = HEADING_CMD_RE.match(stripped)
+        if heading_m:
+            rest = stripped[heading_m.end() :].lstrip()
+            title = ""
+            if rest.startswith("{"):
+                group = read_brace_group(rest, 0)
+                if group:
+                    title = group[0]
+            if title:
+                flush_prose()
+                level = HEADING_LEVEL[heading_m.group(1)]
+                slug = slugify(title)
+                blocks.append(
+                    {
+                        "type": "heading",
+                        "id": unique_block_id(used_ids, f"{chapter_id}/h/{slug}"),
+                        "chapter": chapter_id,
+                        "level": level,
+                        "title": title,
+                        "searchText": latex_to_search_text(title) or title,
+                    }
+                )
+                continue
+
+        file_m = IMPORT_FILE_RE.match(stripped)
+        if file_m:
+            append_imported_tex(file_m.group(1))
+            continue
+
+        if stripped in {r"\appendix", r"\maketitle"}:
+            continue
+
+        prose_buf.append(stripped)
+
+    flush_prose()
+    return blocks
+
+
 def main():
     chapters = []
     snippets = []
+    document: list[dict] = []
     # First pass: collect all candidate files and raw deps
     pending = []  # (id, chapter, path, commands, raw_includes, code, included)
 
@@ -293,9 +523,7 @@ def main():
             continue
         imports = parse_chapter_imports(chapter_id)
         files = discover_files(chapter_id, imports)
-        if not files and chapter_id == "math":
-            # Math is formulas-only; still list chapter for completeness? Skip empty.
-            continue
+        chapter_doc = parse_chapter_document(chapter_id)
 
         chapter_snippets = []
         for path in files:
@@ -312,8 +540,21 @@ def main():
                 (sid, chapter_id, path, commands, raw_includes, code, included)
             )
 
-        if chapter_snippets:
+        mentioned = {b["id"] for b in chapter_doc if b["type"] == "snippet"}
+        for sid, ch, path, commands, raw_includes, code, included in chapter_snippets:
+            if sid not in mentioned:
+                chapter_doc.append(
+                    {
+                        "type": "snippet",
+                        "id": sid,
+                        "chapter": ch,
+                        "includedInPdf": included,
+                    }
+                )
+
+        if chapter_doc or chapter_snippets:
             chapters.append({"id": chapter_id, "title": CHAPTER_TITLES.get(chapter_id, chapter_id)})
+            document.extend(chapter_doc)
             pending.extend(chapter_snippets)
 
     id_set = {p[0] for p in pending}
@@ -325,7 +566,7 @@ def main():
             if resolved and resolved not in deps:
                 deps.append(resolved)
 
-        desc = commands.get("Description", "")
+        desc = strip_figures(commands.get("Description", ""))
         usage = commands.get("Usage", "")
         time = wrap_time(commands.get("Time", ""))
         memory = wrap_time(commands.get("Memory", ""))
@@ -352,10 +593,16 @@ def main():
     chapter_rank = {c: i for i, c in enumerate(CHAPTER_ORDER)}
     snippets.sort(key=lambda s: (chapter_rank.get(s["chapter"], 99), s["name"].lower()))
 
-    payload = {"chapters": chapters, "snippets": snippets}
+    payload = {"chapters": chapters, "snippets": snippets, "document": document}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"Wrote {len(snippets)} snippets in {len(chapters)} chapters → {OUT}")
+    n_h = sum(1 for b in document if b["type"] == "heading")
+    n_p = sum(1 for b in document if b["type"] == "prose")
+    n_s = sum(1 for b in document if b["type"] == "snippet")
+    print(
+        f"Wrote {len(snippets)} snippets, {len(document)} document blocks "
+        f"({n_h} headings, {n_p} prose, {n_s} snippets) in {len(chapters)} chapters → {OUT}"
+    )
 
 
 if __name__ == "__main__":

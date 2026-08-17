@@ -19,7 +19,34 @@ export type Snippet = {
   code: string
 }
 
+export type HeadingBlock = {
+  type: 'heading'
+  id: string
+  chapter: string
+  level: 1 | 2 | 3 | 4
+  title: string
+  searchText: string
+}
+
+export type ProseBlock = {
+  type: 'prose'
+  id: string
+  chapter: string
+  latex: string
+  searchText: string
+}
+
+export type SnippetBlock = {
+  type: 'snippet'
+  id: string
+  chapter: string
+  includedInPdf: boolean
+}
+
+export type DocumentBlock = HeadingBlock | ProseBlock | SnippetBlock
+
 export type SnippetIndex = {
   chapters: Chapter[]
   snippets: Snippet[]
+  document: DocumentBlock[]
 }
