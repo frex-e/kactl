@@ -20,8 +20,10 @@
 struct AhoCorasick {
 	enum {alpha = 26, first = 'A'}; // change this!
 	struct Node {
-		// (nmatches is optional)
-		int back, next[alpha], start = -1, end = -1, nmatches = 0;
+		int back, next[alpha];
+		int start = -1; // first word ending here
+		int end = -1; // longest word ending here; head of backp
+		int nmatches = 0; // #matches here, incl. suffixes (optional)
 		Node(int v) { memset(next, v, sizeof(next)); }
 	};
 	vector<Node> N;
