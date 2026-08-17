@@ -11,9 +11,9 @@ All commands below run from the **repo root**. `make help` lists targets.
 | `make fast` | Preprocess plus a single LaTeX pass (quicker, worse refs/TOC). Same install step. |
 | `make web-pdf` | Preprocess plus two-pass PDF **without** `test-session.pdf`. This is what GitHub Pages uses. |
 | `make showexcluded` | Headers/sources in `content/` with no `\kactlimport`. |
-| `make test-preprocess` | Unit tests for snippet stripping / chapter parsing. |
+| `make test-preprocess` | Unit tests for snippet stripping, chapter parsing, and print-header. |
 
-`pdflatex` is invoked with **`-shell-escape`** (required: page headers still shell out to `preprocessor.py --print-header`). Snippet listings are generated *before* LaTeX, not per `\kactlimport`.
+`pdflatex` is invoked with **`-shell-escape`** (required: page headers shell out to `python3 -m tools.kactl print-header`). Make copies `build/header.tmp.seed` to `build/header.tmp` before each pass; print-header is the only remaining `write18`. Snippet listings are generated *before* LaTeX, not per `\kactlimport`.
 
 TeX packages needed: `texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`, `texlive-plain-generic` (`ulem.sty`), `texlive-fonts-recommended`. Python 3 is required for preprocess.
 

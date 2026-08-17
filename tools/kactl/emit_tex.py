@@ -1,8 +1,9 @@
-"""Emit per-snippet lstlisting TeX and the page-header caption seed."""
+"""Emit per-snippet lstlisting TeX and consume the page-header caption queue."""
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TextIO
 
 from . import BUILD
 from .snippet import ProcessedSnippet, header_caption, listing_tex
@@ -20,9 +21,36 @@ def write_listing(chapter_id: str, snippet: ProcessedSnippet) -> Path:
 
 
 def write_header_seed(snippets: list[ProcessedSnippet]) -> Path:
-    """Captions in typeset order for print-header. Copied to header.tmp each pass."""
+    """Captions in typeset order. Make copies this to header.tmp before each pdflatex pass."""
     BUILD.mkdir(parents=True, exist_ok=True)
     path = BUILD / "header.tmp.seed"
     lines = [header_caption(s) for s in snippets if not s.error]
     path.write_text("".join(line + "\n" for line in lines), encoding="utf-8")
     return path
+
+
+def print_header(data: str, outstream: TextIO, header_tmp: Path | None = None) -> None:
+    """Consume captions from header.tmp up through the last mark on this page."""
+    path = header_tmp if header_tmp is not None else BUILD / "header.tmp"
+    parts = data.split("|")
+    until = parts[0].strip() or parts[1].strip()
+    if not until:
+        return
+    if not path.is_file():
+        return
+    lines = [x.strip() for x in path.read_text(encoding="utf-8").splitlines()]
+    if until not in lines:
+        return
+
+    ind = lines.index(until) + 1
+    header_length = len("".join(lines[:ind]))
+
+    def adjust(name: str) -> str:
+        return name if name.startswith(".") else name.split(".")[0]
+
+    output = r"\enspace{}".join(map(adjust, lines[:ind]))
+    font_size = 8 if header_length > 150 else 10
+    output = r"\hspace{3mm}\textbf{" + output + "}"
+    output = "\\fontsize{%d}{%d}" % (font_size, font_size) + output
+    print(output, file=outstream)
+    path.write_text("".join(line + "\n" for line in lines[ind:]), encoding="utf-8")

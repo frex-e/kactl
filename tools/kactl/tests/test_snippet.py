@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import shutil
+import tempfile
 import unittest
+from io import StringIO
+from pathlib import Path
 
 from tools.kactl import CONTENT
 from tools.kactl.chapter import chapter_order, parse_chapter_imports
+from tools.kactl.emit_tex import print_header
 from tools.kactl.snippet import process_path, resolve_language
 
 
@@ -95,6 +100,53 @@ class TestChapterParse(unittest.TestCase):
                 "Random.h",
             ],
         )
+
+
+class TestPrintHeader(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.queue = self.tmp / "header.tmp"
+        self.queue.write_text(
+            "template.cpp\n.bashrc\nRandom.h\nSegmentTree.h\n",
+            encoding="utf-8",
+        )
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def test_consumes_through_first_mark(self):
+        out = StringIO()
+        print_header(".bashrc|.bashrc", out, self.queue)
+        self.assertEqual(
+            out.getvalue(),
+            "\\fontsize{10}{10}\\hspace{3mm}\\textbf{template\\enspace{}.bashrc}\n",
+        )
+        remaining = self.queue.read_text(encoding="utf-8").splitlines()
+        self.assertEqual(remaining, ["Random.h", "SegmentTree.h"])
+
+    def test_second_page_consumes_the_rest(self):
+        print_header(".bashrc|.bashrc", StringIO(), self.queue)
+        out = StringIO()
+        print_header("SegmentTree.h|SegmentTree.h", out, self.queue)
+        self.assertEqual(
+            out.getvalue(),
+            "\\fontsize{10}{10}\\hspace{3mm}\\textbf{Random\\enspace{}SegmentTree}\n",
+        )
+        self.assertEqual(self.queue.read_text(encoding="utf-8"), "")
+
+    def test_unknown_mark_leaves_queue(self):
+        before = self.queue.read_text(encoding="utf-8")
+        out = StringIO()
+        print_header("Missing.h|Missing.h", out, self.queue)
+        self.assertEqual(out.getvalue(), "")
+        self.assertEqual(self.queue.read_text(encoding="utf-8"), before)
+
+    def test_long_header_uses_smaller_font(self):
+        long_names = [f"VeryLongSnippetName{i:02d}.h" for i in range(12)]
+        self.queue.write_text("".join(n + "\n" for n in long_names), encoding="utf-8")
+        out = StringIO()
+        print_header(f"{long_names[-1]}|{long_names[-1]}", out, self.queue)
+        self.assertTrue(out.getvalue().startswith("\\fontsize{8}{8}"))
 
 
 if __name__ == "__main__":

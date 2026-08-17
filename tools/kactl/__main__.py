@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
 from . import BUILD, CONTENT
 from .chapter import (
@@ -14,11 +15,11 @@ from .chapter import (
     parse_chapter_imports,
 )
 from .emit_json import snippet_json, write_snippets_json
-from .emit_tex import write_header_seed, write_listing
+from .emit_tex import print_header, write_header_seed, write_listing
 from .snippet import process_path
 
 
-def preprocess(json_only: bool = False) -> int:
+def preprocess() -> int:
     BUILD.mkdir(parents=True, exist_ok=True)
     chapters_out = []
     snippets_out = []
@@ -55,8 +56,7 @@ def preprocess(json_only: bool = False) -> int:
             sid = f"{chapter_id}/{name}"
             chapter_pending.append((sid, chapter_id, processed, included))
             if included:
-                if not json_only:
-                    write_listing(chapter_id, processed)
+                write_listing(chapter_id, processed)
                 if not processed.error:
                     pdf_snippets.append(processed)
         for name, (processed, included) in by_name.items():
@@ -91,8 +91,7 @@ def preprocess(json_only: bool = False) -> int:
 
     payload = {"chapters": chapters_out, "snippets": snippets_out, "document": document}
     dest = write_snippets_json(payload)
-    if not json_only:
-        write_header_seed(pdf_snippets)
+    write_header_seed(pdf_snippets)
 
     n_h = sum(1 for b in document if b["type"] == "heading")
     n_p = sum(1 for b in document if b["type"] == "prose")
@@ -101,8 +100,17 @@ def preprocess(json_only: bool = False) -> int:
         f"Wrote {len(snippets_out)} snippets, {len(document)} document blocks "
         f"({n_h} headings, {n_p} prose, {n_s} snippets) in {len(chapters_out)} chapters → {dest}"
     )
-    if not json_only:
-        print(f"Listings → {BUILD / 'listings'}; header seed → {BUILD / 'header.tmp.seed'}")
+    print(f"Listings → {BUILD / 'listings'}; header seed → {BUILD / 'header.tmp.seed'}")
+    return 0
+
+
+def cmd_print_header(mark: str, output: str | None) -> int:
+    if output:
+        Path(output).parent.mkdir(parents=True, exist_ok=True)
+        with open(output, "w", encoding="utf-8") as out:
+            print_header(mark, out)
+    else:
+        print_header(mark, sys.stdout)
     return 0
 
 
@@ -112,17 +120,25 @@ def main(argv: list[str] | None = None) -> int:
         "cmd",
         nargs="?",
         default="preprocess",
-        choices=["preprocess"],
-        help="preprocess (default): write listings, snippets.json, and header seed",
+        choices=["preprocess", "print-header"],
+        help="preprocess (default): listings, snippets.json, header seed; "
+        "print-header: consume header.tmp for a page running head",
     )
     parser.add_argument(
-        "--json-only",
-        action="store_true",
-        help="Only write snippets.json (skip listings and header seed)",
+        "mark",
+        nargs="?",
+        help="last snippet mark on the page (print-header)",
     )
+    parser.add_argument("-o", "--output", help="write print-header TeX to FILE")
     args = parser.parse_args(argv)
     if args.cmd == "preprocess":
-        return preprocess(json_only=args.json_only)
+        if args.mark is not None:
+            parser.error("preprocess does not take a mark")
+        return preprocess()
+    if args.cmd == "print-header":
+        if args.mark is None:
+            parser.error("print-header requires MARK")
+        return cmd_print_header(args.mark, args.output)
     parser.print_help()
     return 2
 

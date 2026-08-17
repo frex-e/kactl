@@ -22,20 +22,29 @@ help:
 
 # Repo-root copy plus the file GitHub Pages serves at /kactl.pdf.
 INSTALL_PDF = cp build/kactl.pdf kactl.pdf && mkdir -p web/public && cp build/kactl.pdf web/public/kactl.pdf
+# Each pdflatex pass must start from the full caption queue.
+RESET_HEADER = cp -f build/header.tmp.seed build/header.tmp
 
 preprocess: | build
 	python3 -m tools.kactl preprocess
 
 fast: preprocess | build
+	$(RESET_HEADER)
 	$(LATEXCMD) content/kactl.tex </dev/null
 	$(INSTALL_PDF)
 
 kactl: test-session.pdf preprocess | build
-	$(LATEXCMD) content/kactl.tex && $(LATEXCMD) content/kactl.tex
+	$(RESET_HEADER)
+	$(LATEXCMD) content/kactl.tex
+	$(RESET_HEADER)
+	$(LATEXCMD) content/kactl.tex
 	$(INSTALL_PDF)
 
 web-pdf: preprocess | build
-	$(LATEXCMD) content/kactl.tex && $(LATEXCMD) content/kactl.tex
+	$(RESET_HEADER)
+	$(LATEXCMD) content/kactl.tex
+	$(RESET_HEADER)
+	$(LATEXCMD) content/kactl.tex
 	$(INSTALL_PDF)
 
 clean:
@@ -60,7 +69,8 @@ test-compiles:
 test-preprocess:
 	python3 -m unittest discover -s tools/kactl/tests -t .
 
-test-session.pdf: content/test-session/test-session.tex content/test-session/chapter.tex | build
+test-session.pdf: content/test-session/test-session.tex content/test-session/chapter.tex preprocess | build
+	$(RESET_HEADER)
 	$(LATEXCMD) content/test-session/test-session.tex
 	cp build/test-session.pdf test-session.pdf
 
