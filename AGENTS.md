@@ -1,8 +1,10 @@
 # AGENTS.md
 
+Longer notes live in [`agents/`](agents/README.md) (content, tests, snippets site, fork vs upstream). Read those when the task needs more than the commands below.
+
 ## Cursor Cloud specific instructions
 
-KACTL (KTH's ICPC reference document) is a **build/test project, not a service**. There is
+This repo is a **build/test project, not a service**. There is
 nothing to "serve": no web server, API, database, or network ports. "Running the app" means
 building the PDF and running the compile/stress tests, i.e. the same steps as CI
 (`.github/workflows/ccpp.yml`). Standard commands live in the `Makefile` (run `make help`);

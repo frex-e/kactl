@@ -1,19 +1,32 @@
-# KACTL (personal fork)
+# KACTL (Monash team fork)
 
-This is a **personal fork** of [KACTL](https://github.com/kth-competitive-programming/kactl), [KTH](https://en.wikipedia.org/wiki/KTH_Royal_Institute_of_Technology)'s ICPC team reference document.
-It consists of 25 pages of copy-pasteable C++ code, for use in ICPC-style programming competitions.
+This is the contest notebook for **A Succulent Chinese Algorithm** (Indra Kusumah-Kasim, Alex Yu, and Parsa Pordastan) at [Monash University](https://www.monash.edu/).
+It is a personal/team fork of [KACTL](https://github.com/kth-competitive-programming/kactl), [KTH](https://en.wikipedia.org/wiki/KTH_Royal_Institute_of_Technology)'s ICPC team reference: copy-pasteable C++ for ICPC-style contests, kept to 25 pages plus a cover.
 
-See [kactl.pdf](https://frex-e.github.io/kactl/kactl.pdf) for the latest typeset PDF (rebuilt on every site deploy), and [content/](./content/) for raw source code. A possibly older copy also lives at [kactl.pdf](./kactl.pdf) in this repo.
+Two artifacts ship from this repo:
 
-Local customizations relative to [upstream](https://github.com/kth-competitive-programming/kactl) are listed under [Local additions](#local-additions).
+- **Typeset notebook:** [kactl.pdf](https://frex-e.github.io/kactl/kactl.pdf) (rebuilt on every GitHub Pages deploy). A possibly older copy also lives at [kactl.pdf](./kactl.pdf) in this repo.
+- **Snippets site:** [frex-e.github.io/kactl](https://frex-e.github.io/kactl/) — a searchable, PDF-like view of the same `content/` tree (chapter order, prose, copy / copy-with-deps).
+
+Local algorithm changes relative to [upstream](https://github.com/kth-competitive-programming/kactl) are listed in [doc/mine-integration.md](./doc/mine-integration.md).
+
+## Where to look
+
+| Path | What |
+|---|---|
+| [content/](./content/) | Notebook source: chapters, snippets, team page (`content/kactl.tex`) |
+| [web/](./web/) | Snippets site (Vite + React). See [web/README.md](./web/README.md) |
+| [stress-tests/](./stress-tests/) | Stress tests run by `make test` |
+| [agents/](./agents/) | Notes for coding agents working in this repo |
+| [doc/mine-integration.md](./doc/mine-integration.md) | Snippets added, replaced, or merged from `mine.typ` |
+
+`make help` lists build and test targets.
 
 ## Aspirations
 
 KACTL algorithms should be: useful, short, fast enough, well tested, and if relevant, readable and easy to modify.
 They should *not* be overly generic, since code is manually typed and that just adds overhead.
 Due to space issues, we also exclude algorithms that are very common/simple (e.g., Dijkstra), or very uncommon (general weighted matching).
-
-If you feel that something is missing, could be cleaned up, or notice a bug, please file an issue or [send a pull request](https://help.github.com/articles/fork-a-repo/)!
 
 ## Customizing KACTL
 
@@ -30,7 +43,9 @@ For nicer alignment you might want to insert `\hardcolumnbreak`, `\columnbreak` 
 though this is usually only done before important contests, and not on the main branch.
 The algorithms that are not included in the pdf are left commented out in `chapter.tex`.
 
-To build KACTL, type `make kactl` (or `make fast`) on a \*nix machine -- this will update `kactl.pdf`.
+To build the notebook, type `make kactl` (or `make fast`) on a \*nix machine -- this will update `kactl.pdf`.
+`make web-pdf` is the same two-pass PDF without `test-session.pdf`, and is what GitHub Pages uses.
+Both copy the PDF to `web/public/kactl.pdf` for the snippets site (that copy is gitignored).
 (Windows might work as well, but is not tested.) `doc/README` has a few more notes about this.
 
 Tips:
@@ -60,7 +75,7 @@ Occasionally the generated kactl.pdf is committed to the repo for convenience, b
 KACTL aims for a high level of confidence in algorithm correctness.
 Testing is done both on online judges and (for newer algorithms) with stress tests
 that compare output to a more naive algorithm for a large amount of randomly generated cases.
-These tests live in the `stress-tests` directory, and are run with CI on every commit. The CI also verifies that all headers compile (except for an exclude list in `docs/scripts/skip_headers`) and that the latex compiles.
+These tests live in the `stress-tests` directory, and are run with CI on every commit. The CI also verifies that all headers compile (except for an exclude list in `doc/scripts/skip_headers`) and that the latex compiles.
 
 `old-unit-tests` contains a couple of broken unit tests, last touched about ten years ago.
 
