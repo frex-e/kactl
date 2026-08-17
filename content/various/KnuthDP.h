@@ -12,8 +12,7 @@
  *  $a\le b\le c\le d$ (``wider gets worse faster'').
  *  Useful $C$: $C(i,j)+C(i+1,j+1)\le C(i,j+1)+C(i+1,j)$;
  *  $C(i,j)=\sum_{k=i}^j w_k$ ($w\ge 0$);
- *  $C(i,j)=g(x_j-x_i)$, $x$ incr, $g$ convex and
- *  nondecreasing;
+ *  $C(i,j)=g(x_j-x_i)$, $x$ incr, $g$ convex nondec.;
  *  $C(i,j)=\min(A_i,B_j)$ if $A$ decreasing, $B$ increasing;
  *  $C(i,j)=\max(0,x_j-x_i-\Delta)$ for $\Delta>0$.
  *  Also consider LineContainer, Li Chao, monotone queues.
