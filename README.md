@@ -1,9 +1,11 @@
-# KACTL
+# KACTL (personal fork)
 
-This repo hosts KACTL, [KTH](https://en.wikipedia.org/wiki/KTH_Royal_Institute_of_Technology)'s ICPC team reference document.
+This is a **personal fork** of [KACTL](https://github.com/kth-competitive-programming/kactl), [KTH](https://en.wikipedia.org/wiki/KTH_Royal_Institute_of_Technology)'s ICPC team reference document.
 It consists of 25 pages of copy-pasteable C++ code, for use in ICPC-style programming competitions.
 
 See [kactl.pdf](./kactl.pdf) for the final, browsable version, and [content/](./content/) for raw source code.
+
+Local customizations relative to [upstream](https://github.com/kth-competitive-programming/kactl) are listed under [Local additions](#local-additions).
 
 ## Aspirations
 
