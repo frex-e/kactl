@@ -99,6 +99,24 @@ input {
   font-size: 0.85rem;
 }
 
+.pdf-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.85rem;
+  padding: 0.42rem 0.85rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.pdf-link:hover {
+  filter: brightness(1.05);
+}
+
 .chapter-nav {
   display: flex;
   flex-direction: column;

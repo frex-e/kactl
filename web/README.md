@@ -18,6 +18,9 @@ npm run dev
 
 `predev` / `prebuild` run `python3 scripts/index-snippets.py`, which writes
 `public/snippets.json` from the repo’s `content/` tree (repo root = parent of `web/`).
+They also copy `kactl.pdf` from the repo root into `public/` when that file exists,
+so the sidebar **Latest PDF** link works locally. For a freshly typeset PDF, run
+`make web-pdf` (or `make kactl`) from the repo root first.
 
 ## Production build
 
@@ -34,5 +37,6 @@ VITE_BASE=/ npm run build
 
 ## GitHub Pages
 
-The workflow `.github/workflows/pages.yml` builds this app and deploys `web/dist`.
+The workflow `.github/workflows/pages.yml` typesets `kactl.pdf` with `make web-pdf`,
+builds this app, and deploys `web/dist` (including the PDF at `kactl.pdf`).
 Enable **Settings → Pages → Build and deployment → Source: GitHub Actions**.
