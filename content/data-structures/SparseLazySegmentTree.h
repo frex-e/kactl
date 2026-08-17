@@ -5,6 +5,7 @@
  * Source: mine.typ
  * Description: Implicit segment tree with lazy range updates.
  *  Creates children on demand. Bounds inclusive.
+ *  Point updates: \texttt{ql}=\texttt{qr}.
  *  Change \texttt{V}, \texttt{U}, \texttt{id}, \texttt{def},
  *  \texttt{idU}, \texttt{binop}, \texttt{applyUpdate},
  *  \texttt{mergeUpdate}. Default is range add / range max.
