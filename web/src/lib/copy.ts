@@ -34,10 +34,7 @@ export function formatSnippetBundle(snippets: Snippet[]): string {
 }
 
 export async function copyText(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text)
-    return true
-  } catch {
+  const fallback = (): boolean => {
     try {
       const ta = document.createElement('textarea')
       ta.value = text
@@ -52,4 +49,19 @@ export async function copyText(text: string): Promise<boolean> {
       return false
     }
   }
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await Promise.race([
+        navigator.clipboard.writeText(text),
+        new Promise<never>((_, reject) =>
+          window.setTimeout(() => reject(new Error('clipboard timeout')), 400),
+        ),
+      ])
+      return true
+    }
+  } catch {
+    return fallback()
+  }
+  return fallback()
 }

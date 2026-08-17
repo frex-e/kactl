@@ -94,20 +94,23 @@ export function SnippetDetail({
   active?: boolean
   scrollRoot?: Element | null
 }) {
-  const [copied, setCopied] = useState<'code' | 'deps' | null>(null)
+  const [copied, setCopied] = useState<'code' | 'deps' | 'fail' | null>(null)
 
   const language = useMemo(() => langFor(snippet.name), [snippet.name])
 
   async function doCopy(mode: 'code' | 'deps') {
-    const bundle =
-      mode === 'code'
-        ? snippet.code
-        : formatSnippetBundle(orderWithDependencies(snippet, byId))
-    const ok = await copyText(bundle)
-    if (ok) {
-      setCopied(mode)
-      window.setTimeout(() => setCopied(null), 1600)
+    setCopied(mode)
+    try {
+      const bundle =
+        mode === 'code'
+          ? snippet.code
+          : formatSnippetBundle(orderWithDependencies(snippet, byId))
+      const ok = await copyText(bundle)
+      if (!ok) setCopied('fail')
+    } catch {
+      setCopied('fail')
     }
+    window.setTimeout(() => setCopied(null), 1600)
   }
 
   return (
@@ -122,7 +125,7 @@ export function SnippetDetail({
         </div>
         <div className="detail-actions">
           <button type="button" className="btn" onClick={() => void doCopy('code')}>
-            {copied === 'code' ? 'Copied' : 'Copy'}
+            {copied === 'code' ? 'Copied' : copied === 'fail' ? 'Copy failed' : 'Copy'}
           </button>
           <button
             type="button"
@@ -130,7 +133,7 @@ export function SnippetDetail({
             onClick={() => void doCopy('deps')}
             title="Copy this snippet and its transitive dependencies"
           >
-            {copied === 'deps' ? 'Copied' : 'Copy with deps'}
+            {copied === 'deps' ? 'Copied' : copied === 'fail' ? 'Copy failed' : 'Copy with deps'}
           </button>
         </div>
       </header>

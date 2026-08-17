@@ -227,6 +227,26 @@ input {
   gap: 0.4rem;
 }
 
+.outline-h1 .list-name {
+  font-weight: 700;
+}
+
+.outline-h2 .list-name {
+  font-weight: 600;
+}
+
+.outline-h3 .list-name,
+.outline-h4 .list-name {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.outline-snippet .list-name {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 .dot-ex {
   width: 0.45rem;
   height: 0.45rem;

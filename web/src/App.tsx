@@ -54,8 +54,10 @@ function toSearchRecords(data: SnippetIndex): SearchRecord[] {
     usage: s.usage,
     code: s.code,
   }))
+  let lastHeading = ''
   for (const block of data.document) {
     if (block.type === 'heading') {
+      lastHeading = block.searchText || block.title
       records.push({
         id: block.id,
         kind: 'heading',
@@ -72,8 +74,8 @@ function toSearchRecords(data: SnippetIndex): SearchRecord[] {
         id: block.id,
         kind: 'prose',
         chapter: block.chapter,
-        name: block.searchText.slice(0, 80),
-        title: 'Chapter text',
+        name: lastHeading || block.searchText.slice(0, 80),
+        title: lastHeading || 'Chapter text',
         searchText: block.searchText,
         description: block.searchText,
         usage: '',
@@ -84,9 +86,25 @@ function toSearchRecords(data: SnippetIndex): SearchRecord[] {
   return records
 }
 
-function outlineFrom(blocks: DocumentBlock[]): { id: string; indent: number; label: string; kind: string; excluded: boolean }[] {
+function outlineFrom(
+  blocks: DocumentBlock[],
+): {
+  id: string
+  indent: number
+  label: string
+  kind: 'heading' | 'snippet'
+  level: number
+  excluded: boolean
+}[] {
   let headingLevel = 1
-  const items: { id: string; indent: number; label: string; kind: string; excluded: boolean }[] = []
+  const items: {
+    id: string
+    indent: number
+    label: string
+    kind: 'heading' | 'snippet'
+    level: number
+    excluded: boolean
+  }[] = []
   for (const block of blocks) {
     if (block.type === 'heading') {
       headingLevel = block.level
@@ -95,6 +113,7 @@ function outlineFrom(blocks: DocumentBlock[]): { id: string; indent: number; lab
         indent: block.level,
         label: block.title,
         kind: 'heading',
+        level: block.level,
         excluded: false,
       })
     } else if (block.type === 'snippet') {
@@ -103,11 +122,21 @@ function outlineFrom(blocks: DocumentBlock[]): { id: string; indent: number; lab
         indent: Math.max(headingLevel, 1) + 1,
         label: block.id.split('/').slice(1).join('/'),
         kind: 'snippet',
+        level: 0,
         excluded: !block.includedInPdf,
       })
     }
   }
   return items
+}
+
+function hitPreview(hit: SearchRecord): string {
+  const excerpt =
+    hit.kind === 'heading'
+      ? ''
+      : descriptionPreview(hit.kind === 'snippet' ? hit.description : hit.searchText, 90)
+  if (excerpt) return `${hit.chapter} · ${excerpt}`
+  return hit.chapter
 }
 
 export default function App() {
@@ -204,7 +233,6 @@ export default function App() {
       })
       .map((h) => recordById.get(h.id as string))
       .filter((r): r is SearchRecord => !!r)
-    if (chapter !== 'all') list = list.filter((r) => r.chapter === chapter)
     if (!showExcluded) {
       list = list.filter((r) => {
         if (r.kind !== 'snippet') return true
@@ -212,7 +240,7 @@ export default function App() {
       })
     }
     return list
-  }, [query, searchEngine, recordById, chapter, showExcluded, byId])
+  }, [query, searchEngine, recordById, showExcluded, byId])
 
   const outline = useMemo(() => outlineFrom(visibleDocument), [visibleDocument])
 
@@ -254,7 +282,23 @@ export default function App() {
 
   function selectChapter(next: string | 'all') {
     setChapter(next)
-    if (docPaneRef.current) docPaneRef.current.scrollTop = 0
+    if (next === 'all') {
+      setSelectedId(null)
+      setHash(null)
+      pendingScroll.current = null
+      if (docPaneRef.current) docPaneRef.current.scrollTop = 0
+      return
+    }
+    const heading = data?.document.find(
+      (b) => b.type === 'heading' && b.chapter === next && b.level === 1,
+    )
+    if (heading) {
+      setSelectedId(heading.id)
+      setHash(heading.id)
+      pendingScroll.current = { id: heading.id, smooth: false }
+    } else if (docPaneRef.current) {
+      docPaneRef.current.scrollTop = 0
+    }
   }
 
   if (error) {
@@ -276,8 +320,12 @@ export default function App() {
   }
 
   const searching = query.trim().length > 0
-  const navItems = searching ? hits : outline
-  const snippetCount = data.snippets.length
+  const visibleSnippets = visibleDocument.filter((b) => b.type === 'snippet').length
+  const countLabel = searching
+    ? `${hits.length} hits`
+    : visibleSnippets
+      ? `${visibleSnippets} snippet${visibleSnippets === 1 ? '' : 's'}`
+      : ''
 
   return (
     <div className="app-shell">
@@ -326,15 +374,14 @@ export default function App() {
             aria-label="Search document"
           />
           <span className="result-count">
-            {searching ? `${hits.length} hits` : `${visibleDocument.filter((b) => b.type === 'snippet').length} / ${snippetCount}`}
+            {countLabel}
           </span>
         </div>
 
         <div className="content-split">
           <div className="list-pane" role="listbox" aria-label={searching ? 'Search results' : 'Outline'}>
-            {navItems.length === 0 ? (
-              <p className="empty">{searching ? 'No matches.' : 'Nothing to show.'}</p>
-            ) : searching ? (
+            {searching && hits.length === 0 && <p className="empty">No matches.</p>}
+            {searching &&
               hits.map((hit) => (
                 <button
                   key={`${hit.kind}:${hit.id}`}
@@ -346,20 +393,20 @@ export default function App() {
                     <span className={`kind-tag kind-${hit.kind}`}>{hit.kind}</span>
                     {hit.kind === 'snippet' ? hit.name : hit.title}
                   </span>
-                  <span className="list-preview">
-                    {hit.kind === 'heading'
-                      ? hit.chapter
-                      : descriptionPreview(hit.kind === 'snippet' ? hit.description : hit.searchText)}
-                  </span>
+                  <span className="list-preview">{hitPreview(hit)}</span>
                 </button>
-              ))
-            ) : (
+              ))}
+            {!searching && outline.length === 0 && <p className="empty">Nothing to show.</p>}
+            {!searching &&
               outline.map((item) => (
                 <button
                   key={item.id}
                   type="button"
-                  className={item.id === selectedId ? 'list-item active' : 'list-item'}
-                  style={{ paddingLeft: `${0.45 + (item.indent - 1) * 0.7}rem` }}
+                  className={
+                    (item.id === selectedId ? 'list-item active ' : 'list-item ') +
+                    (item.kind === 'snippet' ? 'outline-snippet' : `outline-h${item.level}`)
+                  }
+                  style={{ paddingLeft: `${0.5 + (item.indent - 1) * 0.85}rem` }}
                   onClick={() => jumpTo(item.id)}
                 >
                   <span className="list-name">
@@ -367,8 +414,7 @@ export default function App() {
                     {item.excluded && <span className="dot-ex" title="Excluded from PDF" />}
                   </span>
                 </button>
-              ))
-            )}
+              ))}
           </div>
           <div className="detail-pane doc-pane" ref={docPaneRef}>
             {visibleDocument.length ? (
