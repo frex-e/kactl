@@ -34,7 +34,7 @@ def preprocess(json_only: bool = False) -> int:
         files = discover_files(chapter_id, imports)
         chapter_doc = parse_chapter_document(chapter_id)
 
-        chapter_pending = []
+        by_name = {}
         for path in files:
             spec = imports.get(path.name)
             lang_flag = spec.lang_flag if spec else None
@@ -44,14 +44,26 @@ def preprocess(json_only: bool = False) -> int:
             included = spec.included_in_pdf if spec else False
             if path.name not in imports and path.suffix not in {".h", ".hpp", ".cpp", ".java"}:
                 continue
-            sid = f"{chapter_id}/{path.name}"
+            by_name[path.name] = (processed, included)
+
+        chapter_pending = []
+        # Header captions must follow \kactlimport / typeset order, not directory sort.
+        for name, spec in imports.items():
+            if name not in by_name:
+                continue
+            processed, included = by_name[name]
+            sid = f"{chapter_id}/{name}"
             chapter_pending.append((sid, chapter_id, processed, included))
-            if included and not processed.error:
+            if included:
                 if not json_only:
                     write_listing(chapter_id, processed)
-                pdf_snippets.append(processed)
-            elif included and processed.error and not json_only:
-                write_listing(chapter_id, processed)
+                if not processed.error:
+                    pdf_snippets.append(processed)
+        for name, (processed, included) in by_name.items():
+            if name in imports:
+                continue
+            sid = f"{chapter_id}/{name}"
+            chapter_pending.append((sid, chapter_id, processed, included))
 
         mentioned = {b["id"] for b in chapter_doc if b["type"] == "snippet"}
         for sid, ch, processed, included in chapter_pending:

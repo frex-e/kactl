@@ -78,6 +78,24 @@ class TestChapterParse(unittest.TestCase):
         self.assertEqual(processed.mode, "raw")
         self.assertIn("#include <bits/stdc++.h>", processed.code)
 
+    def test_header_seed_matches_import_order(self):
+        from tools.kactl.__main__ import preprocess
+        from tools.kactl import BUILD
+
+        self.assertEqual(preprocess(), 0)
+        seed = (BUILD / "header.tmp.seed").read_text(encoding="utf-8").splitlines()
+        self.assertEqual(
+            seed[:6],
+            [
+                "template.cpp",
+                ".bashrc",
+                ".vimrc",
+                "hash.sh",
+                "troubleshoot.txt",
+                "Random.h",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
