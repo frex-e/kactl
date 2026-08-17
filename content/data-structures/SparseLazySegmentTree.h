@@ -9,7 +9,7 @@
  *  $applyUpdate$, $mergeUpdate$. Default is range add /
  *  range max.
  * Time: $O(\log R)$
- * Status: untested
+ * Status: stress-tested
  */
 #pragma once
 

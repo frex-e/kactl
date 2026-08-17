@@ -7,7 +7,7 @@
  *  insert, XOR-max, and mex of values XOR $xr$.
  *  $size$ is only needed for mex.
  * Time: $O(B)$
- * Status: untested
+ * Status: stress-tested
  */
 #pragma once
 

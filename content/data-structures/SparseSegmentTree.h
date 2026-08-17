@@ -7,7 +7,7 @@
  *  children on demand. Point update, range query.
  *  Bounds inclusive. Change $V$, $id$, $binop$.
  * Time: $O(\log R)$
- * Status: untested
+ * Status: stress-tested
  */
 #pragma once
 

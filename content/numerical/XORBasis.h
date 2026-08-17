@@ -9,7 +9,7 @@
  *  \texttt{XorBasis} is for ints; \texttt{BigBasis} for
  *  bitblocks. For solving $Ax=b$, see SolveLinearBinary.
  * Time: $O(B\cdot |basis|)$ per insert
- * Status: untested
+ * Status: stress-tested
  */
 #pragma once
 
