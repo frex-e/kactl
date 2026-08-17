@@ -7,7 +7,6 @@
 #codly(number-format: none, display-name: false)
 
 // TODO 
-// - Dinics
 // - Some large primes for hashing
 // - Large highly composite numbers for testing bounds
 // - random value apis

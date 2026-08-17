@@ -40,7 +40,7 @@ Also in chapter text (no new `.h`): contest I/O notes, Johnson’s algorithm, ex
 | `content/graph/HLD.h` | uses `LazyUpdateTree`; converts half-open HLD ranges to inclusive `[l, r-1]` |
 | `content/various/KnuthDP.h` | quadrangle notes + `knuthDP` implementation |
 | `content/various/DivideAndConquerDP.h` | layered recurrence + usage of `lo`/`hi`/`f`/`store` |
-| `content/graph/chapter.tex` | Johnson’s notes |
+| `content/graph/chapter.tex` | Johnson’s notes; Dinic included in the PDF |
 | `content/number-theory/chapter.tex` | Möbius code import; linear sieve |
 | `content/contest/chapter.tex` | Random + I/O |
 | `content/various/chapter.tex` | builtins, pragmas, memory |
