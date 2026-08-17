@@ -54,3 +54,5 @@ Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
+- New stress tests: SparseLazySegmentTree, SparseSegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, LinearSieve, Mobius
+- `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`

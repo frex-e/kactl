@@ -8,7 +8,7 @@
  *  result for maximum. Unlike LineContainer, lines can be
  *  restricted to a subrange by inserting on a node range.
  * Time: $O(\log(R-L))$
- * Status: untested
+ * Status: stress-tested
  */
 #pragma once
 

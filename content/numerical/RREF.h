@@ -9,7 +9,7 @@
  *  need the RREF itself (rank, nullspace, row space).
  *  For $Ax=b$ or inversion, see SolveLinear / MatrixInverse.
  * Time: $O(n^2 m)$
- * Status: untested
+ * Status: stress-tested
  */
 #pragma once
 

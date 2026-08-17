@@ -7,7 +7,7 @@
  *  prime factor of $i$; \texttt{pr} lists primes $\le N$.
  *  Factor $i$ by repeatedly dividing out \texttt{lp[i]}.
  * Time: $O(N)$
- * Status: untested
+ * Status: stress-tested
  */
 #pragma once
 

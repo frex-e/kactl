@@ -77,6 +77,26 @@ void test(const string& s, int alpha) {
 		cout << "lcp fails for " << display(s) << ' ' << alpha << endl;
 		assert(lcp == sa.lcp);
 	}
+
+	rep(i,0,sz(sa.sa)) {
+		assert(sa.rank[sa.sa[i]] == i);
+		assert(sa.sa[sa.rank[i]] == i);
+	}
+	rep(i,0,sz(s)) {
+		assert(sa.getLCP(i, i) == sz(s) - i);
+		rep(j,0,sz(s)) {
+			int l = 0;
+			while (i + l < sz(s) && j + l < sz(s) && s[i + l] == s[j + l]) l++;
+			assert(sa.getLCP(i, j) == l);
+			string A = s.substr(i), B = s.substr(j);
+			int exp = A < B ? -1 : A > B ? 1 : 0;
+			assert(sa.cmpSubstr(i, sz(s) - i, j, sz(s) - j, s) == exp);
+		}
+	}
+	if (!s.empty()) {
+		assert(sa.cmpSubstr(0, 0, 0, 0, s) == 0);
+		assert(sa.cmpSubstr(0, 0, 0, 1, s) == -1);
+	}
 }
 
 const int MAXN = 1e5;
@@ -242,6 +262,14 @@ void perf2() {
 int main() {
 	// compare();
 	stress(0);
+	srand(1);
+	rep(it,0,40) {
+		int n = rand() % 180 + 1;
+		int alpha = rand() % 12 + 1;
+		string s(n, 'a');
+		rep(i,0,n) s[i] = (char)(1 + rand() % alpha);
+		test(s, alpha);
+	}
 	cout<<"Tests passed!"<<endl;
 	// perf();
 	// perf2();

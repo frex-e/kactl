@@ -17,7 +17,7 @@
  *  $C(i,j)=\max(0,x_j-x_i-\Delta)$ for $\Delta>0$.
  *  Also consider LineContainer, Li Chao, monotone queues.
  * Time: O(N^2)
- * Status: untested
+ * Status: stress-tested
  */
 #pragma once
 

@@ -6,7 +6,7 @@
  * Description: Fills $\mu(n)$ for $n \in [0, sz)$.
  *  See chapter text for inversion formulas.
  * Time: $O(N \log N)$
- * Status: untested
+ * Status: stress-tested
  */
 #pragma once
 
