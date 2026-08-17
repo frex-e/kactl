@@ -15,7 +15,7 @@ All commands below run from the **repo root**. `make help` lists targets.
 
 TeX packages needed: `texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`, `texlive-plain-generic` (`ulem.sty`), `texlive-fonts-recommended`. Python 3 is required for the preprocessor.
 
-Dirty repo-root `kactl.pdf` after a build is expected. **Do not commit it** unless the task is to update the shipped PDF. `web/public/kactl.pdf` is gitignored.
+Dirty repo-root `kactl.pdf` after a build is expected. **Do not commit it** unless the task is to update the shipped PDF. `web/public/kactl.pdf` and `web/public/snippets.json` are gitignored.
 
 Keep the notebook at **25 pages + cover**.
 
