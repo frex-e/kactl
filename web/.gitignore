@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 public/kactl.pdf
+public/snippets.json
 
 # Editor directories and files
 .vscode/*

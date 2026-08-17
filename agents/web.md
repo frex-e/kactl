@@ -8,7 +8,7 @@ This is **not** a backend. There is nothing to start except `vite` for local UI 
 
 ## Pipeline
 
-1. [web/scripts/index-snippets.py](../web/scripts/index-snippets.py) walks `content/` in the same chapter order as `content/kactl.tex` and writes `web/public/snippets.json`.
+1. [web/scripts/index-snippets.py](../web/scripts/index-snippets.py) walks `content/` in the same chapter order as `content/kactl.tex` and writes `web/public/snippets.json`. That file is gitignored.
 2. `npm run copy-pdf` copies repo-root `kactl.pdf` → `web/public/kactl.pdf` when the PDF exists (for the sidebar “Latest PDF” link). That copy is gitignored.
 3. `predev` / `prebuild` run both of the above. `npm run build` emits `web/dist/`.
 
@@ -22,7 +22,7 @@ The indexer duplicates [content/tex/preprocessor.py](../content/tex/preprocessor
 
 It also parses `chapter.tex`: headings, prose, and `\kactlimport` (including commented-out imports). Commented imports become snippets with `includedInPdf: false`. Types: [web/src/lib/types.ts](../web/src/lib/types.ts).
 
-`web/public/snippets.json` is generated; do not hand-edit it.
+`web/public/snippets.json` is generated and gitignored; do not hand-edit or commit it.
 
 ## UI behavior worth knowing
 

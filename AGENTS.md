@@ -28,6 +28,6 @@ prefer those instead of duplicating them.
 - `make kactl` (and `make web-pdf`) rewrite the committed `kactl.pdf` and copy it to
   `web/public/kactl.pdf` for the snippets site. The repo-root PDF showing as dirty is
   expected — do **not** commit that churn unless you intend to update the shipped PDF.
-  `web/public/kactl.pdf` is gitignored.
+  `web/public/kactl.pdf` and `web/public/snippets.json` are gitignored.
 - `old-unit-tests/` is deprecated/broken (untouched for ~10 years) and is not wired into
   Make or CI — ignore it.
