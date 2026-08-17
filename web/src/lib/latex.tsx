@@ -1,6 +1,32 @@
 import katex from 'katex'
 import type { ReactNode } from 'react'
 
+const TEXT_ESCAPES: Record<string, string> = {
+  _: '_',
+  '#': '#',
+  '&': '&',
+  '%': '%',
+  '{': '{',
+  '}': '}',
+  $: '$',
+  '~': '\u00a0',
+  ' ': ' ',
+}
+
+/** Undo LaTeX text-mode escapes written in KACTL headers (\&, \_, \#, …). */
+export function unescapeLatexText(src: string): string {
+  let out = ''
+  for (let i = 0; i < src.length; i++) {
+    if (src[i] === '\\' && i + 1 < src.length && src[i + 1] in TEXT_ESCAPES) {
+      out += TEXT_ESCAPES[src[i + 1]]
+      i++
+      continue
+    }
+    out += src[i]
+  }
+  return out
+}
+
 const TEXT_CMDS: Record<string, [string, string]> = {
   texttt: ['code', 'ltx-tt'],
   textbf: ['strong', 'ltx-bf'],
@@ -116,9 +142,15 @@ function latexToHtml(src: string): string {
             continue
           }
         }
-        // Unknown command: keep as text (escaped)
+        // Unknown named command: keep as text (escaped)
         out += escapeHtml(cmdMatch[0])
         i = afterCmd
+        continue
+      }
+      const next = src[i + 1]
+      if (next && next in TEXT_ESCAPES) {
+        out += escapeHtml(TEXT_ESCAPES[next])
+        i += 2
         continue
       }
     }
@@ -167,6 +199,7 @@ export function descriptionPreview(desc: string, max = 120): string {
   s = s.replace(/\$([^$]+)\$/g, '$1')
   s = s.replace(/\\[a-zA-Z]+\*?\{([^}]*)\}/g, '$1')
   s = s.replace(/\\[a-zA-Z]+\*?/g, '')
+  s = unescapeLatexText(s)
   s = s.replace(/\s+/g, ' ').trim()
   if (s.length <= max) return s
   return s.slice(0, max - 1) + '…'

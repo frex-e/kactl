@@ -6,7 +6,7 @@ import bash from 'highlight.js/lib/languages/bash'
 import python from 'highlight.js/lib/languages/python'
 import plaintext from 'highlight.js/lib/languages/plaintext'
 import type { Snippet } from '../lib/types'
-import { LatexText, descriptionPreview } from '../lib/latex'
+import { LatexText, descriptionPreview, unescapeLatexText } from '../lib/latex'
 import { copyText, formatSnippetBundle, orderWithDependencies } from '../lib/copy'
 
 hljs.registerLanguage('cpp', cpp)
@@ -107,7 +107,7 @@ export function SnippetDetail({
       {snippet.usage && (
         <section className="detail-section">
           <h3>Usage</h3>
-          <pre className="usage-block">{snippet.usage}</pre>
+          <pre className="usage-block">{unescapeLatexText(snippet.usage)}</pre>
         </section>
       )}
 
