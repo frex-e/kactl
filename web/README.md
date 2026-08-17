@@ -1,9 +1,11 @@
 # KACTL web snippets
 
-Static SPA that indexes the KACTL `content/` headers into a searchable library
-(browse by chapter, full-text search, KaTeX descriptions, copy / copy-with-deps).
+Static SPA that turns the KACTL `content/` tree into a searchable, PDF-like
+document (chapter TeX + snippets in order, full-text search, KaTeX, copy /
+copy-with-deps).
 
-Geometry is omitted for now (figure/`minipage` headers); see the indexer TODO.
+Search matches snippet names, descriptions, code, and chapter headings/prose.
+Clicking a hit or outline row jumps to that place in the sequential view.
 
 ## Local development
 

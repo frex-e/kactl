@@ -227,6 +227,26 @@ input {
   gap: 0.4rem;
 }
 
+.outline-h1 .list-name {
+  font-weight: 700;
+}
+
+.outline-h2 .list-name {
+  font-weight: 600;
+}
+
+.outline-h3 .list-name,
+.outline-h4 .list-name {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.outline-snippet .list-name {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 .dot-ex {
   width: 0.45rem;
   height: 0.45rem;
@@ -248,8 +268,144 @@ input {
   padding: 1.25rem;
 }
 
+.doc-pane {
+  padding: 1.15rem 1.4rem 3rem;
+}
+
+.document {
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+.doc-heading {
+  scroll-margin-top: 0.85rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.doc-h1 {
+  margin: 1.75rem 0 0.65rem;
+  font-size: 2.1rem;
+}
+
+.doc-h1:first-child {
+  margin-top: 0.15rem;
+}
+
+.doc-h2 {
+  margin: 1.6rem 0 0.5rem;
+  font-size: 1.35rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.doc-h3 {
+  margin: 1.2rem 0 0.4rem;
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.doc-h4 {
+  margin: 0.95rem 0 0.3rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.doc-prose {
+  scroll-margin-top: 0.85rem;
+  margin: 0.35rem 0 0.85rem;
+}
+
+.doc-prose-body {
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.snippet-card {
+  scroll-margin-top: 0.85rem;
+  margin: 1.1rem 0 1.6rem;
+  padding: 1rem 1.05rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.snippet-card.active {
+  border-color: rgba(11, 110, 106, 0.45);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.snippet-card .detail-title {
+  font-size: 1.35rem;
+}
+
+.kind-tag {
+  display: inline-block;
+  margin-right: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(21, 32, 41, 0.06);
+}
+
+.kind-heading {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.kind-prose {
+  color: #3d5670;
+}
+
+.ltx-list {
+  margin: 0.4rem 0 0.6rem;
+  padding-left: 1.2rem;
+}
+
+.ltx-list li {
+  margin: 0.2rem 0;
+}
+
+.ltx-table {
+  border-collapse: collapse;
+  margin: 0.55rem 0;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ltx-table td {
+  padding: 0.12rem 0.45rem;
+  vertical-align: baseline;
+}
+
+.ltx-table tr.ltx-rule td {
+  border-top: 1px solid var(--line);
+}
+
+.ltx-center {
+  overflow-x: auto;
+}
+
+.ltx-small {
+  font-size: 0.82em;
+}
+
+.ltx-verb {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .detail {
   padding: 1.15rem 1.25rem 1.5rem;
+}
+
+.snippet-card.detail {
+  padding: 1rem 1.05rem 1.15rem;
 }
 
 .detail-header {

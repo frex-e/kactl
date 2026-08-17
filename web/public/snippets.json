@@ -5,6 +5,10 @@
       "title": "Contest"
     },
     {
+      "id": "math",
+      "title": "Mathematics"
+    },
+    {
       "id": "data-structures",
       "title": "Data structures"
     },
@@ -23,6 +27,10 @@
     {
       "id": "graph",
       "title": "Graph"
+    },
+    {
+      "id": "geometry",
+      "title": "Geometry"
     },
     {
       "id": "strings",
@@ -1548,6 +1556,581 @@
       "code": "template<class T>\npair<T, vi> weightedMatching(vector<vector<T>> &C) {\n\tint i = sz(C), m = i ? sz(C[0]) : 0, c, s, r;\n\tvector<T> dist(m), pot(m);\n\tvi match(i), rev(m, -1), cols(m), prev(m);\n\tT d = 0, nd, cost = 0;\n\twhile (i--) {\n\t\trep(c,0,m) dist[c] = C[i][c], cols[c] = c, prev[c] = i;\n\t\tfor (s = 0;;) {\n\t\t\trep(j,s,m) {\n\t\t\t\tc = cols[j], nd = dist[c] - pot[c];\n\t\t\t\tif (j == s || d > nd) d = nd, swap(cols[s], cols[j]);\n\t\t\t}\n\t\t\tif ((r = rev[c = cols[s++]]) == -1) break;\n\t\t\trep(j,0,m) if (dist[j] > (nd = C[r][j]-C[r][c]+dist[c]))\n\t\t\t\tdist[j] = nd, prev[j] = r;\n\t\t}\n\t\tcost += dist[c];\n\t\twhile (s--) pot[cols[s]] = dist[cols[s]] - d;\n\t\tfor (; r != i; swap(c, match[r]))\n\t\t\tr = rev[c] = prev[c];\n\t}\n\treturn {cost, match};\n}"
     },
     {
+      "id": "geometry/3dHull.h",
+      "name": "3dHull.h",
+      "chapter": "geometry",
+      "description": "Computes all faces of the 3-dimension hull of a point set.\n*No four points must be coplanar*, or else random results will be returned.\nAll faces will point outwards.",
+      "usage": "",
+      "time": "$O(n^2)$",
+      "memory": "",
+      "status": "tested on SPOJ CH3D",
+      "author": "Johan Sannemo",
+      "source": "derived from https://gist.github.com/msg555/4963794 by Mark Gordon",
+      "dependencies": [
+        "geometry/Point3D.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point3D<double> P3;\n\nstruct PR {\n\tvoid ins(int x) { (a == -1 ? a : b) = x; }\n\tvoid rem(int x) { (a == x ? a : b) = -1; }\n\tint cnt() { return (a != -1) + (b != -1); }\n\tint a, b;\n};\n\nstruct F { P3 q; int a, b, c; };\n\nvector<F> hull3d(const vector<P3>& A) {\n\tassert(sz(A) >= 4);\n\tvector<vector<PR>> E(sz(A), vector<PR>(sz(A), {-1, -1}));\n#define E(x,y) E[f.x][f.y]\n\tvector<F> FS;\n\tauto mf = [&](int i, int j, int k, int l) {\n\t\tP3 q = (A[j] - A[i]).cross((A[k] - A[i]));\n\t\tif (q.dot(A[l]) > q.dot(A[i]))\n\t\t\tq = q * -1;\n\t\tF f{q, i, j, k};\n\t\tE(a,b).ins(k); E(a,c).ins(j); E(b,c).ins(i);\n\t\tFS.push_back(f);\n\t};\n\trep(i,0,4) rep(j,i+1,4) rep(k,j+1,4)\n\t\tmf(i, j, k, 6 - i - j - k);\n\n\trep(i,4,sz(A)) {\n\t\trep(j,0,sz(FS)) {\n\t\t\tF f = FS[j];\n\t\t\tif(f.q.dot(A[i]) > f.q.dot(A[f.a])) {\n\t\t\t\tE(a,b).rem(f.c);\n\t\t\t\tE(a,c).rem(f.b);\n\t\t\t\tE(b,c).rem(f.a);\n\t\t\t\tswap(FS[j--], FS.back());\n\t\t\t\tFS.pop_back();\n\t\t\t}\n\t\t}\n\t\tint nw = sz(FS);\n\t\trep(j,0,nw) {\n\t\t\tF f = FS[j];\n#define C(a, b, c) if (E(a,b).cnt() != 2) mf(f.a, f.b, i, f.c);\n\t\t\tC(a, b, c); C(a, c, b); C(b, c, a);\n\t\t}\n\t}\n\tfor (F& it : FS) if ((A[it.b] - A[it.a]).cross(\n\t\tA[it.c] - A[it.a]).dot(it.q) <= 0) swap(it.c, it.b);\n\treturn FS;\n};"
+    },
+    {
+      "id": "geometry/Angle.h",
+      "name": "Angle.h",
+      "chapter": "geometry",
+      "description": "A class for ordering angles (as represented by int points and\na number of rotations around the origin). Useful for rotational sweeping.\nSometimes also represents points or vectors.",
+      "usage": "vector<Angle> v = {w[0], w[0].t360() ...}; // sorted\nint j = 0; rep(i,0,n) { while (v[j] < v[i].t180()) ++j; }\n// sweeps j such that (j-i) represents the number of positively oriented triangles with vertices at 0 and i",
+      "time": "",
+      "memory": "",
+      "status": "Used, works well",
+      "author": "Simon Lindholm",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct Angle {\n\tint x, y;\n\tint t;\n\tAngle(int x, int y, int t=0) : x(x), y(y), t(t) {}\n\tAngle operator-(Angle b) const { return {x-b.x, y-b.y, t}; }\n\tint half() const {\n\t\tassert(x || y);\n\t\treturn y < 0 || (y == 0 && x < 0);\n\t}\n\tAngle t90() const { return {-y, x, t + (half() && x >= 0)}; }\n\tAngle t180() const { return {-x, -y, t + half()}; }\n\tAngle t360() const { return {x, y, t + 1}; }\n};\nbool operator<(Angle a, Angle b) {\n\t// add a.dist2() and b.dist2() to also compare distances\n\treturn make_tuple(a.t, a.half(), a.y * (ll)b.x) <\n\t       make_tuple(b.t, b.half(), a.x * (ll)b.y);\n}\n\n// Given two points, this calculates the smallest angle between\n// them, i.e., the angle that covers the defined line segment.\npair<Angle, Angle> segmentAngles(Angle a, Angle b) {\n\tif (b < a) swap(a, b);\n\treturn (b < a.t180() ?\n\t        make_pair(a, b) : make_pair(b, a.t360()));\n}\nAngle operator+(Angle a, Angle b) { // point a + vector b\n\tAngle r(a.x + b.x, a.y + b.y, a.t);\n\tif (a.t180() < r) r.t--;\n\treturn r.t180() < a ? r.t360() : r;\n}\nAngle angleDiff(Angle a, Angle b) { // angle b - angle a\n\tint tu = b.t - a.t; a.t = b.t;\n\treturn {a.x*b.x + a.y*b.y, a.x*b.y - a.y*b.x, tu - (b < a)};\n}"
+    },
+    {
+      "id": "geometry/CircleIntersection.h",
+      "name": "CircleIntersection.h",
+      "chapter": "geometry",
+      "description": "Computes the pair of points at which two circles intersect.\nReturns false in case of no intersection.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "Simon Lindholm",
+      "source": "",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<double> P;\nbool circleInter(P a,P b,double r1,double r2,pair<P, P>* out) {\n\tif (a == b) { assert(r1 != r2); return false; }\n\tP vec = b - a;\n\tdouble d2 = vec.dist2(), sum = r1+r2, dif = r1-r2,\n\t       p = (d2 + r1*r1 - r2*r2)/(d2*2), h2 = r1*r1 - p*p*d2;\n\tif (sum*sum < d2 || dif*dif > d2) return false;\n\tP mid = a + vec*p, per = vec.perp() * sqrt(fmax(0, h2) / d2);\n\t*out = {mid + per, mid - per};\n\treturn true;\n}"
+    },
+    {
+      "id": "geometry/CircleLine.h",
+      "name": "CircleLine.h",
+      "chapter": "geometry",
+      "description": "Finds the intersection between a circle and a line.\nReturns a vector of either 0, 1, or 2 intersection points.\nP is intended to be Point<double>.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "unit tested",
+      "author": "Victor Lecomte, chilli",
+      "source": "https://vlecomte.github.io/cp-geo.pdf",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": false,
+      "code": "template<class P>\nvector<P> circleLine(P c, double r, P a, P b) {\n\tP ab = b - a, p = a + ab * (c-a).dot(ab) / ab.dist2();\n\tdouble s = a.cross(b, c), h2 = r*r - s*s / ab.dist2();\n\tif (h2 < 0) return {};\n\tif (h2 == 0) return {p};\n\tP h = ab.unit() * sqrt(h2);\n\treturn {p - h, p + h};\n}"
+    },
+    {
+      "id": "geometry/CirclePolygonIntersection.h",
+      "name": "CirclePolygonIntersection.h",
+      "chapter": "geometry",
+      "description": "Returns the area of the intersection of a circle with a\nccw polygon.",
+      "usage": "",
+      "time": "$O(n)$",
+      "memory": "",
+      "status": "Tested on GNYR 2019 Gerrymandering, stress-tested",
+      "author": "chilli, Takanori MAEHARA",
+      "source": "https://github.com/spaghetti-source/algorithm/blob/master/geometry/_geom.cc#L744",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<double> P;\n#define arg(p, q) atan2(p.cross(q), p.dot(q))\ndouble circlePoly(P c, double r, vector<P> ps) {\n\tauto tri = [&](P p, P q) {\n\t\tauto r2 = r * r / 2;\n\t\tP d = q - p;\n\t\tauto a = d.dot(p)/d.dist2(), b = (p.dist2()-r*r)/d.dist2();\n\t\tauto det = a * a - b;\n\t\tif (det <= 0) return arg(p, q) * r2;\n\t\tauto s = max(0., -a-sqrt(det)), t = min(1., -a+sqrt(det));\n\t\tif (t < 0 || 1 <= s) return arg(p, q) * r2;\n\t\tP u = p + d * s, v = q + d * (t-1);\n\t\treturn arg(p,u) * r2 + u.cross(v)/2 + arg(v,q) * r2;\n\t};\n\tauto sum = 0.0;\n\trep(i,0,sz(ps))\n\t\tsum += tri(ps[i] - c, ps[(i + 1) % sz(ps)] - c);\n\treturn sum;\n}"
+    },
+    {
+      "id": "geometry/CircleTangents.h",
+      "name": "CircleTangents.h",
+      "chapter": "geometry",
+      "description": "Finds the external tangents of two circles, or internal if r2 is negated.\nCan return 0, 1, or 2 tangents -- 0 if one circle contains the other (or overlaps it, in the internal case, or if the circles are the same);\n1 if the circles are tangent to each other (in which case .first = .second and the tangent line is perpendicular to the line between the centers).\n.first and .second give the tangency points at circle 1 and 2 respectively.\nTo find the tangents of a circle with a point set r2 to 0.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "tested",
+      "author": "Victor Lecomte, chilli",
+      "source": "https://vlecomte.github.io/cp-geo.pdf",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "template<class P>\nvector<pair<P, P>> tangents(P c1, double r1, P c2, double r2) {\n\tP d = c2 - c1;\n\tdouble dr = r1 - r2, d2 = d.dist2(), h2 = d2 - dr * dr;\n\tif (d2 == 0 || h2 < 0)  return {};\n\tvector<pair<P, P>> out;\n\tfor (double sign : {-1, 1}) {\n\t\tP v = (d * dr + d.perp() * sqrt(h2) * sign) / d2;\n\t\tout.push_back({c1 + v * r1, c2 + v * r2});\n\t}\n\tif (h2 == 0) out.pop_back();\n\treturn out;\n}"
+    },
+    {
+      "id": "geometry/circumcircle.h",
+      "name": "circumcircle.h",
+      "chapter": "geometry",
+      "description": "The circumcirle of a triangle is the circle intersecting all three vertices. ccRadius returns the radius of the circle going through points A, B and C and ccCenter returns the center of the same circle.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "tested",
+      "author": "Ulf Lundstrom",
+      "source": "http://en.wikipedia.org/wiki/Circumcircle",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<double> P;\ndouble ccRadius(P A, P B, P C) {\n\treturn (B-A).dist()*(C-B).dist()*(A-C).dist()/\n\t\t\tabs((B-A).cross(C-A))/2;\n}\nP ccCenter(P A, P B, P C) {\n\tP b = C-A, c = B-A;\n\treturn A + (b*c.dist2()-c*b.dist2()).perp()/b.cross(c)/2;\n}"
+    },
+    {
+      "id": "geometry/ClosestPair.h",
+      "name": "ClosestPair.h",
+      "chapter": "geometry",
+      "description": "Finds the closest pair of points.",
+      "usage": "",
+      "time": "$O(n \\log n)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "Simon Lindholm",
+      "source": "https://codeforces.com/blog/entry/58747",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<ll> P;\npair<P, P> closest(vector<P> v) {\n\tassert(sz(v) > 1);\n\tset<P> S;\n\tsort(all(v), [](P a, P b) { return a.y < b.y; });\n\tpair<ll, pair<P, P>> ret{LLONG_MAX, {P(), P()}};\n\tint j = 0;\n\tfor (P p : v) {\n\t\tP d{1 + (ll)sqrt(ret.first), 0};\n\t\twhile (v[j].y <= p.y - d.x) S.erase(v[j++]);\n\t\tauto lo = S.lower_bound(p - d), hi = S.upper_bound(p + d);\n\t\tfor (; lo != hi; ++lo)\n\t\t\tret = min(ret, {(*lo - p).dist2(), {*lo, p}});\n\t\tS.insert(p);\n\t}\n\treturn ret.second;\n}"
+    },
+    {
+      "id": "geometry/ConvexHull.h",
+      "name": "ConvexHull.h",
+      "chapter": "geometry",
+      "description": "Returns a vector of the points of the convex hull in counter-clockwise order.\nPoints on the edge of the hull between two other points are not considered part of the hull.",
+      "usage": "",
+      "time": "$O(n \\log n)$",
+      "memory": "",
+      "status": "stress-tested, tested with kattis:convexhull",
+      "author": "Stjepan Glavina, chilli",
+      "source": "https://github.com/stjepang/snippets/blob/master/convex_hull.cpp",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<ll> P;\nvector<P> convexHull(vector<P> pts) {\n\tif (sz(pts) <= 1) return pts;\n\tsort(all(pts));\n\tvector<P> h(sz(pts)+1);\n\tint s = 0, t = 0;\n\tfor (int it = 2; it--; s = --t, reverse(all(pts)))\n\t\tfor (P p : pts) {\n\t\t\twhile (t >= s + 2 && h[t-2].cross(h[t-1], p) <= 0) t--;\n\t\t\th[t++] = p;\n\t\t}\n\treturn {h.begin(), h.begin() + t - (t == 2 && h[0] == h[1])};\n}"
+    },
+    {
+      "id": "geometry/DelaunayTriangulation.h",
+      "name": "DelaunayTriangulation.h",
+      "chapter": "geometry",
+      "description": "Computes the Delaunay triangulation of a set of points.\nEach circumcircle contains none of the input points.\nIf any three points are collinear or any four are on the same circle, behavior is undefined.",
+      "usage": "",
+      "time": "$O(n^2)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "Mattias de Zalenski",
+      "source": "Geometry in C",
+      "dependencies": [
+        "geometry/Point.h",
+        "geometry/3dHull.h"
+      ],
+      "includedInPdf": false,
+      "code": "template<class P, class F>\nvoid delaunay(vector<P>& ps, F trifun) {\n\tif (sz(ps) == 3) { int d = (ps[0].cross(ps[1], ps[2]) < 0);\n\t\ttrifun(0,1+d,2-d); }\n\tvector<P3> p3;\n\tfor (P p : ps) p3.emplace_back(p.x, p.y, p.dist2());\n\tif (sz(ps) > 3) for(auto t:hull3d(p3)) if ((p3[t.b]-p3[t.a]).\n\t\t\tcross(p3[t.c]-p3[t.a]).dot(P3(0,0,1)) < 0)\n\t\ttrifun(t.a, t.c, t.b);\n}"
+    },
+    {
+      "id": "geometry/FastDelaunay.h",
+      "name": "FastDelaunay.h",
+      "chapter": "geometry",
+      "description": "Fast Delaunay triangulation.\nEach circumcircle contains none of the input points.\nThere must be no duplicate points.\nIf all points are on a line, no triangles will be returned.\nShould work for doubles as well, though there may be precision issues in 'circ'.\nReturns triangles in order \\{t[0][0], t[0][1], t[0][2], t[1][0], \\dots\\}, all counter-clockwise.",
+      "usage": "",
+      "time": "$O(n \\log n)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "Philippe Legault",
+      "source": "https://github.com/Bathlamos/delaunay-triangulation/",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<ll> P;\ntypedef struct Quad* Q;\ntypedef __int128_t lll; // (can be ll if coords are < 2e4)\nP arb(LLONG_MAX,LLONG_MAX); // not equal to any other point\n\nstruct Quad {\n\tQ rot, o; P p = arb; bool mark;\n\tP& F() { return r()->p; }\n\tQ& r() { return rot->rot; }\n\tQ prev() { return rot->o->rot; }\n\tQ next() { return r()->prev(); }\n} *H;\n\nbool circ(P p, P a, P b, P c) { // is p in the circumcircle?\n\tlll p2 = p.dist2(), A = a.dist2()-p2,\n\t    B = b.dist2()-p2, C = c.dist2()-p2;\n\treturn p.cross(a,b)*C + p.cross(b,c)*A + p.cross(c,a)*B > 0;\n}\nQ makeEdge(P orig, P dest) {\n\tQ r = H ? H : new Quad{new Quad{new Quad{new Quad{0}}}};\n\tH = r->o; r->r()->r() = r;\n\trep(i,0,4) r = r->rot, r->p = arb, r->o = i & 1 ? r : r->r();\n\tr->p = orig; r->F() = dest;\n\treturn r;\n}\nvoid splice(Q a, Q b) {\n\tswap(a->o->rot->o, b->o->rot->o); swap(a->o, b->o);\n}\nQ connect(Q a, Q b) {\n\tQ q = makeEdge(a->F(), b->p);\n\tsplice(q, a->next());\n\tsplice(q->r(), b);\n\treturn q;\n}\n\npair<Q,Q> rec(const vector<P>& s) {\n\tif (sz(s) <= 3) {\n\t\tQ a = makeEdge(s[0], s[1]), b = makeEdge(s[1], s.back());\n\t\tif (sz(s) == 2) return { a, a->r() };\n\t\tsplice(a->r(), b);\n\t\tauto side = s[0].cross(s[1], s[2]);\n\t\tQ c = side ? connect(b, a) : 0;\n\t\treturn {side < 0 ? c->r() : a, side < 0 ? c : b->r() };\n\t}\n\n#define H(e) e->F(), e->p\n#define valid(e) (e->F().cross(H(base)) > 0)\n\tQ A, B, ra, rb;\n\tint half = sz(s) / 2;\n\ttie(ra, A) = rec({all(s) - half});\n\ttie(B, rb) = rec({sz(s) - half + all(s)});\n\twhile ((B->p.cross(H(A)) < 0 && (A = A->next())) ||\n\t       (A->p.cross(H(B)) > 0 && (B = B->r()->o)));\n\tQ base = connect(B->r(), A);\n\tif (A->p == ra->p) ra = base->r();\n\tif (B->p == rb->p) rb = base;\n\n#define DEL(e, init, dir) Q e = init->dir; if (valid(e)) \\\n\t\twhile (circ(e->dir->F(), H(base), e->F())) { \\\n\t\t\tQ t = e->dir; \\\n\t\t\tsplice(e, e->prev()); \\\n\t\t\tsplice(e->r(), e->r()->prev()); \\\n\t\t\te->o = H; H = e; e = t; \\\n\t\t}\n\tfor (;;) {\n\t\tDEL(LC, base->r(), o);  DEL(RC, base, prev());\n\t\tif (!valid(LC) && !valid(RC)) break;\n\t\tif (!valid(LC) || (valid(RC) && circ(H(RC), H(LC))))\n\t\t\tbase = connect(RC, base->r());\n\t\telse\n\t\t\tbase = connect(base->r(), LC->r());\n\t}\n\treturn { ra, rb };\n}\n\nvector<P> triangulate(vector<P> pts) {\n\tsort(all(pts));  assert(unique(all(pts)) == pts.end());\n\tif (sz(pts) < 2) return {};\n\tQ e = rec(pts).first;\n\tvector<Q> q = {e};\n\tint qi = 0;\n\twhile (e->o->F().cross(e->F(), e->p) < 0) e = e->o;\n#define ADD { Q c = e; do { c->mark = 1; pts.push_back(c->p); \\\n\tq.push_back(c->r()); c = c->next(); } while (c != e); }\n\tADD; pts.clear();\n\twhile (qi < sz(q)) if (!(e = q[qi++])->mark) ADD;\n\treturn pts;\n}"
+    },
+    {
+      "id": "geometry/HullDiameter.h",
+      "name": "HullDiameter.h",
+      "chapter": "geometry",
+      "description": "Returns the two points with max distance on a convex hull (ccw,\nno duplicate/collinear points).",
+      "usage": "",
+      "time": "$O(n)$",
+      "memory": "",
+      "status": "stress-tested, tested on kattis:roberthood",
+      "author": "Oleksandr Bacherikov, chilli",
+      "source": "https://codeforces.com/blog/entry/48868",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<ll> P;\narray<P, 2> hullDiameter(vector<P> S) {\n\tint n = sz(S), j = n < 2 ? 0 : 1;\n\tpair<ll, array<P, 2>> res({0, {S[0], S[0]}});\n\trep(i,0,j)\n\t\tfor (;; j = (j + 1) % n) {\n\t\t\tres = max(res, {(S[i] - S[j]).dist2(), {S[i], S[j]}});\n\t\t\tif ((S[(j + 1) % n] - S[j]).cross(S[i + 1] - S[i]) >= 0)\n\t\t\t\tbreak;\n\t\t}\n\treturn res.second;\n}"
+    },
+    {
+      "id": "geometry/InsidePolygon.h",
+      "name": "InsidePolygon.h",
+      "chapter": "geometry",
+      "description": "Returns true if p lies within the polygon. If strict is true,\nit returns false for points on the boundary. The algorithm uses\nproducts in intermediate steps so watch out for overflow.",
+      "usage": "vector<P> v = {P{4,4}, P{1,2}, P{2,1}};\nbool in = inPolygon(v, P{3, 3}, false);",
+      "time": "$O(n)$",
+      "memory": "",
+      "status": "stress-tested and tested on kattis:pointinpolygon",
+      "author": "Victor Lecomte, chilli",
+      "source": "https://vlecomte.github.io/cp-geo.pdf",
+      "dependencies": [
+        "geometry/Point.h",
+        "geometry/OnSegment.h",
+        "geometry/SegmentDistance.h"
+      ],
+      "includedInPdf": true,
+      "code": "template<class P>\nbool inPolygon(vector<P> &p, P a, bool strict = true) {\n\tint cnt = 0, n = sz(p);\n\trep(i,0,n) {\n\t\tP q = p[(i + 1) % n];\n\t\tif (onSegment(p[i], q, a)) return !strict;\n\t\t//or: if (segDist(p[i], q, a) <= eps) return !strict;\n\t\tcnt ^= ((a.y<p[i].y) - (a.y<q.y)) * a.cross(p[i], q) > 0;\n\t}\n\treturn cnt;\n}"
+    },
+    {
+      "id": "geometry/kdTree.h",
+      "name": "kdTree.h",
+      "chapter": "geometry",
+      "description": "KD-tree (2d, can be extended to 3d)",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "Tested on excellentengineers",
+      "author": "Stanford",
+      "source": "Stanford Notebook",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef long long T;\ntypedef Point<T> P;\nconst T INF = numeric_limits<T>::max();\n\nbool on_x(P a, P b) { return a.x < b.x; }\nbool on_y(P a, P b) { return a.y < b.y; }\n\nstruct Node {\n\tP pt; // if this is a leaf, the single point in it\n\tT x0 = INF, x1 = -INF, y0 = INF, y1 = -INF; // bounds\n\tNode *first = 0, *second = 0;\n\n\tT distance(P p) { // min squared distance to a point\n\t\tT x = (p.x < x0 ? x0 : p.x > x1 ? x1 : p.x);\n\t\tT y = (p.y < y0 ? y0 : p.y > y1 ? y1 : p.y);\n\t\treturn (P(x,y) - p).dist2();\n\t}\n\n\tNode(vector<P>&& vp) : pt(vp[0]) {\n\t\tfor (P p : vp) {\n\t\t\tx0 = min(x0, p.x); x1 = max(x1, p.x);\n\t\t\ty0 = min(y0, p.y); y1 = max(y1, p.y);\n\t\t}\n\t\tif (vp.size() > 1) {\n\t\t\t// split on x if width >= height (not ideal...)\n\t\t\tsort(all(vp), x1 - x0 >= y1 - y0 ? on_x : on_y);\n\t\t\t// divide by taking half the array for each child (not\n\t\t\t// best performance with many duplicates in the middle)\n\t\t\tint half = sz(vp)/2;\n\t\t\tfirst = new Node({vp.begin(), vp.begin() + half});\n\t\t\tsecond = new Node({vp.begin() + half, vp.end()});\n\t\t}\n\t}\n};\n\nstruct KDTree {\n\tNode* root;\n\tKDTree(const vector<P>& vp) : root(new Node({all(vp)})) {}\n\n\tpair<T, P> search(Node *node, P p) {\n\t\tif (!node->first) {\n\t\t\t// uncomment if we should not find the point itself:\n\t\t\t// if (p == node->pt) return {INF, P()};\n\t\t\treturn make_pair((p - node->pt).dist2(), node->pt);\n\t\t}\n\n\t\tNode *f = node->first, *s = node->second;\n\t\tT bfirst = f->distance(p), bsec = s->distance(p);\n\t\tif (bfirst > bsec) swap(bsec, bfirst), swap(f, s);\n\n\t\t// search closest side first, other side if needed\n\t\tauto best = search(f, p);\n\t\tif (bsec < best.first)\n\t\t\tbest = min(best, search(s, p));\n\t\treturn best;\n\t}\n\n\t// find nearest point to a point, and its squared distance\n\t// (requires an arbitrary operator< for Point)\n\tpair<T, P> nearest(P p) {\n\t\treturn search(root, p);\n\t}\n};"
+    },
+    {
+      "id": "geometry/linearTransformation.h",
+      "name": "linearTransformation.h",
+      "chapter": "geometry",
+      "description": "Apply the linear transformation (translation, rotation and scaling) which takes line p0-p1 to line q0-q1 to point r.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "not tested",
+      "author": "Per Austrin, Ulf Lundstrom",
+      "source": "",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<double> P;\nP linearTransformation(P p0, P p1, P q0, P q1, P r) {\n\tP dp = p1-p0, dq = q1-q0, num(dp.cross(dq), dp.dot(dq));\n\treturn q0 + P((r-p0).cross(num), (r-p0).dot(num))/dp.dist2();\n}"
+    },
+    {
+      "id": "geometry/lineDistance.h",
+      "name": "lineDistance.h",
+      "chapter": "geometry",
+      "description": "Returns the signed distance between point p and the line containing points a and b.\nPositive value on left side and negative on right as seen from a towards b. a==b gives nan.\nP is supposed to be Point<T> or Point3D<T> where T is e.g. double or long long.\nIt uses products in intermediate steps so watch out for overflow if using int or long long.\nUsing Point3D will always give a non-negative distance. For Point3D, call .dist on the result of the cross product.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "tested",
+      "author": "Ulf Lundstrom",
+      "source": "Basic math",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "template<class P>\ndouble lineDist(P a, P b, P p) {\n\treturn (double)(b-a).cross(p-a)/(b-a).dist();\n}"
+    },
+    {
+      "id": "geometry/LineHullIntersection.h",
+      "name": "LineHullIntersection.h",
+      "chapter": "geometry",
+      "description": "Line-convex polygon intersection. The polygon must be ccw and have no collinear points.\nlineHull(line, poly) returns a pair describing the intersection of a line with the polygon:\n$(-1, -1)$ if no collision;\n$(i, -1)$ if touching the corner $i$;\n$(i, i)$ if along side $(i, i+1)$;\n$(i, j)$ if crossing sides $(i, i+1)$ and $(j, j+1)$.\nIn the last case, if a corner $i$ is crossed, this is treated as happening on side $(i, i+1)$.\nThe points are returned in the same order as the line hits the polygon.\n\\texttt{extrVertex} returns the point of a hull with the max projection onto a line.",
+      "usage": "",
+      "time": "$O(\\log n)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "Oleksandr Bacherikov, chilli",
+      "source": "https://github.com/AlCash07/ACTL/blob/master/include/actl/geometry/algorithm/intersect/line_convex_polygon.hpp",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "#define cmp(i,j) sgn(dir.perp().cross(poly[(i)%n]-poly[(j)%n]))\n#define extr(i) cmp(i + 1, i) >= 0 && cmp(i, i - 1 + n) < 0\ntemplate <class P> int extrVertex(vector<P>& poly, P dir) {\n\tint n = sz(poly), lo = 0, hi = n;\n\tif (extr(0)) return 0;\n\twhile (lo + 1 < hi) {\n\t\tint m = (lo + hi) / 2;\n\t\tif (extr(m)) return m;\n\t\tint ls = cmp(lo + 1, lo), ms = cmp(m + 1, m);\n\t\t(ls < ms || (ls == ms && ls == cmp(lo, m)) ? hi : lo) = m;\n\t}\n\treturn lo;\n}\n\n#define cmpL(i) sgn(a.cross(poly[i], b))\ntemplate <class P>\narray<int, 2> lineHull(P a, P b, vector<P>& poly) {\n\tint endA = extrVertex(poly, (a - b).perp());\n\tint endB = extrVertex(poly, (b - a).perp());\n\tif (cmpL(endA) < 0 || cmpL(endB) > 0)\n\t\treturn {-1, -1};\n\tarray<int, 2> res;\n\trep(i,0,2) {\n\t\tint lo = endB, hi = endA, n = sz(poly);\n\t\twhile ((lo + 1) % n != hi) {\n\t\t\tint m = ((lo + hi + (lo < hi ? 0 : n)) / 2) % n;\n\t\t\t(cmpL(m) == cmpL(endB) ? lo : hi) = m;\n\t\t}\n\t\tres[i] = (lo + !cmpL(hi)) % n;\n\t\tswap(endA, endB);\n\t}\n\tif (res[0] == res[1]) return {res[0], -1};\n\tif (!cmpL(res[0]) && !cmpL(res[1]))\n\t\tswitch ((res[0] - res[1] + sz(poly) + 1) % sz(poly)) {\n\t\t\tcase 0: return {res[0], res[0]};\n\t\t\tcase 2: return {res[1], res[1]};\n\t\t}\n\treturn res;\n}"
+    },
+    {
+      "id": "geometry/lineIntersection.h",
+      "name": "lineIntersection.h",
+      "chapter": "geometry",
+      "description": "If a unique intersection point of the lines going through s1,e1 and s2,e2 exists \\{1, point\\} is returned.\nIf no intersection point exists \\{0, (0,0)\\} is returned and if infinitely many exists \\{-1, (0,0)\\} is returned.\nThe wrong position will be returned if P is Point<ll> and the intersection point does not have integer coordinates.\nProducts of three coordinates are used in intermediate steps so watch out for overflow if using int or ll.",
+      "usage": "auto res = lineInter(s1,e1,s2,e2);\nif (res.first == 1)\ncout << \"intersection point at \" << res.second << endl;",
+      "time": "",
+      "memory": "",
+      "status": "stress-tested, and tested through half-plane tests",
+      "author": "Victor Lecomte, chilli",
+      "source": "https://vlecomte.github.io/cp-geo.pdf",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "template<class P>\npair<int, P> lineInter(P s1, P e1, P s2, P e2) {\n\tauto d = (e1 - s1).cross(e2 - s2);\n\tif (d == 0) // if parallel\n\t\treturn {-(s1.cross(e1, s2) == 0), P(0, 0)};\n\tauto p = s2.cross(e1, e2), q = s2.cross(e2, s1);\n\treturn {1, (s1 * p + e1 * q) / d};\n}"
+    },
+    {
+      "id": "geometry/LineProjectionReflection.h",
+      "name": "LineProjectionReflection.h",
+      "chapter": "geometry",
+      "description": "Projects point p onto line ab. Set refl=true to get reflection\nof point p across line ab instead. The wrong point will be returned if P is\nan integer point and the desired point doesn't have integer coordinates.\nProducts of three coordinates are used in intermediate steps so watch out\nfor overflow.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "Victor Lecomte, chilli",
+      "source": "https://vlecomte.github.io/cp-geo.pdf",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": false,
+      "code": "template<class P>\nP lineProj(P a, P b, P p, bool refl=false) {\n\tP v = b - a;\n\treturn p - v.perp()*(1+refl)*v.cross(p-a)/v.dist2();\n}"
+    },
+    {
+      "id": "geometry/ManhattanMST.h",
+      "name": "ManhattanMST.h",
+      "chapter": "geometry",
+      "description": "Given N points, returns up to 4*N edges, which are guaranteed\nto contain a minimum spanning tree for the graph with edge weights w(p, q) =\n|p.x - q.x| + |p.y - q.y|. Edges are in the form (distance, src, dst). Use a\nstandard MST algorithm on the result to find the final MST.",
+      "usage": "",
+      "time": "$O(N \\log N)$",
+      "memory": "",
+      "status": "Stress-tested",
+      "author": "chilli, Takanori MAEHARA",
+      "source": "https://github.com/spaghetti-source/algorithm/blob/master/geometry/rectilinear_mst.cc",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": false,
+      "code": "typedef Point<int> P;\nvector<array<int, 3>> manhattanMST(vector<P> ps) {\n\tvi id(sz(ps));\n\tiota(all(id), 0);\n\tvector<array<int, 3>> edges;\n\trep(k,0,4) {\n\t\tsort(all(id), [&](int i, int j) {\n\t\t     return (ps[i]-ps[j]).x < (ps[j]-ps[i]).y;});\n\t\tmap<int, int> sweep;\n\t\tfor (int i : id) {\n\t\t\tfor (auto it = sweep.lower_bound(-ps[i].y);\n\t\t\t\t        it != sweep.end(); sweep.erase(it++)) {\n\t\t\t\tint j = it->second;\n\t\t\t\tP d = ps[i] - ps[j];\n\t\t\t\tif (d.y > d.x) break;\n\t\t\t\tedges.push_back({d.y + d.x, i, j});\n\t\t\t}\n\t\t\tsweep[-ps[i].y] = i;\n\t\t}\n\t\tfor (P& p : ps) if (k & 1) p.x = -p.x; else swap(p.x, p.y);\n\t}\n\treturn edges;\n}"
+    },
+    {
+      "id": "geometry/MinimumEnclosingCircle.h",
+      "name": "MinimumEnclosingCircle.h",
+      "chapter": "geometry",
+      "description": "Computes the minimum circle that encloses a set of points.",
+      "usage": "",
+      "time": "expected $O(n)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "Andrew He, chilli",
+      "source": "folklore",
+      "dependencies": [
+        "geometry/circumcircle.h"
+      ],
+      "includedInPdf": true,
+      "code": "pair<P, double> mec(vector<P> ps) {\n\tshuffle(all(ps), mt19937(time(0)));\n\tP o = ps[0];\n\tdouble r = 0, EPS = 1 + 1e-8;\n\trep(i,0,sz(ps)) if ((o - ps[i]).dist() > r * EPS) {\n\t\to = ps[i], r = 0;\n\t\trep(j,0,i) if ((o - ps[j]).dist() > r * EPS) {\n\t\t\to = (ps[i] + ps[j]) / 2;\n\t\t\tr = (o - ps[i]).dist();\n\t\t\trep(k,0,j) if ((o - ps[k]).dist() > r * EPS) {\n\t\t\t\to = ccCenter(ps[i], ps[j], ps[k]);\n\t\t\t\tr = (o - ps[i]).dist();\n\t\t\t}\n\t\t}\n\t}\n\treturn {o, r};\n}"
+    },
+    {
+      "id": "geometry/OnSegment.h",
+      "name": "OnSegment.h",
+      "chapter": "geometry",
+      "description": "Returns true iff p lies on the line segment from s to e.\nUse \\texttt{(segDist(s,e,p)<=epsilon)} instead when using Point<double>.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "",
+      "author": "Victor Lecomte, chilli",
+      "source": "https://vlecomte.github.io/cp-geo.pdf",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "template<class P> bool onSegment(P s, P e, P p) {\n\treturn p.cross(s, e) == 0 && (s - p).dot(e - p) <= 0;\n}"
+    },
+    {
+      "id": "geometry/Point.h",
+      "name": "Point.h",
+      "chapter": "geometry",
+      "description": "Class to handle points in the plane.\nT can be e.g. double or long long. (Avoid int.)",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "Works fine, used a lot",
+      "author": "Ulf Lundstrom",
+      "source": "My head with inspiration from tinyKACTL",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "template <class T> int sgn(T x) { return (x > 0) - (x < 0); }\ntemplate<class T>\nstruct Point {\n\ttypedef Point P;\n\tT x, y;\n\texplicit Point(T x=0, T y=0) : x(x), y(y) {}\n\tbool operator<(P p) const { return tie(x,y) < tie(p.x,p.y); }\n\tbool operator==(P p) const { return tie(x,y)==tie(p.x,p.y); }\n\tP operator+(P p) const { return P(x+p.x, y+p.y); }\n\tP operator-(P p) const { return P(x-p.x, y-p.y); }\n\tP operator*(T d) const { return P(x*d, y*d); }\n\tP operator/(T d) const { return P(x/d, y/d); }\n\tT dot(P p) const { return x*p.x + y*p.y; }\n\tT cross(P p) const { return x*p.y - y*p.x; }\n\tT cross(P a, P b) const { return (a-*this).cross(b-*this); }\n\tT dist2() const { return x*x + y*y; }\n\tdouble dist() const { return sqrt((double)dist2()); }\n\t// angle to x-axis in interval [-pi, pi]\n\tdouble angle() const { return atan2(y, x); }\n\tP unit() const { return *this/dist(); } // makes dist()=1\n\tP perp() const { return P(-y, x); } // rotates +90 degrees\n\tP normal() const { return perp().unit(); }\n\t// returns point rotated 'a' radians ccw around the origin\n\tP rotate(double a) const {\n\t\treturn P(x*cos(a)-y*sin(a),x*sin(a)+y*cos(a)); }\n\tfriend ostream& operator<<(ostream& os, P p) {\n\t\treturn os << \"(\" << p.x << \",\" << p.y << \")\"; }\n};"
+    },
+    {
+      "id": "geometry/Point3D.h",
+      "name": "Point3D.h",
+      "chapter": "geometry",
+      "description": "Class to handle points in 3D space.\nT can be e.g. double or long long.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "tested, except for phi and theta",
+      "author": "Ulf Lundstrom with inspiration from tinyKACTL",
+      "source": "",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "template<class T> struct Point3D {\n\ttypedef Point3D P;\n\tT x, y, z;\n\texplicit Point3D(T x=0, T y=0, T z=0) : x(x), y(y), z(z) {}\n\tbool operator<(P p) const {\n\t\treturn tie(x, y, z) < tie(p.x, p.y, p.z); }\n\tbool operator==(P p) const {\n\t\treturn tie(x, y, z) == tie(p.x, p.y, p.z); }\n\tP operator+(P p) const { return P(x+p.x, y+p.y, z+p.z); }\n\tP operator-(P p) const { return P(x-p.x, y-p.y, z-p.z); }\n\tP operator*(T d) const { return P(x*d, y*d, z*d); }\n\tP operator/(T d) const { return P(x/d, y/d, z/d); }\n\tT dot(P p) const { return x*p.x + y*p.y + z*p.z; }\n\tP cross(P p) const {\n\t\treturn P(y*p.z - z*p.y, z*p.x - x*p.z, x*p.y - y*p.x);\n\t}\n\tT dist2() const { return x*x + y*y + z*z; }\n\tdouble dist() const { return sqrt((double)dist2()); }\n\t//Azimuthal angle (longitude) to x-axis in interval [-pi, pi]\n\tdouble phi() const { return atan2(y, x); }\n\t//Zenith angle (latitude) to the z-axis in interval [0, pi]\n\tdouble theta() const { return atan2(sqrt(x*x+y*y),z); }\n\tP unit() const { return *this/(T)dist(); } //makes dist()=1\n\t//returns unit vector normal to *this and p\n\tP normal(P p) const { return cross(p).unit(); }\n\t//returns point rotated 'angle' radians ccw around axis\n\tP rotate(double angle, P axis) const {\n\t\tdouble s = sin(angle), c = cos(angle); P u = axis.unit();\n\t\treturn u*dot(u)*(1-c) + (*this)*c - cross(u)*s;\n\t}\n};"
+    },
+    {
+      "id": "geometry/PointInsideHull.h",
+      "name": "PointInsideHull.h",
+      "chapter": "geometry",
+      "description": "Determine whether a point t lies inside a convex hull (CCW\norder, with no collinear points). Returns true if point lies within\nthe hull. If strict is true, points on the boundary aren't included.",
+      "usage": "",
+      "time": "$O(\\log N)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "chilli",
+      "source": "https://github.com/ngthanhtrung23/ACM_Notebook_new",
+      "dependencies": [
+        "geometry/Point.h",
+        "geometry/sideOf.h",
+        "geometry/OnSegment.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<ll> P;\n\nbool inHull(const vector<P>& l, P p, bool strict = true) {\n\tint a = 1, b = sz(l) - 1, r = !strict;\n\tif (sz(l) < 3) return r && onSegment(l[0], l.back(), p);\n\tif (sideOf(l[0], l[a], l[b]) > 0) swap(a, b);\n\tif (sideOf(l[0], l[a], p) >= r || sideOf(l[0], l[b], p)<= -r)\n\t\treturn false;\n\twhile (abs(a - b) > 1) {\n\t\tint c = (a + b) / 2;\n\t\t(sideOf(l[0], l[c], p) > 0 ? b : a) = c;\n\t}\n\treturn sgn(l[a].cross(l[b], p)) < r;\n}"
+    },
+    {
+      "id": "geometry/PolygonArea.h",
+      "name": "PolygonArea.h",
+      "chapter": "geometry",
+      "description": "Returns twice the signed area of a polygon.\nClockwise enumeration gives negative area. Watch out for overflow if using int as T!",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "Stress-tested and tested on kattis:polygonarea",
+      "author": "Ulf Lundstrom",
+      "source": "tinyKACTL",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "template<class T>\nT polygonArea2(vector<Point<T>>& v) {\n\tT a = v.back().cross(v[0]);\n\trep(i,0,sz(v)-1) a += v[i].cross(v[i+1]);\n\treturn a;\n}"
+    },
+    {
+      "id": "geometry/PolygonCenter.h",
+      "name": "PolygonCenter.h",
+      "chapter": "geometry",
+      "description": "Returns the center of mass for a polygon.",
+      "usage": "",
+      "time": "$O(n)$",
+      "memory": "",
+      "status": "Tested",
+      "author": "Ulf Lundstrom",
+      "source": "",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<double> P;\nP polygonCenter(const vector<P>& v) {\n\tP res(0, 0); double A = 0;\n\tfor (int i = 0, j = sz(v) - 1; i < sz(v); j = i++) {\n\t\tres = res + (v[i] + v[j]) * v[j].cross(v[i]);\n\t\tA += v[j].cross(v[i]);\n\t}\n\treturn res / A / 3;\n}"
+    },
+    {
+      "id": "geometry/PolygonCut.h",
+      "name": "PolygonCut.h",
+      "chapter": "geometry",
+      "description": "Returns a vector with the vertices of a polygon with everything to the left of the line going from s to e cut away.",
+      "usage": "vector<P> p = ...;\np = polygonCut(p, P(0,0), P(1,0));",
+      "time": "",
+      "memory": "",
+      "status": "tested but not extensively",
+      "author": "Ulf Lundstrom",
+      "source": "",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<double> P;\nvector<P> polygonCut(const vector<P>& poly, P s, P e) {\n\tvector<P> res;\n\trep(i,0,sz(poly)) {\n\t\tP cur = poly[i], prev = i ? poly[i-1] : poly.back();\n\t\tauto a = s.cross(e, cur), b = s.cross(e, prev);\n\t\tif ((a < 0) != (b < 0))\n\t\t\tres.push_back(cur + (prev - cur) * (a / (a - b)));\n\t\tif (a < 0)\n\t\t\tres.push_back(cur);\n\t}\n\treturn res;\n}"
+    },
+    {
+      "id": "geometry/PolygonUnion.h",
+      "name": "PolygonUnion.h",
+      "chapter": "geometry",
+      "description": "Calculates the area of the union of $n$ polygons (not necessarily\nconvex). The points within each polygon must be given in CCW order.\n(Epsilon checks may optionally be added to sideOf/sgn, but shouldn't be needed.)",
+      "usage": "",
+      "time": "$O(N^2)$, where $N$ is the total number of points",
+      "memory": "",
+      "status": "stress-tested, Submitted on ECNA 2017 Problem A",
+      "author": "black_horse2014, chilli",
+      "source": "https://codeforces.com/gym/101673/submission/50481926",
+      "dependencies": [
+        "geometry/Point.h",
+        "geometry/sideOf.h"
+      ],
+      "includedInPdf": false,
+      "code": "typedef Point<double> P;\ndouble rat(P a, P b) { return sgn(b.x) ? a.x/b.x : a.y/b.y; }\ndouble polyUnion(vector<vector<P>>& poly) {\n\tdouble ret = 0;\n\trep(i,0,sz(poly)) rep(v,0,sz(poly[i])) {\n\t\tP A = poly[i][v], B = poly[i][(v + 1) % sz(poly[i])];\n\t\tvector<pair<double, int>> segs = {{0, 0}, {1, 0}};\n\t\trep(j,0,sz(poly)) if (i != j) {\n\t\t\trep(u,0,sz(poly[j])) {\n\t\t\t\tP C = poly[j][u], D = poly[j][(u + 1) % sz(poly[j])];\n\t\t\t\tint sc = sideOf(A, B, C), sd = sideOf(A, B, D);\n\t\t\t\tif (sc != sd) {\n\t\t\t\t\tdouble sa = C.cross(D, A), sb = C.cross(D, B);\n\t\t\t\t\tif (min(sc, sd) < 0)\n\t\t\t\t\t\tsegs.emplace_back(sa / (sa - sb), sgn(sc - sd));\n\t\t\t\t} else if (!sc && !sd && j<i && sgn((B-A).dot(D-C))>0){\n\t\t\t\t\tsegs.emplace_back(rat(C - A, B - A), 1);\n\t\t\t\t\tsegs.emplace_back(rat(D - A, B - A), -1);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tsort(all(segs));\n\t\tfor (auto& s : segs) s.first = min(max(s.first, 0.0), 1.0);\n\t\tdouble sum = 0;\n\t\tint cnt = segs[0].second;\n\t\trep(j,1,sz(segs)) {\n\t\t\tif (!cnt) sum += segs[j].first - segs[j - 1].first;\n\t\t\tcnt += segs[j].second;\n\t\t}\n\t\tret += A.cross(B) * sum;\n\t}\n\treturn ret / 2;\n}"
+    },
+    {
+      "id": "geometry/PolyhedronVolume.h",
+      "name": "PolyhedronVolume.h",
+      "chapter": "geometry",
+      "description": "Magic formula for the volume of a polyhedron. Faces should point outwards.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "tested",
+      "author": "Mattias de Zalenski",
+      "source": "",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "template<class V, class L>\ndouble signedPolyVolume(const V& p, const L& trilist) {\n\tdouble v = 0;\n\tfor (auto i : trilist) v += p[i.a].cross(p[i.b]).dot(p[i.c]);\n\treturn v / 6;\n}"
+    },
+    {
+      "id": "geometry/SegmentDistance.h",
+      "name": "SegmentDistance.h",
+      "chapter": "geometry",
+      "description": "Returns the shortest distance between point p and the line segment from point s to e.",
+      "usage": "Point<double> a, b(2,2), p(1,1);\nbool onSegment = segDist(a,b,p) < 1e-10;",
+      "time": "",
+      "memory": "",
+      "status": "tested",
+      "author": "Ulf Lundstrom",
+      "source": "",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "typedef Point<double> P;\ndouble segDist(P s, P e, P p) {\n\tif (s==e) return (p-s).dist();\n\tauto d = (e-s).dist2(), t = min(d,max(.0,(p-s).dot(e-s)));\n\treturn ((p-s)*d-(e-s)*t).dist()/d;\n}"
+    },
+    {
+      "id": "geometry/SegmentIntersection.h",
+      "name": "SegmentIntersection.h",
+      "chapter": "geometry",
+      "description": "If a unique intersection point between the line segments going from s1 to e1 and from s2 to e2 exists then it is returned.\nIf no intersection point exists an empty vector is returned.\nIf infinitely many exist a vector with 2 elements is returned, containing the endpoints of the common line segment.\nThe wrong position will be returned if P is Point<ll> and the intersection point does not have integer coordinates.\nProducts of three coordinates are used in intermediate steps so watch out for overflow if using int or long long.",
+      "usage": "vector<P> inter = segInter(s1,e1,s2,e2);\nif (sz(inter)==1)\ncout << \"segments intersect at \" << inter[0] << endl;",
+      "time": "",
+      "memory": "",
+      "status": "stress-tested, tested on kattis:intersection",
+      "author": "Victor Lecomte, chilli",
+      "source": "https://vlecomte.github.io/cp-geo.pdf",
+      "dependencies": [
+        "geometry/Point.h",
+        "geometry/OnSegment.h"
+      ],
+      "includedInPdf": true,
+      "code": "template<class P> vector<P> segInter(P a, P b, P c, P d) {\n\tauto oa = c.cross(d, a), ob = c.cross(d, b),\n\t     oc = a.cross(b, c), od = a.cross(b, d);\n\t// Checks if intersection is single non-endpoint point.\n\tif (sgn(oa) * sgn(ob) < 0 && sgn(oc) * sgn(od) < 0)\n\t\treturn {(a * ob - b * oa) / (ob - oa)};\n\tset<P> s;\n\tif (onSegment(c, d, a)) s.insert(a);\n\tif (onSegment(c, d, b)) s.insert(b);\n\tif (onSegment(a, b, c)) s.insert(c);\n\tif (onSegment(a, b, d)) s.insert(d);\n\treturn {all(s)};\n}"
+    },
+    {
+      "id": "geometry/sideOf.h",
+      "name": "sideOf.h",
+      "chapter": "geometry",
+      "description": "Returns where $p$ is as seen from $s$ towards $e$. 1/0/-1 $\\Leftrightarrow$ left/on line/right.\nIf the optional argument $eps$ is given 0 is returned if $p$ is within distance $eps$ from the line.\nP is supposed to be Point<T> where T is e.g. double or long long.\nIt uses products in intermediate steps so watch out for overflow if using int or long long.",
+      "usage": "bool left = sideOf(p1,p2,q)==1;",
+      "time": "",
+      "memory": "",
+      "status": "tested",
+      "author": "Ulf Lundstrom",
+      "source": "",
+      "dependencies": [
+        "geometry/Point.h"
+      ],
+      "includedInPdf": true,
+      "code": "template<class P>\nint sideOf(P s, P e, P p) { return sgn(s.cross(e, p)); }\n\ntemplate<class P>\nint sideOf(P s, P e, P p, double eps) {\n\tauto a = (e-s).cross(p-s);\n\tdouble l = (e-s).dist()*eps;\n\treturn (a > l) - (a < -l);\n}"
+    },
+    {
+      "id": "geometry/sphericalDistance.h",
+      "name": "sphericalDistance.h",
+      "chapter": "geometry",
+      "description": "Returns the shortest distance on the sphere with radius radius between the points\nwith azimuthal angles (longitude) f1 ($\\phi_1$) and f2 ($\\phi_2$) from x axis and zenith angles\n(latitude) t1 ($\\theta_1$) and t2 ($\\theta_2$) from z axis (0 = north pole). All angles measured\nin radians. The algorithm starts by converting the spherical coordinates to cartesian coordinates\nso if that is what you have you can use only the two last rows. dx*radius is then the difference\nbetween the two points in the x direction and d*radius is the total distance between the points.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "tested on kattis:airlinehub",
+      "author": "Ulf Lundstrom",
+      "source": "My geometric reasoning",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "double sphericalDistance(double f1, double t1,\n\t\tdouble f2, double t2, double radius) {\n\tdouble dx = sin(t2)*cos(f2) - sin(t1)*cos(f1);\n\tdouble dy = sin(t2)*sin(f2) - sin(t1)*sin(f1);\n\tdouble dz = cos(t2) - cos(t1);\n\tdouble d = sqrt(dx*dx + dy*dy + dz*dz);\n\treturn radius*2*asin(d/2);\n}"
+    },
+    {
       "id": "strings/AhoCorasick.h",
       "name": "AhoCorasick.h",
       "chapter": "strings",
@@ -1953,6 +2536,1936 @@
       "dependencies": [],
       "includedInPdf": true,
       "code": "Recursion\nDivide and conquer\n\tFinding interesting points in N log N\nAlgorithm analysis\n\tMaster theorem\n\tAmortized time complexity\nGreedy algorithm\n\tScheduling\n\tMax contiguous subvector sum\n\tInvariants\n\tHuffman encoding\nGraph theory\n\tDynamic graphs (extra book-keeping)\n\tBreadth first search\n\tDepth first search\n\t* Normal trees / DFS trees\n\tDijkstra's algorithm\n\tMST: Prim's algorithm\n\tBellman-Ford\n\tKonig's theorem and vertex cover\n\tMin-cost max flow\n\tLovasz toggle\n\tMatrix tree theorem\n\tMaximal matching, general graphs\n\tHopcroft-Karp\n\tHall's marriage theorem\n\tGraphical sequences\n\tFloyd-Warshall\n\tEuler cycles\n\tFlow networks\n\t* Augmenting paths\n\t* Edmonds-Karp\n\tBipartite matching\n\tMin. path cover\n\tTopological sorting\n\tStrongly connected components\n\t2-SAT\n\tCut vertices, cut-edges and biconnected components\n\tEdge coloring\n\t* Trees\n\tVertex coloring\n\t* Bipartite graphs (=> trees)\n\t* 3^n (special case of set cover)\n\tDiameter and centroid\n\tK'th shortest path\n\tShortest cycle\nDynamic programming\n\tKnapsack\n\tCoin change\n\tLongest common subsequence\n\tLongest increasing subsequence\n\tNumber of paths in a dag\n\tShortest path in a dag\n\tDynprog over intervals\n\tDynprog over subsets\n\tDynprog over probabilities\n\tDynprog over trees\n\t3^n set cover\n\tDivide and conquer\n\tKnuth optimization\n\tConvex hull optimizations\n\tRMQ (sparse table a.k.a 2^k-jumps)\n\tBitonic cycle\n\tLog partitioning (loop over most restricted)\nCombinatorics\n\tComputation of binomial coefficients\n\tPigeon-hole principle\n\tInclusion/exclusion\n\tCatalan number\n\tPick's theorem\nNumber theory\n\tInteger parts\n\tDivisibility\n\tEuclidean algorithm\n\tModular arithmetic\n\t* Modular multiplication\n\t* Modular inverses\n\t* Modular exponentiation by squaring\n\tChinese remainder theorem\n\tFermat's little theorem\n\tEuler's theorem\n\tPhi function\n\tFrobenius number\n\tQuadratic reciprocity\n\tPollard-Rho\n\tMiller-Rabin\n\tHensel lifting\n\tVieta root jumping\nGame theory\n\tCombinatorial games\n\tGame trees\n\tMini-max\n\tNim\n\tGames on graphs\n\tGames on graphs with loops\n\tGrundy numbers\n\tBipartite games without repetition\n\tGeneral games without repetition\n\tAlpha-beta pruning\nProbability theory\nOptimization\n\tBinary search\n\tTernary search\n\tUnimodality and convex functions\n\tBinary search on derivative\nNumerical methods\n\tNumeric integration\n\tNewton's method\n\tRoot-finding with binary/ternary search\n\tGolden section search\nMatrices\n\tGaussian elimination\n\tExponentiation by squaring\nSorting\n\tRadix sort\nGeometry\n\tCoordinates and vectors\n\t* Cross product\n\t* Scalar product\n\tConvex hull\n\tPolygon cut\n\tClosest pair\n\tCoordinate-compression\n\tQuadtrees\n\tKD-trees\n\tAll segment-segment intersection\nSweeping\n\tDiscretization (convert to events and sweep)\n\tAngle sweeping\n\tLine sweeping\n\tDiscrete second derivatives\nStrings\n\tLongest common substring\n\tPalindrome subsequences\n\tKnuth-Morris-Pratt\n\tTries\n\tRolling polynomial hashes\n\tSuffix array\n\tSuffix tree\n\tAho-Corasick\n\tManacher's algorithm\n\tLetter position lists\nCombinatorial search\n\tMeet in the middle\n\tBrute-force with pruning\n\tBest-first (A*)\n\tBidirectional search\n\tIterative deepening DFS / A*\nData structures\n\tLCA (2^k-jumps in trees in general)\n\tPull/push-technique on trees\n\tHeavy-light decomposition\n\tCentroid decomposition\n\tLazy propagation\n\tSelf-balancing trees\n\tConvex hull trick (wcipeg.com/wiki/Convex_hull_trick)\n\tMonotone queues / monotone stacks / sliding queues\n\tSliding queue using 2 stacks\n\tPersistent segment tree"
+    }
+  ],
+  "document": [
+    {
+      "type": "heading",
+      "id": "contest/h/contest",
+      "chapter": "contest",
+      "level": 1,
+      "title": "Contest",
+      "searchText": "Contest"
+    },
+    {
+      "type": "snippet",
+      "id": "contest/template.cpp",
+      "chapter": "contest",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "contest/.bashrc",
+      "chapter": "contest",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "contest/.vimrc",
+      "chapter": "contest",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "contest/hash.sh",
+      "chapter": "contest",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "contest/troubleshoot.txt",
+      "chapter": "contest",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "contest/Random.h",
+      "chapter": "contest",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "contest/h/i-o",
+      "chapter": "contest",
+      "level": 2,
+      "title": "I/O",
+      "searchText": "I/O"
+    },
+    {
+      "type": "prose",
+      "id": "contest/p/1",
+      "chapter": "contest",
+      "latex": "Fixed precision: \\verb@cout << fixed << setprecision(6);@\n\nBinary (C++20): \\verb@format(\"{:06b}\", b)@ fixed width, \\verb@format(\"{:b}\", b)@ variable width. C++17: \\verb@bitset<6>(b)@.",
+      "searchText": "Fixed precision: cout << fixed << setprecision(6); Binary (C++20): format(\" :06b \", b) fixed width, format(\" :b \", b) variable width. C++17: bitset<6>(b)."
+    },
+    {
+      "type": "heading",
+      "id": "math/h/mathematics",
+      "chapter": "math",
+      "level": 1,
+      "title": "Mathematics",
+      "searchText": "Mathematics"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/equations",
+      "chapter": "math",
+      "level": 2,
+      "title": "Equations",
+      "searchText": "Equations"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/1",
+      "chapter": "math",
+      "latex": "\\[ax^2+bx+c=0 \\Rightarrow x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}\\]\n\nThe extremum is given by $x = -b/2a$.\n\n\\[\\begin{aligned}ax+by=e\\\\cx+dy=f\\end{aligned} \\Rightarrow \\begin{aligned}x=\\dfrac{ed-bf}{ad-bc}\\\\y=\\dfrac{af-ec}{ad-bc}\\end{aligned}\\]\n\nIn general, given an equation $Ax = b$, the solution to a variable $x_i$ is given by \\[x_i = \\frac{\\det A_i'}{\\det A} \\] where $A_i'$ is $A$ with the $i$'th column replaced by $b$.",
+      "searchText": "ax^2+bx+c=0 x = -b b^2-4ac 2a The extremum is given by x = -b/2a . ax+by=e +dy=f x= ed-bf ad-bc = af-ec ad-bc In general, given an equation Ax = b , the solution to a variable x_i is given by x_i = A_i' A where A_i' is A with the i 'th column replaced by b ."
+    },
+    {
+      "type": "heading",
+      "id": "math/h/recurrences",
+      "chapter": "math",
+      "level": 2,
+      "title": "Recurrences",
+      "searchText": "Recurrences"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/2",
+      "chapter": "math",
+      "latex": "If $a_n = c_1 a_{n-1} + \\dots + c_k a_{n-k}$, and $r_1, \\dots, r_k$ are distinct roots of $x^k - c_1 x^{k-1} - \\dots - c_k$, there are $d_1, \\dots, d_k$ s.t. \\[a_n = d_1r_1^n + \\dots + d_kr_k^n. \\] Non-distinct roots $r$ become polynomial factors, e.g. $a_n = (d_1n + d_2)r^n$.",
+      "searchText": "If a_n = c_1 a_ n-1 + + c_k a_ n-k , and r_1, , r_k are distinct roots of x^k - c_1 x^ k-1 - - c_k , there are d_1, , d_k s.t. a_n = d_1r_1^n + + d_kr_k^n. Non-distinct roots r become polynomial factors, e.g. a_n = (d_1n + d_2)r^n ."
+    },
+    {
+      "type": "heading",
+      "id": "math/h/trigonometry",
+      "chapter": "math",
+      "level": 2,
+      "title": "Trigonometry",
+      "searchText": "Trigonometry"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/3",
+      "chapter": "math",
+      "latex": "\\begin{align*} \\sin(v+w)&{}=\\sin v\\cos w+\\cos v\\sin w\\\\ \\cos(v+w)&{}=\\cos v\\cos w-\\sin v\\sin w\\\\ \\end{align*} \\begin{align*} \\tan(v+w)&{}=\\dfrac{\\tan v+\\tan w}{1-\\tan v\\tan w}\\\\ \\sin v+\\sin w&{}=2\\sin\\dfrac{v+w}{2}\\cos\\dfrac{v-w}{2}\\\\ \\cos v+\\cos w&{}=2\\cos\\dfrac{v+w}{2}\\cos\\dfrac{v-w}{2} \\end{align*} \\[ (V+W)\\tan(v-w)/2{}=(V-W)\\tan(v+w)/2 \\] where $V, W$ are lengths of sides opposite angles $v, w$. \\begin{align*} a\\cos x+b\\sin x&=r\\cos(x-\\phi)\\\\ a\\sin x+b\\cos x&=r\\sin(x+\\phi) \\end{align*} where $r=\\sqrt{a^2+b^2}, \\phi=\\operatorname{atan2}(b,a)$.",
+      "searchText": "(v+w) = v w+ v w\\ (v+w) = v w- v w\\ (v+w) = v+ w 1- v w \\ v+ w =2 v+w 2 v-w 2 \\ v+ w =2 v+w 2 v-w 2 (V+W) (v-w)/2 =(V-W) (v+w)/2 where V, W are lengths of sides opposite angles v, w . a x+b x =r (x- )\\ a x+b x =r (x+ ) where r= a^2+b^2 , = atan2 (b,a) ."
+    },
+    {
+      "type": "heading",
+      "id": "math/h/geometry",
+      "chapter": "math",
+      "level": 2,
+      "title": "Geometry",
+      "searchText": "Geometry"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/triangles",
+      "chapter": "math",
+      "level": 3,
+      "title": "Triangles",
+      "searchText": "Triangles"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/4",
+      "chapter": "math",
+      "latex": "Side lengths: $a,b,c$\\\\ Semiperimeter: $p=\\dfrac{a+b+c}{2}$\\\\ Area: $A=\\sqrt{p(p-a)(p-b)(p-c)}$\\\\ Circumradius: $R=\\dfrac{abc}{4A}$\\\\ Inradius: $r=\\dfrac{A}{p}$\\\\ Length of median (divides triangle into two equal-area triangles): $m_a=\\tfrac{1}{2}\\sqrt{2b^2+2c^2-a^2}$\\\\ Length of bisector (divides angles in two): $s_a=\\sqrt{bc\\left[1-\\left(\\dfrac{a}{b+c}\\right)^2\\right]}$\\\\ Law of sines: $\\dfrac{\\sin\\alpha}{a}=\\dfrac{\\sin\\beta}{b}=\\dfrac{\\sin\\gamma}{c}=\\dfrac{1}{2R}$\\\\ Law of cosines: $a^2=b^2+c^2-2bc\\cos\\alpha$\\\\ Law of tangents: $\\dfrac{a+b}{a-b}=\\dfrac{\\tan\\dfrac{\\alpha+\\beta}{2}}{\\tan\\dfrac{\\alpha-\\beta}{2}}$\\\\",
+      "searchText": "Side lengths: a,b,c \\ Semiperimeter: p= a+b+c 2 \\ Area: A= p(p-a)(p-b)(p-c) \\ Circumradius: R= abc 4A \\ Inradius: r= A p \\ Length of median (divides triangle into two equal-area triangles): m_a= 1 2 2b^2+2c^2-a^2 \\ Length of bisector (divides angles in two): s_a= bc [1- ( a b+c )^2 ] \\ Law of sines: a = b = c = 1 2R \\ Law of cosines: a^2=b^2+c^2-2bc \\ Law of tangents: a+b a-b = + 2 - 2 \\"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/quadrilaterals",
+      "chapter": "math",
+      "level": 3,
+      "title": "Quadrilaterals",
+      "searchText": "Quadrilaterals"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/5",
+      "chapter": "math",
+      "latex": "With side lengths $a,b,c,d$, diagonals $e, f$, diagonals angle $\\theta$, area $A$ and magic flux $F=b^2+d^2-a^2-c^2$:\n\n\\[ 4A = 2ef \\cdot \\sin\\theta = F\\tan\\theta = \\sqrt{4e^2f^2-F^2} \\]\n\nFor cyclic quadrilaterals the sum of opposite angles is $180^\\circ$, $ef = ac + bd$, and $A = \\sqrt{(p-a)(p-b)(p-c)(p-d)}$.",
+      "searchText": "With side lengths a,b,c,d , diagonals e, f , diagonals angle , area A and magic flux F=b^2+d^2-a^2-c^2 : 4A = 2ef = F = 4e^2f^2-F^2 For cyclic quadrilaterals the sum of opposite angles is 180^ , ef = ac + bd , and A = (p-a)(p-b)(p-c)(p-d) ."
+    },
+    {
+      "type": "heading",
+      "id": "math/h/spherical-coordinates",
+      "chapter": "math",
+      "level": 3,
+      "title": "Spherical coordinates",
+      "searchText": "Spherical coordinates"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/6",
+      "chapter": "math",
+      "latex": "\\begin{center} \\includegraphics[width=25mm]{content/math/sphericalCoordinates} \\end{center} \\[\\begin{array}{cc} x = r\\sin\\theta\\cos\\phi & r = \\sqrt{x^2+y^2+z^2}\\\\ y = r\\sin\\theta\\sin\\phi & \\theta = \\textrm{acos}(z/\\sqrt{x^2+y^2+z^2})\\\\ z = r\\cos\\theta & \\phi = \\textrm{atan2}(y,x) \\end{array}\\]",
+      "searchText": "cc x = r r = x^2+y^2+z^2 \\ y = r = acos (z/ x^2+y^2+z^2 )\\ z = r = atan2 (y,x)"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/derivatives-integrals",
+      "chapter": "math",
+      "level": 2,
+      "title": "Derivatives/Integrals",
+      "searchText": "Derivatives/Integrals"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/7",
+      "chapter": "math",
+      "latex": "\\begin{align*} \\dfrac{d}{dx}\\arcsin x = \\dfrac{1}{\\sqrt{1-x^2}} &&& \\dfrac{d}{dx}\\arccos x = -\\dfrac{1}{\\sqrt{1-x^2}} \\\\ \\dfrac{d}{dx}\\tan x = 1+\\tan^2 x &&& \\dfrac{d}{dx}\\arctan x = \\dfrac{1}{1+x^2} \\\\ \\int\\tan ax = -\\dfrac{\\ln|\\cos ax|}{a} &&& \\int x\\sin ax = \\dfrac{\\sin ax-ax \\cos ax}{a^2} \\\\ \\int e^{-x^2} = \\frac{\\sqrt \\pi}{2} \\text{erf}(x) &&& \\int xe^{ax}dx = \\frac{e^{ax}}{a^2}(ax-1) \\end{align*}\n\nIntegration by parts: \\[\\int_a^bf(x)g(x)dx = [F(x)g(x)]_a^b-\\int_a^bF(x)g'(x)dx\\]",
+      "searchText": "d dx x = 1 1-x^2 d dx x = - 1 1-x^2 \\ d dx x = 1+ ^2 x d dx x = 1 1+x^2 \\ ax = - | ax| a x ax = ax-ax ax a^2 \\ e^ -x^2 = 2 erf (x) xe^ ax dx = e^ ax a^2 (ax-1) Integration by parts: _a^bf(x)g(x)dx = [F(x)g(x)]_a^b- _a^bF(x)g'(x)dx"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/sums",
+      "chapter": "math",
+      "level": 2,
+      "title": "Sums",
+      "searchText": "Sums"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/8",
+      "chapter": "math",
+      "latex": "\\[ c^a + c^{a+1} + \\dots + c^{b} = \\frac{c^{b+1} - c^a}{c-1}, c \\neq 1 \\] \\begin{align*} 1 + 2 + 3 + \\dots + n &= \\frac{n(n+1)}{2} \\\\ 1^2 + 2^2 + 3^2 + \\dots + n^2 &= \\frac{n(2n+1)(n+1)}{6} \\\\ 1^3 + 2^3 + 3^3 + \\dots + n^3 &= \\frac{n^2(n+1)^2}{4} \\\\ 1^4 + 2^4 + 3^4 + \\dots + n^4 &= \\frac{n(n+1)(2n+1)(3n^2 + 3n - 1)}{30} \\\\ \\end{align*}",
+      "searchText": "c^a + c^ a+1 + + c^ b = c^ b+1 - c^a c-1 , c 1 1 + 2 + 3 + + n = n(n+1) 2 \\ 1^2 + 2^2 + 3^2 + + n^2 = n(2n+1)(n+1) 6 \\ 1^3 + 2^3 + 3^3 + + n^3 = n^2(n+1)^2 4 \\ 1^4 + 2^4 + 3^4 + + n^4 = n(n+1)(2n+1)(3n^2 + 3n - 1) 30 \\"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/series",
+      "chapter": "math",
+      "level": 2,
+      "title": "Series",
+      "searchText": "Series"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/9",
+      "chapter": "math",
+      "latex": "$$e^x = 1+x+\\frac{x^2}{2!}+\\frac{x^3}{3!}+\\dots,\\,(-\\infty<x<\\infty)$$ $$\\ln(1+x) = x-\\frac{x^2}{2}+\\frac{x^3}{3}-\\frac{x^4}{4}+\\dots,\\,(-1<x\\leq1)$$ $$\\sqrt{1+x} = 1+\\frac{x}{2}-\\frac{x^2}{8}+\\frac{2x^3}{32}-\\frac{5x^4}{128}+\\dots,\\,(-1\\leq x\\leq1)$$ $$\\sin x = x-\\frac{x^3}{3!}+\\frac{x^5}{5!}-\\frac{x^7}{7!}+\\dots,\\,(-\\infty<x<\\infty)$$ $$\\cos x = 1-\\frac{x^2}{2!}+\\frac{x^4}{4!}-\\frac{x^6}{6!}+\\dots,\\,(-\\infty<x<\\infty)$$",
+      "searchText": "e^x = 1+x+ x^2 2! + x^3 3! + ,,(- <x< ) (1+x) = x- x^2 2 + x^3 3 - x^4 4 + ,,(-1<x 1) 1+x = 1+ x 2 - x^2 8 + 2x^3 32 - 5x^4 128 + ,,(-1 x 1) x = x- x^3 3! + x^5 5! - x^7 7! + ,,(- <x< ) x = 1- x^2 2! + x^4 4! - x^6 6! + ,,(- <x< )"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/probability-theory",
+      "chapter": "math",
+      "level": 2,
+      "title": "Probability theory",
+      "searchText": "Probability theory"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/10",
+      "chapter": "math",
+      "latex": "Let $X$ be a discrete random variable with probability $p_X(x)$ of assuming the value $x$. It will then have an expected value (mean) $\\mu=\\mathbb{E}(X)=\\sum_xxp_X(x)$ and variance $\\sigma^2=V(X)=\\mathbb{E}(X^2)-(\\mathbb{E}(X))^2=\\sum_x(x-\\mathbb{E}(X))^2p_X(x)$ where $\\sigma$ is the standard deviation. If $X$ is instead continuous it will have a probability density function $f_X(x)$ and the sums above will instead be integrals with $p_X(x)$ replaced by $f_X(x)$.\n\nExpectation is linear: \\[\\mathbb{E}(aX+bY) = a\\mathbb{E}(X)+b\\mathbb{E}(Y)\\] For independent $X$ and $Y$, \\[V(aX+bY) = a^2V(X)+b^2V(Y).\\]",
+      "searchText": "Let X be a discrete random variable with probability p_X(x) of assuming the value x . It will then have an expected value (mean) = E (X)= _xxp_X(x) and variance ^2=V(X)= E (X^2)-( E (X))^2= _x(x- E (X))^2p_X(x) where is the standard deviation. If X is instead continuous it will have a probability density function f_X(x) and the sums above will instead be integrals with p_X(x) replaced by f_X(x) . Expectation is linear: E (aX+bY) = a E (X)+b E (Y) For independent X and Y , V(aX+bY) = a^2V(X)+b^2V(Y)."
+    },
+    {
+      "type": "heading",
+      "id": "math/h/discrete-distributions",
+      "chapter": "math",
+      "level": 3,
+      "title": "Discrete distributions",
+      "searchText": "Discrete distributions"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/binomial-distribution",
+      "chapter": "math",
+      "level": 4,
+      "title": "Binomial distribution",
+      "searchText": "Binomial distribution"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/11",
+      "chapter": "math",
+      "latex": "The number of successes in $n$ independent yes/no experiments, each which yields success with probability $p$ is $\\textrm{Bin}(n,p),\\,n=1,2,\\dots,\\, 0\\leq p\\leq1$. \\[p(k)=\\binom{n}{k}p^k(1-p)^{n-k}\\] \\[\\mu = np,\\,\\sigma^2=np(1-p)\\] $\\textrm{Bin}(n,p)$ is approximately $\\textrm{Po}(np)$ for small $p$.",
+      "searchText": "The number of successes in n independent yes/no experiments, each which yields success with probability p is Bin (n,p),,n=1,2, ,, 0 p 1 . p(k)= n k p^k(1-p)^ n-k = np,, ^2=np(1-p) Bin (n,p) is approximately Po (np) for small p ."
+    },
+    {
+      "type": "heading",
+      "id": "math/h/first-success-distribution",
+      "chapter": "math",
+      "level": 4,
+      "title": "First success distribution",
+      "searchText": "First success distribution"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/12",
+      "chapter": "math",
+      "latex": "The number of trials needed to get the first success in independent yes/no experiments, each which yields success with probability $p$ is $\\textrm{Fs}(p),\\,0\\leq p\\leq1$. \\[p(k)=p(1-p)^{k-1},\\,k=1,2,\\dots\\] \\[\\mu = \\frac1p,\\,\\sigma^2=\\frac{1-p}{p^2}\\]",
+      "searchText": "The number of trials needed to get the first success in independent yes/no experiments, each which yields success with probability p is Fs (p),,0 p 1 . p(k)=p(1-p)^ k-1 ,,k=1,2, = 1p,, ^2= 1-p p^2"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/poisson-distribution",
+      "chapter": "math",
+      "level": 4,
+      "title": "Poisson distribution",
+      "searchText": "Poisson distribution"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/13",
+      "chapter": "math",
+      "latex": "The number of events occurring in a fixed period of time $t$ if these events occur with a known average rate $\\kappa$ and independently of the time since the last event is $\\textrm{Po}(\\lambda),\\,\\lambda=t\\kappa$. \\[p(k)=e^{-\\lambda}\\frac{\\lambda^k}{k!}, k=0,1,2,\\dots\\] \\[\\mu=\\lambda,\\,\\sigma^2=\\lambda\\]",
+      "searchText": "The number of events occurring in a fixed period of time t if these events occur with a known average rate and independently of the time since the last event is Po ( ),, =t . p(k)=e^ - ^k k! , k=0,1,2, = ,, ^2="
+    },
+    {
+      "type": "heading",
+      "id": "math/h/continuous-distributions",
+      "chapter": "math",
+      "level": 3,
+      "title": "Continuous distributions",
+      "searchText": "Continuous distributions"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/uniform-distribution",
+      "chapter": "math",
+      "level": 4,
+      "title": "Uniform distribution",
+      "searchText": "Uniform distribution"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/14",
+      "chapter": "math",
+      "latex": "If the probability density function is constant between $a$ and $b$ and 0 elsewhere it is $\\textrm{U}(a,b),\\,a<b$. \\[f(x) = \\left\\{ \\begin{array}{cl} \\frac{1}{b-a} & a<x<b\\\\ 0 & \\textrm{otherwise} \\end{array}\\right.\\] \\[\\mu=\\frac{a+b}{2},\\,\\sigma^2=\\frac{(b-a)^2}{12}\\]",
+      "searchText": "If the probability density function is constant between a and b and 0 elsewhere it is U (a,b),,a<b . f(x) = cl 1 b-a a<x<b\\ 0 otherwise . = a+b 2 ,, ^2= (b-a)^2 12"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/exponential-distribution",
+      "chapter": "math",
+      "level": 4,
+      "title": "Exponential distribution",
+      "searchText": "Exponential distribution"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/15",
+      "chapter": "math",
+      "latex": "The time between events in a Poisson process is $\\textrm{Exp}(\\lambda),\\,\\lambda>0$. \\[f(x) = \\left\\{ \\begin{array}{cl} \\lambda e^{-\\lambda x} & x\\geq0\\\\ 0 & x<0 \\end{array}\\right.\\] \\[\\mu=\\frac{1}{\\lambda},\\,\\sigma^2=\\frac{1}{\\lambda^2}\\]",
+      "searchText": "The time between events in a Poisson process is Exp ( ),, >0 . f(x) = cl e^ - x x 0\\ 0 x<0 . = 1 ,, ^2= 1 ^2"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/normal-distribution",
+      "chapter": "math",
+      "level": 4,
+      "title": "Normal distribution",
+      "searchText": "Normal distribution"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/16",
+      "chapter": "math",
+      "latex": "Most real random values with mean $\\mu$ and variance $\\sigma^2$ are well described by $\\mathcal{N}(\\mu,\\sigma^2),\\,\\sigma>0$. \\[ f(x) = \\frac{1}{\\sqrt{2\\pi\\sigma^2}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}} \\] If $X_1 \\sim \\mathcal{N}(\\mu_1,\\sigma_1^2)$ and $X_2 \\sim \\mathcal{N}(\\mu_2,\\sigma_2^2)$ then \\[ aX_1 + bX_2 + c \\sim \\mathcal{N}(\\mu_1+\\mu_2+c,a^2\\sigma_1^2+b^2\\sigma_2^2) \\]",
+      "searchText": "Most real random values with mean and variance ^2 are well described by N ( , ^2),, >0 . f(x) = 1 2 ^2 e^ - (x- )^2 2 ^2 If X_1 N ( _1, _1^2) and X_2 N ( _2, _2^2) then aX_1 + bX_2 + c N ( _1+ _2+c,a^2 _1^2+b^2 _2^2)"
+    },
+    {
+      "type": "heading",
+      "id": "math/h/markov-chains",
+      "chapter": "math",
+      "level": 2,
+      "title": "Markov chains",
+      "searchText": "Markov chains"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/17",
+      "chapter": "math",
+      "latex": "A \\emph{Markov chain} is a discrete random process with the property that the next state depends only on the current state. Let $X_1,X_2,\\ldots$ be a sequence of random variables generated by the Markov process. Then there is a transition matrix $\\mathbf{P} = (p_{ij})$, with $p_{ij} = \\Pr(X_n = i | X_{n-1} = j)$, and $\\mathbf{p}^{(n)} = \\mathbf P^n \\mathbf p^{(0)}$ is the probability distribution for $X_n$ (i.e., $p^{(n)}_i = \\Pr(X_n = i)$), where $\\mathbf{p}^{(0)}$ is the initial distribution.\n\n$\\mathbf{\\pi}$ is a stationary distribution if $\\mathbf{\\pi} = \\mathbf{\\pi P}$. If the Markov chain is \\emph{irreducible} (it is possible to get to any state from any state), then $\\pi_i = \\frac{1}{\\mathbb{E}(T_i)}$ where $\\mathbb{E}(T_i)$  is the expected time between two visits in state $i$. $\\pi_j/\\pi_i$ is the expected number of visits in state $j$ between two visits in state $i$.\n\nFor a connected, undirected and non-bipartite graph, where the transition probability is uniform among all neighbors, $\\pi_i$ is proportional to node $i$'s degree.\n\nA Markov chain is \\emph{ergodic} if the asymptotic distribution is independent of the initial distribution. A finite Markov chain is ergodic iff it is irreducible and \\emph{aperiodic} (i.e., the gcd of cycle lengths is 1). $\\lim_{k\\rightarrow\\infty}\\mathbf{P}^k = \\mathbf{1}\\pi$.\n\nA Markov chain is an A-chain if the states can be partitioned into two sets $\\mathbf{A}$ and $\\mathbf{G}$, such that all states in $\\mathbf{A}$ are absorbing ($p_{ii}=1$), and all states in $\\mathbf{G}$ leads to an absorbing state in $\\mathbf{A}$. The probability for absorption in state $i\\in\\mathbf{A}$, when the initial state is $j$, is $a_{ij} = p_{ij}+\\sum_{k\\in\\mathbf{G}} a_{ik}p_{kj}$. The expected time until absorption, when the initial state is $i$, is $t_i = 1+\\sum_{k\\in\\mathbf{G}}p_{ki}t_k$.",
+      "searchText": "A Markov chain is a discrete random process with the property that the next state depends only on the current state. Let X_1,X_2, be a sequence of random variables generated by the Markov process. Then there is a transition matrix P = (p_ ij ) , with p_ ij = (X_n = i | X_ n-1 = j) , and p ^ (n) = P^n p^ (0) is the probability distribution for X_n (i.e., p^ (n) _i = (X_n = i) ), where p ^ (0) is the initial distribution. is a stationary distribution if = P . If the Markov chain is irreducible (it is possible to get to any state from any state), then _i = 1 E (T_i) where E (T_i) is the expected time between two visits in state i . _j/ _i is the expected number of visits in state j between two visits in state i . For a connected, undirected and non-bipartite graph, where the transition probability is uniform among all neighbors, _i is proportional to node i 's degree. A Markov chain is ergodic if the asymptotic distribution is independent of the initial distribution. A finite Markov chain is ergodic iff it is irreducible and aperiodic (i.e., the gcd of cycle lengths is 1). _ k P ^k = 1 . A Markov chain is an A-chain if the states can be partitioned into two sets A and G , such that all states in A are absorbing ( p_ ii =1 ), and all states in G leads to an absorbing state in A . The probability for absorption in state i A , when the initial state is j , is a_ ij = p_ ij + _ k G a_ ik p_ kj . The expected time until absorption, when the initial state is i , is t_i = 1+ _ k G p_ ki t_k ."
+    },
+    {
+      "type": "heading",
+      "id": "data-structures/h/data-structures",
+      "chapter": "data-structures",
+      "level": 1,
+      "title": "Data structures",
+      "searchText": "Data structures"
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/OrderStatisticTree.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/HashMap.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/BinaryTrie.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/SegmentTree.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/LazySegmentTree.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/SparseSegmentTree.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/SparseLazySegmentTree.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/UnionFind.h",
+      "chapter": "data-structures",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/UnionFindRollback.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/SubMatrix.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/Matrix.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/LineContainer.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/LiChao.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/Treap.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/FenwickTree.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/FenwickTree2d.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/RMQ.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/MoQueries.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "numerical/h/numerical",
+      "chapter": "numerical",
+      "level": 1,
+      "title": "Numerical",
+      "searchText": "Numerical"
+    },
+    {
+      "type": "heading",
+      "id": "numerical/h/polynomials-and-recurrences",
+      "chapter": "numerical",
+      "level": 2,
+      "title": "Polynomials and recurrences",
+      "searchText": "Polynomials and recurrences"
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/Polynomial.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/PolyRoots.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/PolyInterpolate.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/BerlekampMassey.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/LinearRecurrence.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "numerical/h/optimization",
+      "chapter": "numerical",
+      "level": 2,
+      "title": "Optimization",
+      "searchText": "Optimization"
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/GoldenSectionSearch.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/HillClimbing.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/Integrate.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/IntegrateAdaptive.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/Simplex.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "numerical/h/matrices",
+      "chapter": "numerical",
+      "level": 2,
+      "title": "Matrices",
+      "searchText": "Matrices"
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/Determinant.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/IntDeterminant.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/SolveLinear.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/SolveLinear2.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/SolveLinearBinary.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/RREF.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/XORBasis.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/MatrixInverse.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/MatrixInverse-mod.h",
+      "chapter": "numerical",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/Tridiagonal.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "numerical/h/fourier-transforms",
+      "chapter": "numerical",
+      "level": 2,
+      "title": "Fourier transforms",
+      "searchText": "Fourier transforms"
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/FastFourierTransform.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/FastFourierTransformMod.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/NumberTheoreticTransform.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/FastSubsetTransform.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "number-theory/h/number-theory",
+      "chapter": "number-theory",
+      "level": 1,
+      "title": "Number theory",
+      "searchText": "Number theory"
+    },
+    {
+      "type": "heading",
+      "id": "number-theory/h/modular-arithmetic",
+      "chapter": "number-theory",
+      "level": 2,
+      "title": "Modular arithmetic",
+      "searchText": "Modular arithmetic"
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/ModularArithmetic.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/ModInverse.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/ModPow.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/ModLog.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/ModSum.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/ModMulLL.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/ModSqrt.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "number-theory/h/primality",
+      "chapter": "number-theory",
+      "level": 2,
+      "title": "Primality",
+      "searchText": "Primality"
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/FastEratosthenes.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/LinearSieve.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/MillerRabin.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/Factor.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "number-theory/h/divisibility",
+      "chapter": "number-theory",
+      "level": 2,
+      "title": "Divisibility",
+      "searchText": "Divisibility"
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/euclid.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/Euclid.java",
+      "chapter": "number-theory",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/CRT.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "number-theory/h/bezout-s-identity",
+      "chapter": "number-theory",
+      "level": 3,
+      "title": "Bézout's identity",
+      "searchText": "Bézout's identity"
+    },
+    {
+      "type": "prose",
+      "id": "number-theory/p/1",
+      "chapter": "number-theory",
+      "latex": "For $a \\neq $, $b \\neq 0$, then $d=gcd(a,b)$ is the smallest positive integer for which there are integer solutions to $$ax+by=d$$ If $(x,y)$ is one solution, then all solutions are given by $$\\left(x+\\frac{kb}{\\gcd(a,b)}, y-\\frac{ka}{\\gcd(a,b)}\\right), \\quad k\\in\\mathbb{Z}$$",
+      "searchText": "For a , b 0 , then d=gcd(a,b) is the smallest positive integer for which there are integer solutions to ax+by=d If (x,y) is one solution, then all solutions are given by (x+ kb (a,b) , y- ka (a,b) ), k Z"
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/phiFunction.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "number-theory/h/fractions",
+      "chapter": "number-theory",
+      "level": 2,
+      "title": "Fractions",
+      "searchText": "Fractions"
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/ContinuedFractions.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/FracBinarySearch.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "number-theory/h/pythagorean-triples",
+      "chapter": "number-theory",
+      "level": 2,
+      "title": "Pythagorean Triples",
+      "searchText": "Pythagorean Triples"
+    },
+    {
+      "type": "prose",
+      "id": "number-theory/p/2",
+      "chapter": "number-theory",
+      "latex": "The Pythagorean triples are uniquely generated by \\[ a=k\\cdot (m^{2}-n^{2}),\\ \\,b=k\\cdot (2mn),\\ \\,c=k\\cdot (m^{2}+n^{2}), \\] with $m > n > 0$, $k > 0$, $m \\bot n$, and either $m$ or $n$ even.",
+      "searchText": "The Pythagorean triples are uniquely generated by a=k (m^ 2 -n^ 2 ), ,b=k (2mn), ,c=k (m^ 2 +n^ 2 ), with m > n > 0 , k > 0 , m n , and either m or n even."
+    },
+    {
+      "type": "heading",
+      "id": "number-theory/h/primes",
+      "chapter": "number-theory",
+      "level": 2,
+      "title": "Primes",
+      "searchText": "Primes"
+    },
+    {
+      "type": "prose",
+      "id": "number-theory/p/3",
+      "chapter": "number-theory",
+      "latex": "$p=962592769$ is such that $2^{21} \\mid p-1$, which may be useful. For hashing use 970592641 (31-bit number), 31443539979727 (45-bit), 3006703054056749 (52-bit). There are 78498 primes less than 1\\,000\\,000.\n\nPrimitive roots exist modulo any prime power $p^a$, except for $p = 2, a > 2$, and there are $\\phi(\\phi(p^a))$ many. For $p = 2, a > 2$, the group $\\mathbb Z_{2^a}^\\times$ is instead isomorphic to $\\mathbb Z_2 \\times \\mathbb Z_{2^{a-2}}$.",
+      "searchText": "p=962592769 is such that 2^ 21 p-1 , which may be useful. For hashing use 970592641 (31-bit number), 31443539979727 (45-bit), 3006703054056749 (52-bit). There are 78498 primes less than 1,000,000. Primitive roots exist modulo any prime power p^a , except for p = 2, a > 2 , and there are ( (p^a)) many. For p = 2, a > 2 , the group Z_ 2^a ^ is instead isomorphic to Z_2 Z_ 2^ a-2 ."
+    },
+    {
+      "type": "heading",
+      "id": "number-theory/h/estimates",
+      "chapter": "number-theory",
+      "level": 2,
+      "title": "Estimates",
+      "searchText": "Estimates"
+    },
+    {
+      "type": "prose",
+      "id": "number-theory/p/4",
+      "chapter": "number-theory",
+      "latex": "$\\sum_{d|n} d = O(n \\log \\log n)$.\n\nThe number of divisors of $n$ is at most around 100 for $n < 5e4$, 500 for $n < 1e7$, 2000 for $n < 1e10$, 200\\,000 for $n < 1e19$.",
+      "searchText": "_ d|n d = O(n n) . The number of divisors of n is at most around 100 for n < 5e4 , 500 for n < 1e7 , 2000 for n < 1e10 , 200,000 for n < 1e19 ."
+    },
+    {
+      "type": "heading",
+      "id": "number-theory/h/mobius-function",
+      "chapter": "number-theory",
+      "level": 2,
+      "title": "Mobius Function",
+      "searchText": "Mobius Function"
+    },
+    {
+      "type": "prose",
+      "id": "number-theory/p/5",
+      "chapter": "number-theory",
+      "latex": "\\[ \\mu(n) = \\begin{cases} 0 & n \\textrm{ is not square free}\\\\ 1 & n \\textrm{ has even number of prime factors}\\\\ -1 & n \\textrm{ has odd number of prime factors}\\\\\\end{cases} \\] Mobius Inversion: \\[ g(n) = \\sum_{d|n} f(d) \\Leftrightarrow f(n) = \\sum_{d|n} \\mu(d)g(n/d) \\] Other useful formulas/forms:\n\n$ \\sum_{d | n} \\mu(d) = [ n = 1] $ (very useful)\n\n$ g(n) = \\sum_{n|d} f(d) \\Leftrightarrow f(n) = \\sum_{n|d} \\mu(d/n)g(d)$\n\n$ g(n) = \\sum_{1 \\leq m \\leq n} f(\\left\\lfloor\\frac{n}{m}\\right \\rfloor ) \\Leftrightarrow f(n) = \\sum_{1\\leq m\\leq n} \\mu(m)g(\\left\\lfloor\\frac{n}{m}\\right\\rfloor)$",
+      "searchText": "(n) = 0 n is not square free \\ 1 n has even number of prime factors \\ -1 n has odd number of prime factors \\ Mobius Inversion: g(n) = _ d|n f(d) f(n) = _ d|n (d)g(n/d) Other useful formulas/forms: _ d | n (d) = [ n = 1] (very useful) g(n) = _ n|d f(d) f(n) = _ n|d (d/n)g(d) g(n) = _ 1 m n f( n m ) f(n) = _ 1 m n (m)g( n m )"
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/Mobius.h",
+      "chapter": "number-theory",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "number-theory/Eratosthenes.h",
+      "chapter": "number-theory",
+      "includedInPdf": false
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/combinatorial",
+      "chapter": "combinatorial",
+      "level": 1,
+      "title": "Combinatorial",
+      "searchText": "Combinatorial"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/permutations",
+      "chapter": "combinatorial",
+      "level": 2,
+      "title": "Permutations",
+      "searchText": "Permutations"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/factorial",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Factorial",
+      "searchText": "Factorial"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/1",
+      "chapter": "combinatorial",
+      "latex": "\\begin{center} \\begin{tabular}{l} \\begin{tabular}{c|c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c} $n$  & 1 & 2 & 3 & 4  & 5   & 6   & 7    & 8     & 9      & 10\\\\ \\hline $n!$ & 1 & 2 & 6 & 24 & 120 & 720 & 5040 & 40320 & 362880 & 3628800\\\\ \\end{tabular}\\\\ \\begin{tabular}{c|c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c} $n$  & 11    & 12    & 13    & 14     & 15     & 16     & 17\\\\ \\hline $n!$ & 4.0e7 & 4.8e8 & 6.2e9 & 8.7e10 & 1.3e12 & 2.1e13 & 3.6e14\\\\ \\end{tabular}\\\\ \\begin{tabular}{c|c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c} $n$  & 20   & 25   & 30   & 40   & 50   & 100   & 150   & 171\\\\ \\hline $n!$ & 2e18 & 2e25 & 3e32 & 8e47 & 3e64 & 9e157 & 6e262 & \\scriptsize{$>$DBL\\_MAX}\\\\ \\end{tabular} \\end{tabular} \\end{center}",
+      "searchText": "l c|c@ c@ c@ c@ c@ c@ c@ c@ c@ c n 1 2 3 4 5 6 7 8 9 10\\ n! 1 2 6 24 120 720 5040 40320 362880 3628800\\ \\ c|c@ c@ c@ c@ c@ c@ c@ c@ c@ c n 11 12 13 14 15 16 17\\ n! 4.0e7 4.8e8 6.2e9 8.7e10 1.3e12 2.1e13 3.6e14\\ \\ c|c@ c@ c@ c@ c@ c@ c@ c@ c@ c n 20 25 30 40 50 100 150 171\\ n! 2e18 2e25 3e32 8e47 3e64 9e157 6e262 > DBL_MAX \\"
+    },
+    {
+      "type": "snippet",
+      "id": "combinatorial/IntPerm.h",
+      "chapter": "combinatorial",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/cycles",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Cycles",
+      "searchText": "Cycles"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/2",
+      "chapter": "combinatorial",
+      "latex": "Let $g_S(n)$ be the number of $n$-permutations whose cycle lengths all belong to the set $S$. Then $$\\sum_{n=0} ^\\infty g_S(n) \\frac{x^n}{n!} = \\exp\\left(\\sum_{n\\in S} \\frac{x^n} {n} \\right)$$",
+      "searchText": "Let g_S(n) be the number of n -permutations whose cycle lengths all belong to the set S . Then _ n=0 ^ g_S(n) x^n n! = ( _ n S x^n n )"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/derangements",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Derangements",
+      "searchText": "Derangements"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/3",
+      "chapter": "combinatorial",
+      "latex": "Permutations of a set such that none of the elements appear in their original position. \\[ \\mkern-2mu D(n) = (n-1)(D(n-1)+D(n-2)) = n D(n-1)+(-1)^n = \\left\\lfloor\\frac{n!}{e}\\right\\rceil \\]",
+      "searchText": "Permutations of a set such that none of the elements appear in their original position. -2mu D(n) = (n-1)(D(n-1)+D(n-2)) = n D(n-1)+(-1)^n = n! e"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/burnside-s-lemma",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Burnside's lemma",
+      "searchText": "Burnside's lemma"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/4",
+      "chapter": "combinatorial",
+      "latex": "Given a group $G$ of symmetries and a set $X$, the number of elements of $X$ \\emph{up to symmetry} equals \\[ {\\frac {1}{|G|}}\\sum _{{g\\in G}}|X^{g}|, \\] where $X^{g}$ are the elements fixed by $g$ ($g.x = x$).\n\nIf $f(n)$ counts ``configurations'' (of some sort) of length $n$, we can ignore rotational symmetry using $G = \\mathbb Z_n$ to get \\[ g(n) = \\frac 1 n \\sum_{k=0}^{n-1}{f(\\text{gcd}(n, k))} = \\frac 1 n \\sum_{k|n}{f(k)\\phi(n/k)}. \\]",
+      "searchText": "Given a group G of symmetries and a set X , the number of elements of X up to symmetry equals 1 |G| _ g G |X^ g |, where X^ g are the elements fixed by g ( g.x = x ). If f(n) counts ``configurations'' (of some sort) of length n , we can ignore rotational symmetry using G = Z_n to get g(n) = 1 n _ k=0 ^ n-1 f( gcd (n, k)) = 1 n _ k|n f(k) (n/k) ."
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/partitions-and-subsets",
+      "chapter": "combinatorial",
+      "level": 2,
+      "title": "Partitions and subsets",
+      "searchText": "Partitions and subsets"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/partition-function",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Partition function",
+      "searchText": "Partition function"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/5",
+      "chapter": "combinatorial",
+      "latex": "Number of ways of writing $n$ as a sum of positive integers, disregarding the order of the summands. \\[ p(0) = 1,\\ p(n) = \\sum_{k \\in \\mathbb Z \\setminus \\{0\\}}{(-1)^{k+1} p(n - k(3k-1) / 2)} \\] \\[ p(n) \\sim 0.145 / n \\cdot \\exp(2.56 \\sqrt{n}) \\]\n\n\\begin{center} \\begin{tabular}{c|c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c@{\\ }c} $n$    & 0 & 1 & 2 & 3 & 4 & 5 & 6  & 7  & 8  & 9  & 20  & 50  & 100 \\\\ \\hline $p(n)$ & 1 & 1 & 2 & 3 & 5 & 7 & 11 & 15 & 22 & 30 & 627 & $\\mathtt{\\sim}$2e5 & $\\mathtt{\\sim}$2e8 \\\\ \\end{tabular} \\end{center}",
+      "searchText": "Number of ways of writing n as a sum of positive integers, disregarding the order of the summands. p(0) = 1, p(n) = _ k Z 0 (-1)^ k+1 p(n - k(3k-1) / 2) p(n) 0.145 / n (2.56 n ) c|c@ c@ c@ c@ c@ c@ c@ c@ c@ c@ c@ c@ c n 0 1 2 3 4 5 6 7 8 9 20 50 100 \\ p(n) 1 1 2 3 5 7 11 15 22 30 627 2e5 2e8 \\"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/lucas-theorem",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Lucas' Theorem",
+      "searchText": "Lucas' Theorem"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/6",
+      "chapter": "combinatorial",
+      "latex": "Let $n,m$ be non-negative integers and $p$ a prime. Write $n=n_kp^k+...+n_1p+n_0$ and $m=m_kp^k+...+m_1p+m_0$. Then $\\binom{n}{m} \\equiv \\prod_{i=0}^k\\binom{n_i}{m_i} \\pmod{p}$.",
+      "searchText": "Let n,m be non-negative integers and p a prime. Write n=n_kp^k+...+n_1p+n_0 and m=m_kp^k+...+m_1p+m_0 . Then n m _ i=0 ^k n_i m_i p ."
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/binomials",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Binomials",
+      "searchText": "Binomials"
+    },
+    {
+      "type": "snippet",
+      "id": "combinatorial/multinomial.h",
+      "chapter": "combinatorial",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/general-purpose-numbers",
+      "chapter": "combinatorial",
+      "level": 2,
+      "title": "General purpose numbers",
+      "searchText": "General purpose numbers"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/bernoulli-numbers",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Bernoulli numbers",
+      "searchText": "Bernoulli numbers"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/7",
+      "chapter": "combinatorial",
+      "latex": "EGF of Bernoulli numbers is $B(t)=\\frac{t}{e^t-1}$ (FFT-able). $B[0,\\ldots] = [1, -\\frac{1}{2}, \\frac{1}{6}, 0, -\\frac{1}{30}, 0, \\frac{1}{42}, \\ldots]$\n\nSums of powers: \\small \\[ \\sum_{i=1}^n n^m = \\frac{1}{m+1} \\sum_{k=0}^m \\binom{m+1}{k} B_k \\cdot (n+1)^{m+1-k} \\] \\normalsize\n\nEuler-Maclaurin formula for infinite sums: \\small \\[ \\sum_{i=m}^{\\infty} f(i) = \\int_m^\\infty f(x) dx - \\sum_{k=1}^\\infty \\frac{B_k}{k!}f^{(k-1)}(m) \\] \\[ \\approx \\int_{m}^\\infty f(x)dx + \\frac{f(m)}{2} - \\frac{f'(m)}{12} + \\frac{f'''(m)}{720} + O(f^{(5)}(m)) \\] \\normalsize",
+      "searchText": "EGF of Bernoulli numbers is B(t)= t e^t-1 (FFT-able). B[0, ] = [1, - 1 2 , 1 6 , 0, - 1 30 , 0, 1 42 , ] Sums of powers: _ i=1 ^n n^m = 1 m+1 _ k=0 ^m m+1 k B_k (n+1)^ m+1-k Euler-Maclaurin formula for infinite sums: _ i=m ^ f(i) = _m^ f(x) dx - _ k=1 ^ B_k k! f^ (k-1) (m) _ m ^ f(x)dx + f(m) 2 - f'(m) 12 + f'''(m) 720 + O(f^ (5) (m))"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/stirling-numbers-of-the-first-kind",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Stirling numbers of the first kind",
+      "searchText": "Stirling numbers of the first kind"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/8",
+      "chapter": "combinatorial",
+      "latex": "Number of permutations on $n$ items with $k$ cycles. \\begin{align*} &c(n,k) = c(n-1,k-1) + (n-1) c(n-1,k),\\ c(0,0) = 1 \\\\ &\\textstyle \\sum_{k=0}^n c(n,k)x^k = x(x+1) \\dots (x+n-1) \\end{align*} $c(8,k) = 8, 0, 5040, 13068, 13132, 6769, 1960, 322, 28, 1$ \\\\ $c(n,2) = 0, 0, 1, 3, 11, 50, 274, 1764, 13068, 109584, \\dots$",
+      "searchText": "Number of permutations on n items with k cycles. c(n,k) = c(n-1,k-1) + (n-1) c(n-1,k), c(0,0) = 1 \\ _ k=0 ^n c(n,k)x^k = x(x+1) (x+n-1) c(8,k) = 8, 0, 5040, 13068, 13132, 6769, 1960, 322, 28, 1 \\ c(n,2) = 0, 0, 1, 3, 11, 50, 274, 1764, 13068, 109584,"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/eulerian-numbers",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Eulerian numbers",
+      "searchText": "Eulerian numbers"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/9",
+      "chapter": "combinatorial",
+      "latex": "Number of permutations $\\pi \\in S_n$ in which exactly $k$ elements are greater than the previous element. $k$ $j$:s s.t. $\\pi(j)>\\pi(j+1)$, $k+1$ $j$:s s.t. $\\pi(j)\\geq j$, $k$ $j$:s s.t. $\\pi(j)>j$. $$E(n,k) = (n-k)E(n-1,k-1) + (k+1)E(n-1,k)$$ $$E(n,0) = E(n,n-1) = 1$$ $$E(n,k) = \\sum_{j=0}^k(-1)^j\\binom{n+1}{j}(k+1-j)^n$$",
+      "searchText": "Number of permutations S_n in which exactly k elements are greater than the previous element. k j :s s.t. (j)> (j+1) , k+1 j :s s.t. (j) j , k j :s s.t. (j)>j . E(n,k) = (n-k)E(n-1,k-1) + (k+1)E(n-1,k) E(n,0) = E(n,n-1) = 1 E(n,k) = _ j=0 ^k(-1)^j n+1 j (k+1-j)^n"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/stirling-numbers-of-the-second-kind",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Stirling numbers of the second kind",
+      "searchText": "Stirling numbers of the second kind"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/10",
+      "chapter": "combinatorial",
+      "latex": "Partitions of $n$ distinct elements into exactly $k$ groups. $$S(n,k) = S(n-1,k-1) + k S(n-1,k)$$ $$S(n,1) = S(n,n) = 1$$ $$S(n,k) = \\frac{1}{k!}\\sum_{j=0}^k (-1)^{k-j}\\binom{k}{j}j^n$$",
+      "searchText": "Partitions of n distinct elements into exactly k groups. S(n,k) = S(n-1,k-1) + k S(n-1,k) S(n,1) = S(n,n) = 1 S(n,k) = 1 k! _ j=0 ^k (-1)^ k-j k j j^n"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/bell-numbers",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Bell numbers",
+      "searchText": "Bell numbers"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/11",
+      "chapter": "combinatorial",
+      "latex": "Total number of partitions of $n$ distinct elements. $B(n) =$ $1, 1, 2, 5, 15, 52, 203, 877, 4140, 21147, \\dots$. For $p$ prime, \\[ B(p^m+n)\\equiv mB(n)+B(n+1) \\pmod{p} \\]",
+      "searchText": "Total number of partitions of n distinct elements. B(n) = 1, 1, 2, 5, 15, 52, 203, 877, 4140, 21147, . For p prime, B(p^m+n) mB(n)+B(n+1) p"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/labeled-unrooted-trees",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Labeled unrooted trees",
+      "searchText": "Labeled unrooted trees"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/12",
+      "chapter": "combinatorial",
+      "latex": "\\# on $n$ vertices: $n^{n-2}$ \\\\ \\# on $k$ existing trees of size $n_i$: $n_1n_2\\cdots n_k n^{k-2}$ \\\\ \\# with degrees $d_i$: $(n-2)! / ((d_1-1)! \\cdots (d_n-1)!)$",
+      "searchText": "on n vertices: n^ n-2 \\ on k existing trees of size n_i : n_1n_2 n_k n^ k-2 \\ with degrees d_i : (n-2)! / ((d_1-1)! (d_n-1)!)"
+    },
+    {
+      "type": "heading",
+      "id": "combinatorial/h/catalan-numbers",
+      "chapter": "combinatorial",
+      "level": 3,
+      "title": "Catalan numbers",
+      "searchText": "Catalan numbers"
+    },
+    {
+      "type": "prose",
+      "id": "combinatorial/p/13",
+      "chapter": "combinatorial",
+      "latex": "\\[ C_n=\\frac{1}{n+1}\\binom{2n}{n}= \\binom{2n}{n}-\\binom{2n}{n+1} = \\frac{(2n)!}{(n+1)!n!} \\] \\[ C_0=1,\\ C_{n+1} = \\frac{2(2n+1)}{n+2}C_n,\\ C_{n+1}=\\sum C_iC_{n-i} \\] ${C_n = 1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786, \\dots}$ \\begin{itemize}[noitemsep] \\item sub-diagonal monotone paths in an $n\\times n$ grid. \\item strings with $n$ pairs of parenthesis, correctly nested. \\item binary trees with with $n+1$ leaves (0 or 2 children). \\item ordered trees with $n+1$ vertices. \\item ways a convex polygon with $n+2$ sides can be cut into triangles by connecting vertices with straight lines. \\item permutations of $[n]$ with no 3-term increasing subseq. \\end{itemize}",
+      "searchText": "C_n= 1 n+1 2n n = 2n n - 2n n+1 = (2n)! (n+1)!n! C_0=1, C_ n+1 = 2(2n+1) n+2 C_n, C_ n+1 = C_iC_ n-i C_n = 1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862, 16796, 58786, sub-diagonal monotone paths in an n n grid. strings with n pairs of parenthesis, correctly nested. binary trees with with n+1 leaves (0 or 2 children). ordered trees with n+1 vertices. ways a convex polygon with n+2 sides can be cut into triangles by connecting vertices with straight lines. permutations of [n] with no 3-term increasing subseq."
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/graph",
+      "chapter": "graph",
+      "level": 1,
+      "title": "Graph",
+      "searchText": "Graph"
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/fundamentals",
+      "chapter": "graph",
+      "level": 2,
+      "title": "Fundamentals",
+      "searchText": "Fundamentals"
+    },
+    {
+      "type": "snippet",
+      "id": "graph/BellmanFord.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/johnson-s-algorithm",
+      "chapter": "graph",
+      "level": 3,
+      "title": "Johnson's algorithm",
+      "searchText": "Johnson's algorithm"
+    },
+    {
+      "type": "prose",
+      "id": "graph/p/1",
+      "chapter": "graph",
+      "latex": "All-pairs shortest paths with negative weights and no negative cycles. Run Bellman-Ford with every vertex at distance 0 (or from a virtual source); check for negative cycles. Reweight $w'(u,v)=w(u,v)+h(u)-h(v)$, then Dijkstra from each source.",
+      "searchText": "All-pairs shortest paths with negative weights and no negative cycles. Run Bellman-Ford with every vertex at distance 0 (or from a virtual source); check for negative cycles. Reweight w'(u,v)=w(u,v)+h(u)-h(v) , then Dijkstra from each source."
+    },
+    {
+      "type": "snippet",
+      "id": "graph/FloydWarshall.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/TopoSort.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/network-flow",
+      "chapter": "graph",
+      "level": 2,
+      "title": "Network flow",
+      "searchText": "Network flow"
+    },
+    {
+      "type": "snippet",
+      "id": "graph/PushRelabel.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/MinCostMaxFlow.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/EdmondsKarp.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/Dinic.h",
+      "chapter": "graph",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "graph/MinCut.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/GlobalMinCut.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/GomoryHu.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/matching",
+      "chapter": "graph",
+      "level": 2,
+      "title": "Matching",
+      "searchText": "Matching"
+    },
+    {
+      "type": "snippet",
+      "id": "graph/HopcroftKarp.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/DFSMatching.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/MinimumVertexCover.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/WeightedMatching.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/GeneralMatching.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/dfs-algorithms",
+      "chapter": "graph",
+      "level": 2,
+      "title": "DFS algorithms",
+      "searchText": "DFS algorithms"
+    },
+    {
+      "type": "snippet",
+      "id": "graph/SCC.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/BiconnectedComponents.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/2sat.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/EulerWalk.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/coloring",
+      "chapter": "graph",
+      "level": 2,
+      "title": "Coloring",
+      "searchText": "Coloring"
+    },
+    {
+      "type": "snippet",
+      "id": "graph/EdgeColoring.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/heuristics",
+      "chapter": "graph",
+      "level": 2,
+      "title": "Heuristics",
+      "searchText": "Heuristics"
+    },
+    {
+      "type": "snippet",
+      "id": "graph/MaximalCliques.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/MaximumClique.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/MaximumIndependentSet.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/trees",
+      "chapter": "graph",
+      "level": 2,
+      "title": "Trees",
+      "searchText": "Trees"
+    },
+    {
+      "type": "snippet",
+      "id": "graph/BinaryLifting.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/LCA.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/CompressTree.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/HLD.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/LinkCutTree.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "graph/DirectedMST.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/math",
+      "chapter": "graph",
+      "level": 2,
+      "title": "Math",
+      "searchText": "Math"
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/number-of-spanning-trees",
+      "chapter": "graph",
+      "level": 3,
+      "title": "Number of Spanning Trees",
+      "searchText": "Number of Spanning Trees"
+    },
+    {
+      "type": "prose",
+      "id": "graph/p/2",
+      "chapter": "graph",
+      "latex": "Create an $N\\times N$ matrix \\texttt{mat}, and for each edge $a \\rightarrow b \\in G$, do \\texttt{mat[a][b]--, mat[b][b]++} (and \\texttt{mat[b][a]--, mat[a][a]++} if $G$ is undirected). Remove the $i$th row and column and take the determinant; this yields the number of directed spanning trees rooted at $i$ (if $G$ is undirected, remove any row/column).",
+      "searchText": "Create an N N matrix mat , and for each edge a b G , do mat[a][b]--, mat[b][b]++ (and mat[b][a]--, mat[a][a]++ if G is undirected). Remove the i th row and column and take the determinant; this yields the number of directed spanning trees rooted at i (if G is undirected, remove any row/column)."
+    },
+    {
+      "type": "heading",
+      "id": "graph/h/erdos-gallai-theorem",
+      "chapter": "graph",
+      "level": 3,
+      "title": "Erdős–Gallai theorem",
+      "searchText": "Erdős–Gallai theorem"
+    },
+    {
+      "type": "prose",
+      "id": "graph/p/3",
+      "chapter": "graph",
+      "latex": "A simple graph with node degrees $d_1 \\ge \\dots \\ge d_n$ exists iff $d_1 + \\dots + d_n$ is even and for every $k = 1\\dots n$, \\[ \\sum _{i=1}^{k}d_{i}\\leq k(k-1)+\\sum _{i=k+1}^{n}\\min(d_{i},k). \\]",
+      "searchText": "A simple graph with node degrees d_1 d_n exists iff d_1 + + d_n is even and for every k = 1 n , _ i=1 ^ k d_ i k(k-1)+ _ i=k+1 ^ n (d_ i ,k)."
+    },
+    {
+      "type": "heading",
+      "id": "geometry/h/geometry",
+      "chapter": "geometry",
+      "level": 1,
+      "title": "Geometry",
+      "searchText": "Geometry"
+    },
+    {
+      "type": "heading",
+      "id": "geometry/h/geometric-primitives",
+      "chapter": "geometry",
+      "level": 2,
+      "title": "Geometric primitives",
+      "searchText": "Geometric primitives"
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/Point.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/lineDistance.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/SegmentDistance.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/SegmentIntersection.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/lineIntersection.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/sideOf.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/OnSegment.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/linearTransformation.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/LineProjectionReflection.h",
+      "chapter": "geometry",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/Angle.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "geometry/h/circles",
+      "chapter": "geometry",
+      "level": 2,
+      "title": "Circles",
+      "searchText": "Circles"
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/CircleIntersection.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/CircleTangents.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/CircleLine.h",
+      "chapter": "geometry",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/CirclePolygonIntersection.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/circumcircle.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/MinimumEnclosingCircle.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "geometry/h/polygons",
+      "chapter": "geometry",
+      "level": 2,
+      "title": "Polygons",
+      "searchText": "Polygons"
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/InsidePolygon.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/PolygonArea.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/PolygonCenter.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/PolygonCut.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/PolygonUnion.h",
+      "chapter": "geometry",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/ConvexHull.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/HullDiameter.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/PointInsideHull.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/LineHullIntersection.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "geometry/h/misc-point-set-problems",
+      "chapter": "geometry",
+      "level": 2,
+      "title": "Misc. Point Set Problems",
+      "searchText": "Misc. Point Set Problems"
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/ClosestPair.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/ManhattanMST.h",
+      "chapter": "geometry",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/kdTree.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/DelaunayTriangulation.h",
+      "chapter": "geometry",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/FastDelaunay.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "geometry/h/3d",
+      "chapter": "geometry",
+      "level": 2,
+      "title": "3D",
+      "searchText": "3D"
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/PolyhedronVolume.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/Point3D.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/3dHull.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "geometry/sphericalDistance.h",
+      "chapter": "geometry",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "strings/h/strings",
+      "chapter": "strings",
+      "level": 1,
+      "title": "Strings",
+      "searchText": "Strings"
+    },
+    {
+      "type": "snippet",
+      "id": "strings/KMP.h",
+      "chapter": "strings",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "strings/Zfunc.h",
+      "chapter": "strings",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "strings/Manacher.h",
+      "chapter": "strings",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "strings/MinRotation.h",
+      "chapter": "strings",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "strings/SuffixArray.h",
+      "chapter": "strings",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "strings/SuffixTree.h",
+      "chapter": "strings",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "strings/Hashing.h",
+      "chapter": "strings",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "strings/AhoCorasick.h",
+      "chapter": "strings",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "strings/Hashing-codeforces.h",
+      "chapter": "strings",
+      "includedInPdf": false
+    },
+    {
+      "type": "heading",
+      "id": "various/h/various",
+      "chapter": "various",
+      "level": 1,
+      "title": "Various",
+      "searchText": "Various"
+    },
+    {
+      "type": "heading",
+      "id": "various/h/intervals",
+      "chapter": "various",
+      "level": 2,
+      "title": "Intervals",
+      "searchText": "Intervals"
+    },
+    {
+      "type": "snippet",
+      "id": "various/IntervalContainer.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/IntervalCover.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/ConstantIntervals.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "various/h/misc-algorithms",
+      "chapter": "various",
+      "level": 2,
+      "title": "Misc. algorithms",
+      "searchText": "Misc. algorithms"
+    },
+    {
+      "type": "snippet",
+      "id": "various/TernarySearch.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/LIS.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/FastKnapsack.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "various/h/dynamic-programming",
+      "chapter": "various",
+      "level": 2,
+      "title": "Dynamic programming",
+      "searchText": "Dynamic programming"
+    },
+    {
+      "type": "snippet",
+      "id": "various/KnuthDP.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/DivideAndConquerDP.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "various/h/debugging-tricks",
+      "chapter": "various",
+      "level": 2,
+      "title": "Debugging tricks",
+      "searchText": "Debugging tricks"
+    },
+    {
+      "type": "prose",
+      "id": "various/p/1",
+      "chapter": "various",
+      "latex": "\\begin{itemize} \\item \\verb@signal(SIGSEGV, [](int) { _Exit(0); });@ converts segfaults into Wrong Answers. Similarly one can catch SIGABRT (assertion failures) and SIGFPE (zero divisions). \\verb@_GLIBCXX_DEBUG@ failures generate SIGABRT (or SIGSEGV on gcc 5.4.0 apparently). \\item \\verb@feenableexcept(29);@ kills the program on NaNs (\\texttt 1), 0-divs (\\texttt 4), infinities (\\texttt 8) and denormals (\\texttt{16}). \\end{itemize}",
+      "searchText": "signal(SIGSEGV, [](int) _Exit(0); ); converts segfaults into Wrong Answers. Similarly one can catch SIGABRT (assertion failures) and SIGFPE (zero divisions). _GLIBCXX_DEBUG failures generate SIGABRT (or SIGSEGV on gcc 5.4.0 apparently). feenableexcept(29); kills the program on NaNs ( 1), 0-divs ( 4), infinities ( 8) and denormals ( 16 )."
+    },
+    {
+      "type": "snippet",
+      "id": "various/MemoryUsage.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "various/h/optimization-tricks",
+      "chapter": "various",
+      "level": 2,
+      "title": "Optimization tricks",
+      "searchText": "Optimization tricks"
+    },
+    {
+      "type": "prose",
+      "id": "various/p/2",
+      "chapter": "various",
+      "latex": "\\verb@__builtin_ia32_ldmxcsr(40896);@ disables denormals (which make floats 20x slower near their minimum value).",
+      "searchText": "__builtin_ia32_ldmxcsr(40896); disables denormals (which make floats 20x slower near their minimum value)."
+    },
+    {
+      "type": "heading",
+      "id": "various/h/bit-hacks",
+      "chapter": "various",
+      "level": 3,
+      "title": "Bit hacks",
+      "searchText": "Bit hacks"
+    },
+    {
+      "type": "prose",
+      "id": "various/p/3",
+      "chapter": "various",
+      "latex": "\\begin{itemize} \\item \\verb@x & -x@ is the least bit in \\texttt{x}. \\item \\verb@for (int x = m; x; ) { --x &= m; ... }@ loops over all subset masks of \\texttt{m} (except \\texttt{m} itself). \\item \\verb@c = x&-x, r = x+c; (((r^x) >> 2)/c) | r@ is the next number after \\texttt{x} with the same number of bits set. \\item \\verb@rep(b,0,K) rep(i,0,(1 << K))@ \\\\ \\verb@  if (i & 1 << b) D[i] += D[i^(1 << b)];@ computes all sums of subsets. \\item \\verb@__builtin_ctz(x)@ trailing zeros (\\texttt{int}). \\item \\verb@__builtin_clzll(x)@ leading zeros (\\texttt{ll}). \\item \\verb@__builtin_popcountll(x)@ number of ones. \\end{itemize}",
+      "searchText": "x -x is the least bit in x . for (int x = m; x; ) --x = m; ... loops over all subset masks of m (except m itself). c = x -x, r = x+c; (((r^x) >> 2)/c) | r is the next number after x with the same number of bits set. rep(b,0,K) rep(i,0,(1 << K)) \\ if (i 1 << b) D[i] += D[i^(1 << b)]; computes all sums of subsets. __builtin_ctz(x) trailing zeros ( int ). __builtin_clzll(x) leading zeros ( ll ). __builtin_popcountll(x) number of ones."
+    },
+    {
+      "type": "heading",
+      "id": "various/h/pragmas",
+      "chapter": "various",
+      "level": 3,
+      "title": "Pragmas",
+      "searchText": "Pragmas"
+    },
+    {
+      "type": "snippet",
+      "id": "various/Pragmas.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/FastMod.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/FastInput.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/BumpAllocator.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/SmallPtr.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/BumpAllocatorSTL.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/Unrolling.h",
+      "chapter": "various",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "various/SIMD.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "appendix/h/techniques",
+      "chapter": "appendix",
+      "level": 1,
+      "title": "Techniques",
+      "searchText": "Techniques"
+    },
+    {
+      "type": "snippet",
+      "id": "appendix/techniques.txt",
+      "chapter": "appendix",
+      "includedInPdf": true
     }
   ]
 }

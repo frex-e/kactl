@@ -1,8 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import MiniSearch from 'minisearch'
-import type { Snippet, SnippetIndex } from './lib/types'
-import { SnippetDetail, SnippetListItem } from './components/SnippetViews'
+import type { DocumentBlock, Snippet, SnippetIndex } from './lib/types'
+import { descriptionPreview } from './lib/latex'
+import { DocumentView } from './components/DocumentView'
 import './App.css'
+
+type SearchRecord = {
+  id: string
+  kind: 'snippet' | 'heading' | 'prose'
+  chapter: string
+  name: string
+  title: string
+  searchText: string
+  description: string
+  usage: string
+  code: string
+}
 
 function parseHash(): { chapter: string | null; id: string | null } {
   const raw = window.location.hash.replace(/^#\/?/, '')
@@ -22,6 +35,110 @@ function setHash(id: string | null) {
   history.replaceState(null, '', `#/${id}`)
 }
 
+function cssEscape(value: string): string {
+  if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+    return CSS.escape(value)
+  }
+  return value.replace(/"/g, '\\"')
+}
+
+function toSearchRecords(data: SnippetIndex): SearchRecord[] {
+  const records: SearchRecord[] = data.snippets.map((s) => ({
+    id: s.id,
+    kind: 'snippet' as const,
+    chapter: s.chapter,
+    name: s.name,
+    title: s.name,
+    searchText: `${s.name} ${s.description} ${s.usage}`,
+    description: s.description,
+    usage: s.usage,
+    code: s.code,
+  }))
+  let lastHeading = ''
+  for (const block of data.document) {
+    if (block.type === 'heading') {
+      lastHeading = block.searchText || block.title
+      records.push({
+        id: block.id,
+        kind: 'heading',
+        chapter: block.chapter,
+        name: block.title,
+        title: block.title,
+        searchText: block.searchText,
+        description: '',
+        usage: '',
+        code: '',
+      })
+    } else if (block.type === 'prose') {
+      records.push({
+        id: block.id,
+        kind: 'prose',
+        chapter: block.chapter,
+        name: lastHeading || block.searchText.slice(0, 80),
+        title: lastHeading || 'Chapter text',
+        searchText: block.searchText,
+        description: block.searchText,
+        usage: '',
+        code: '',
+      })
+    }
+  }
+  return records
+}
+
+function outlineFrom(
+  blocks: DocumentBlock[],
+): {
+  id: string
+  indent: number
+  label: string
+  kind: 'heading' | 'snippet'
+  level: number
+  excluded: boolean
+}[] {
+  let headingLevel = 1
+  const items: {
+    id: string
+    indent: number
+    label: string
+    kind: 'heading' | 'snippet'
+    level: number
+    excluded: boolean
+  }[] = []
+  for (const block of blocks) {
+    if (block.type === 'heading') {
+      headingLevel = block.level
+      items.push({
+        id: block.id,
+        indent: block.level,
+        label: block.title,
+        kind: 'heading',
+        level: block.level,
+        excluded: false,
+      })
+    } else if (block.type === 'snippet') {
+      items.push({
+        id: block.id,
+        indent: Math.max(headingLevel, 1) + 1,
+        label: block.id.split('/').slice(1).join('/'),
+        kind: 'snippet',
+        level: 0,
+        excluded: !block.includedInPdf,
+      })
+    }
+  }
+  return items
+}
+
+function hitPreview(hit: SearchRecord): string {
+  const excerpt =
+    hit.kind === 'heading'
+      ? ''
+      : descriptionPreview(hit.kind === 'snippet' ? hit.description : hit.searchText, 90)
+  if (excerpt) return `${hit.chapter} · ${excerpt}`
+  return hit.chapter
+}
+
 export default function App() {
   const [data, setData] = useState<SnippetIndex | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -29,6 +146,9 @@ export default function App() {
   const [chapter, setChapter] = useState<string | 'all'>('all')
   const [showExcluded, setShowExcluded] = useState(true)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [scrollRoot, setScrollRoot] = useState<Element | null>(null)
+  const docPaneRef = useRef<HTMLDivElement>(null)
+  const pendingScroll = useRef<{ id: string; smooth: boolean } | null>(null)
 
   useEffect(() => {
     const url = `${import.meta.env.BASE_URL}snippets.json`
@@ -38,29 +158,23 @@ export default function App() {
         return r.json()
       })
       .then((json: SnippetIndex) => {
+        json.document ??= []
         setData(json)
         const h = parseHash()
-        if (h.id && json.snippets.some((s) => s.id === h.id)) {
+        if (h.id) {
           setSelectedId(h.id)
           setChapter(h.chapter ?? 'all')
-        } else if (json.snippets.length) {
-          setSelectedId(json.snippets[0].id)
+          pendingScroll.current = { id: h.id, smooth: false }
+        } else if (h.chapter && json.chapters.some((c) => c.id === h.chapter)) {
+          setChapter(h.chapter)
         }
       })
       .catch((e: Error) => setError(e.message))
   }, [])
 
   useEffect(() => {
-    const onHash = () => {
-      const h = parseHash()
-      if (h.id) {
-        setSelectedId(h.id)
-        if (h.chapter) setChapter(h.chapter)
-      }
-    }
-    window.addEventListener('hashchange', onHash)
-    return () => window.removeEventListener('hashchange', onHash)
-  }, [])
+    setScrollRoot(docPaneRef.current)
+  }, [data])
 
   const byId = useMemo(() => {
     const m = new Map<string, Snippet>()
@@ -68,61 +182,122 @@ export default function App() {
     return m
   }, [data])
 
+  const byDocId = useMemo(() => {
+    const m = new Map<string, DocumentBlock>()
+    data?.document.forEach((b) => m.set(b.id, b))
+    return m
+  }, [data])
+
+  const searchRecords = useMemo(() => (data ? toSearchRecords(data) : []), [data])
+
   const searchEngine = useMemo(() => {
-    if (!data) return null
-    const ms = new MiniSearch<Snippet>({
-      fields: ['name', 'description', 'usage', 'code', 'id'],
-      storeFields: ['id'],
+    if (!searchRecords.length) return null
+    const ms = new MiniSearch<SearchRecord>({
+      fields: ['name', 'title', 'searchText', 'description', 'usage', 'code', 'id'],
+      storeFields: ['id', 'kind', 'chapter', 'title', 'name'],
       processTerm: (term) => term.toLowerCase(),
       searchOptions: {
-        boost: { name: 4, description: 2 },
+        boost: { name: 4, title: 4, description: 2, searchText: 2 },
         prefix: true,
         fuzzy: 0.15,
         processTerm: (term) => term.toLowerCase(),
       },
     })
-    ms.addAll(data.snippets)
+    ms.addAll(searchRecords)
     return ms
-  }, [data])
+  }, [searchRecords])
 
-  const filtered = useMemo(() => {
+  const visibleDocument = useMemo(() => {
     if (!data) return []
-    let list = data.snippets
-    if (chapter !== 'all') list = list.filter((s) => s.chapter === chapter)
-    if (!showExcluded) list = list.filter((s) => s.includedInPdf)
+    return data.document.filter((block) => {
+      if (chapter !== 'all' && block.chapter !== chapter) return false
+      if (block.type === 'snippet' && !showExcluded && !block.includedInPdf) return false
+      return true
+    })
+  }, [data, chapter, showExcluded])
+
+  const recordById = useMemo(() => {
+    const m = new Map<string, SearchRecord>()
+    searchRecords.forEach((r) => m.set(r.id, r))
+    return m
+  }, [searchRecords])
+
+  const hits = useMemo(() => {
     const q = query.trim()
-    if (q && searchEngine) {
-      const hits = new Set(
-        searchEngine
-          .search(q, { prefix: true, fuzzy: 0.15, boost: { name: 4, description: 2 } })
-          .map((h) => h.id as string),
-      )
-      list = list.filter((s) => hits.has(s.id))
+    if (!q || !searchEngine) return []
+    let list = searchEngine
+      .search(q, {
+        prefix: true,
+        fuzzy: 0.15,
+        boost: { name: 4, title: 4, description: 2, searchText: 2 },
+      })
+      .map((h) => recordById.get(h.id as string))
+      .filter((r): r is SearchRecord => !!r)
+    if (!showExcluded) {
+      list = list.filter((r) => {
+        if (r.kind !== 'snippet') return true
+        return byId.get(r.id)?.includedInPdf !== false
+      })
     }
     return list
-  }, [data, chapter, showExcluded, query, searchEngine])
+  }, [query, searchEngine, recordById, showExcluded, byId])
+
+  const outline = useMemo(() => outlineFrom(visibleDocument), [visibleDocument])
+
+  const jumpTo = useCallback(
+    (id: string, smooth = true) => {
+      setSelectedId(id)
+      setHash(id)
+      const block = byDocId.get(id)
+      const snippet = byId.get(id)
+      const targetChapter = block?.chapter ?? snippet?.chapter
+      if (targetChapter && chapter !== 'all' && targetChapter !== chapter) {
+        setChapter(targetChapter)
+      }
+      if (snippet && !snippet.includedInPdf) setShowExcluded(true)
+      pendingScroll.current = { id, smooth }
+    },
+    [byDocId, byId, chapter],
+  )
 
   useEffect(() => {
-    if (!filtered.length) return
-    if (selectedId && filtered.some((s) => s.id === selectedId)) return
-    const next = filtered[0]
-    setSelectedId(next.id)
-    setHash(next.id)
-  }, [filtered, selectedId])
+    const onHash = () => {
+      const h = parseHash()
+      if (h.id) jumpTo(h.id, false)
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [jumpTo])
 
-  const selected =
-    selectedId && filtered.some((s) => s.id === selectedId)
-      ? (byId.get(selectedId) ?? null)
-      : filtered.length
-        ? (byId.get(filtered[0].id) ?? null)
-        : null
+  useLayoutEffect(() => {
+    const pending = pendingScroll.current
+    if (!pending || !data) return
+    const root = docPaneRef.current
+    if (!root) return
+    const el = root.querySelector(`[data-doc-id="${cssEscape(pending.id)}"]`)
+    if (!el) return
+    pendingScroll.current = null
+    el.scrollIntoView({ block: 'start', behavior: pending.smooth ? 'smooth' : 'auto' })
+  }, [data, visibleDocument, selectedId, scrollRoot])
 
-  function selectSnippet(id: string) {
-    setSelectedId(id)
-    setHash(id)
-    const s = byId.get(id)
-    if (s && chapter !== 'all' && s.chapter !== chapter) {
-      setChapter(s.chapter)
+  function selectChapter(next: string | 'all') {
+    setChapter(next)
+    if (next === 'all') {
+      setSelectedId(null)
+      setHash(null)
+      pendingScroll.current = null
+      if (docPaneRef.current) docPaneRef.current.scrollTop = 0
+      return
+    }
+    const heading = data?.document.find(
+      (b) => b.type === 'heading' && b.chapter === next && b.level === 1,
+    )
+    if (heading) {
+      setSelectedId(heading.id)
+      setHash(heading.id)
+      pendingScroll.current = { id: heading.id, smooth: false }
+    } else if (docPaneRef.current) {
+      docPaneRef.current.scrollTop = 0
     }
   }
 
@@ -144,19 +319,27 @@ export default function App() {
     )
   }
 
+  const searching = query.trim().length > 0
+  const visibleSnippets = visibleDocument.filter((b) => b.type === 'snippet').length
+  const countLabel = searching
+    ? `${hits.length} hits`
+    : visibleSnippets
+      ? `${visibleSnippets} snippet${visibleSnippets === 1 ? '' : 's'}`
+      : ''
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
           <p className="brand-mark">KACTL</p>
-          <h1 className="brand-title">Snippets</h1>
-          <p className="brand-sub">Searchable contest reference</p>
+          <h1 className="brand-title">Reference</h1>
+          <p className="brand-sub">Searchable contest document</p>
         </div>
         <nav className="chapter-nav" aria-label="Chapters">
           <button
             type="button"
             className={chapter === 'all' ? 'nav-item active' : 'nav-item'}
-            onClick={() => setChapter('all')}
+            onClick={() => selectChapter('all')}
           >
             All
           </button>
@@ -165,7 +348,7 @@ export default function App() {
               key={c.id}
               type="button"
               className={chapter === c.id ? 'nav-item active' : 'nav-item'}
-              onClick={() => setChapter(c.id)}
+              onClick={() => selectChapter(c.id)}
             >
               {c.title}
             </button>
@@ -179,47 +362,71 @@ export default function App() {
           />
           Show PDF-excluded
         </label>
-        <p className="sidebar-note">Geometry deferred (figure headers).</p>
       </aside>
 
       <main className="main">
         <div className="search-bar">
           <input
             type="search"
-            placeholder="Search name, description, code…"
+            placeholder="Search snippets, headings, chapter text…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            aria-label="Search snippets"
+            aria-label="Search document"
           />
           <span className="result-count">
-            {filtered.length} / {data.snippets.length}
+            {countLabel}
           </span>
         </div>
 
         <div className="content-split">
-          <div className="list-pane" role="listbox" aria-label="Snippets">
-            {filtered.length === 0 ? (
-              <p className="empty">No matches.</p>
-            ) : (
-              filtered.map((s) => (
-                <SnippetListItem
-                  key={s.id}
-                  snippet={s}
-                  active={s.id === selectedId}
-                  onSelect={() => selectSnippet(s.id)}
-                />
-              ))
-            )}
+          <div className="list-pane" role="listbox" aria-label={searching ? 'Search results' : 'Outline'}>
+            {searching && hits.length === 0 && <p className="empty">No matches.</p>}
+            {searching &&
+              hits.map((hit) => (
+                <button
+                  key={`${hit.kind}:${hit.id}`}
+                  type="button"
+                  className={hit.id === selectedId ? 'list-item active' : 'list-item'}
+                  onClick={() => jumpTo(hit.id)}
+                >
+                  <span className="list-name">
+                    <span className={`kind-tag kind-${hit.kind}`}>{hit.kind}</span>
+                    {hit.kind === 'snippet' ? hit.name : hit.title}
+                  </span>
+                  <span className="list-preview">{hitPreview(hit)}</span>
+                </button>
+              ))}
+            {!searching && outline.length === 0 && <p className="empty">Nothing to show.</p>}
+            {!searching &&
+              outline.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={
+                    (item.id === selectedId ? 'list-item active ' : 'list-item ') +
+                    (item.kind === 'snippet' ? 'outline-snippet' : `outline-h${item.level}`)
+                  }
+                  style={{ paddingLeft: `${0.5 + (item.indent - 1) * 0.85}rem` }}
+                  onClick={() => jumpTo(item.id)}
+                >
+                  <span className="list-name">
+                    {item.label}
+                    {item.excluded && <span className="dot-ex" title="Excluded from PDF" />}
+                  </span>
+                </button>
+              ))}
           </div>
-          <div className="detail-pane">
-            {selected ? (
-              <SnippetDetail
-                snippet={selected}
+          <div className="detail-pane doc-pane" ref={docPaneRef}>
+            {visibleDocument.length ? (
+              <DocumentView
+                blocks={visibleDocument}
                 byId={byId}
-                onSelectDep={(id) => selectSnippet(id)}
+                selectedId={selectedId}
+                onSelectDep={(id) => jumpTo(id)}
+                scrollRoot={scrollRoot}
               />
             ) : (
-              <p className="empty">Select a snippet.</p>
+              <p className="empty">Nothing to show.</p>
             )}
           </div>
         </div>

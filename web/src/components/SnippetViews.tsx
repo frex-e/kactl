@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import hljs from 'highlight.js/lib/core'
 import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
@@ -6,7 +6,7 @@ import bash from 'highlight.js/lib/languages/bash'
 import python from 'highlight.js/lib/languages/python'
 import plaintext from 'highlight.js/lib/languages/plaintext'
 import type { Snippet } from '../lib/types'
-import { LatexText, descriptionPreview, unescapeLatexText } from '../lib/latex'
+import { LatexText, unescapeLatexText } from '../lib/latex'
 import { copyText, formatSnippetBundle, orderWithDependencies } from '../lib/copy'
 
 hljs.registerLanguage('cpp', cpp)
@@ -23,39 +23,101 @@ function langFor(name: string): string {
   return 'plaintext'
 }
 
+function highlightCode(code: string, language: string): string {
+  try {
+    return hljs.highlight(code, { language }).value
+  } catch {
+    return hljs.highlight(code, { language: 'plaintext' }).value
+  }
+}
+
+export function LazyCode({
+  code,
+  language,
+  eager,
+  root,
+}: {
+  code: string
+  language: string
+  eager?: boolean
+  root?: Element | null
+}) {
+  const ref = useRef<HTMLPreElement>(null)
+  const [html, setHtml] = useState<string | null>(() =>
+    eager ? highlightCode(code, language) : null,
+  )
+
+  useEffect(() => {
+    setHtml(eager ? highlightCode(code, language) : null)
+  }, [code, language, eager])
+
+  useEffect(() => {
+    if (html !== null) return
+    const el = ref.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHtml(highlightCode(code, language))
+        }
+      },
+      { root: root ?? null, rootMargin: '240px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [code, language, html, root])
+
+  return (
+    <pre ref={ref} className="code-block">
+      {html ? (
+        <code
+          className={`hljs language-${language}`}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      ) : (
+        <code className="hljs">{code}</code>
+      )}
+    </pre>
+  )
+}
+
 export function SnippetDetail({
   snippet,
   byId,
   onSelectDep,
+  active,
+  scrollRoot,
 }: {
   snippet: Snippet
   byId: Map<string, Snippet>
   onSelectDep: (id: string) => void
+  active?: boolean
+  scrollRoot?: Element | null
 }) {
-  const [copied, setCopied] = useState<'code' | 'deps' | null>(null)
+  const [copied, setCopied] = useState<'code' | 'deps' | 'fail' | null>(null)
 
-  const highlighted = useMemo(() => {
-    try {
-      return hljs.highlight(snippet.code, { language: langFor(snippet.name) }).value
-    } catch {
-      return hljs.highlight(snippet.code, { language: 'plaintext' }).value
-    }
-  }, [snippet])
+  const language = useMemo(() => langFor(snippet.name), [snippet.name])
 
   async function doCopy(mode: 'code' | 'deps') {
-    const bundle =
-      mode === 'code'
-        ? snippet.code
-        : formatSnippetBundle(orderWithDependencies(snippet, byId))
-    const ok = await copyText(bundle)
-    if (ok) {
-      setCopied(mode)
-      window.setTimeout(() => setCopied(null), 1600)
+    setCopied(mode)
+    try {
+      const bundle =
+        mode === 'code'
+          ? snippet.code
+          : formatSnippetBundle(orderWithDependencies(snippet, byId))
+      const ok = await copyText(bundle)
+      if (!ok) setCopied('fail')
+    } catch {
+      setCopied('fail')
     }
+    window.setTimeout(() => setCopied(null), 1600)
   }
 
   return (
-    <article className="detail">
+    <article
+      className={active ? 'detail snippet-card active' : 'detail snippet-card'}
+      data-doc-id={snippet.id}
+    >
       <header className="detail-header">
         <div>
           <p className="detail-chapter">{snippet.chapter}</p>
@@ -63,7 +125,7 @@ export function SnippetDetail({
         </div>
         <div className="detail-actions">
           <button type="button" className="btn" onClick={() => void doCopy('code')}>
-            {copied === 'code' ? 'Copied' : 'Copy'}
+            {copied === 'code' ? 'Copied' : copied === 'fail' ? 'Copy failed' : 'Copy'}
           </button>
           <button
             type="button"
@@ -71,7 +133,7 @@ export function SnippetDetail({
             onClick={() => void doCopy('deps')}
             title="Copy this snippet and its transitive dependencies"
           >
-            {copied === 'deps' ? 'Copied' : 'Copy with deps'}
+            {copied === 'deps' ? 'Copied' : copied === 'fail' ? 'Copy failed' : 'Copy with deps'}
           </button>
         </div>
       </header>
@@ -138,37 +200,13 @@ export function SnippetDetail({
 
       <section className="detail-section">
         <h3>Code</h3>
-        <pre className="code-block">
-          <code
-            className={`hljs language-${langFor(snippet.name)}`}
-            dangerouslySetInnerHTML={{ __html: highlighted }}
-          />
-        </pre>
+        <LazyCode
+          code={snippet.code}
+          language={language}
+          eager={active}
+          root={scrollRoot}
+        />
       </section>
     </article>
-  )
-}
-
-export function SnippetListItem({
-  snippet,
-  active,
-  onSelect,
-}: {
-  snippet: Snippet
-  active: boolean
-  onSelect: () => void
-}) {
-  return (
-    <button
-      type="button"
-      className={active ? 'list-item active' : 'list-item'}
-      onClick={onSelect}
-    >
-      <span className="list-name">
-        {snippet.name}
-        {!snippet.includedInPdf && <span className="dot-ex" title="Excluded from PDF" />}
-      </span>
-      <span className="list-preview">{descriptionPreview(snippet.description)}</span>
-    </button>
   )
 }
