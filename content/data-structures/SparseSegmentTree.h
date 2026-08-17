@@ -5,7 +5,7 @@
  * Source: mine.typ
  * Description: Implicit (pointer) segment tree. Creates
  *  children on demand. Point update, range query.
- *  Bounds inclusive. Change $V$, $id$, $binop$.
+ *  Bounds inclusive. Change \texttt{V}, \texttt{id}, \texttt{binop}.
  * Time: $O(\log R)$
  * Status: stress-tested
  */

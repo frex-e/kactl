@@ -9,7 +9,7 @@
  *  \texttt{bmi,bmi2}: tzcnt/pdep/pext.
  *  \texttt{lzcnt,popcnt}: hardware clz/popcount.
  *  \texttt{trapv} aborts on signed overflow (slow; debug).
- *  Do not combine trapv with Ofast if you need traps.
+ *  Do not combine \texttt{trapv} with \texttt{Ofast} if you need traps.
  * Status: untested
  */
 #pragma once

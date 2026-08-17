@@ -4,8 +4,8 @@
  * License: CC0
  * Source: mine.typ
  * Description: Partial-pivot reduced row echelon form of a
- *  (possibly rectangular) matrix. Returns (rank, det).
- *  det is meaningful for square matrices. Use this when you
+ *  (possibly rectangular) matrix. Returns \texttt{(rank, det)}.
+ *  \texttt{det} is meaningful for square matrices. Use this when you
  *  need the RREF itself (rank, nullspace, row space).
  *  For $Ax=b$ or inversion, see SolveLinear / MatrixInverse.
  * Time: $O(n^2 m)$

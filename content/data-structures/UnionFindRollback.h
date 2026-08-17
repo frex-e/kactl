@@ -4,7 +4,7 @@
  * License: CC0
  * Source: folklore
  * Description: Disjoint-set data structure with undo.
- * If undo is not needed, skip st, time() and rollback().
+ * If undo is not needed, skip \texttt{st}, \texttt{time()} and \texttt{rollback()}.
  * Usage: int t = uf.time(); ...; uf.rollback(t);
  * Time: $O(\log(N))$
  * Status: tested as part of DirectedMST.h

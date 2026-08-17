@@ -3,9 +3,9 @@
  * Date: 2009-03-21
  * License: CC0
  * Source:
- * Description: Returns where $p$ is as seen from $s$ towards $e$. 1/0/-1 $\Leftrightarrow$ left/on line/right.
- * If the optional argument $eps$ is given 0 is returned if $p$ is within distance $eps$ from the line.
- * P is supposed to be Point<T> where T is e.g. double or long long.
+ * Description: Returns where \texttt{p} is as seen from \texttt{s} towards \texttt{e}. 1/0/-1 $\Leftrightarrow$ left/on line/right.
+ * If the optional argument \texttt{eps} is given 0 is returned if \texttt{p} is within distance \texttt{eps} from the line.
+ * \texttt{P} is supposed to be \texttt{Point<T>} where \texttt{T} is e.g. \texttt{double} or \texttt{long long}.
  * It uses products in intermediate steps so watch out for overflow if using int or long long.
  * Usage:
  * 	bool left = sideOf(p1,p2,q)==1;

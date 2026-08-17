@@ -1,8 +1,8 @@
 /**
  * Author: chilli
  * License: CC0
- * Description: z[i] computes the length of the longest common prefix of s[i:] and s,
- * except z[0] = 0. (abacaba -> 0010301)
+ * Description: \texttt{z[i]} computes the length of the longest common prefix of \texttt{s[i:]} and \texttt{s},
+ * except \texttt{z[0] = 0}. (abacaba -> 0010301)
  * Time: O(n)
  * Status: stress-tested
  */

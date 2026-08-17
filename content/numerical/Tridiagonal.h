@@ -3,7 +3,7 @@
  * Date: 2009-08-15
  * License: CC0
  * Source: https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
- * Description: $x=\textrm{tridiagonal}(d,p,q,b)$ solves the equation system
+ * Description: \texttt{x = tridiagonal(d, p, q, b)} solves the equation system
 \[
 \left(\begin{array}{c}b_0\\b_1\\b_2\\b_3\\\vdots\\b_{n-1}\end{array}\right) =
 \left(\begin{array}{cccccc}
@@ -22,7 +22,7 @@ This is useful for solving problems on the type
 where $a_0$, $a_{n+1}$, $b_i$, $c_i$ and $d_i$ are known. $a$ can then be obtained from
 \[
 \begin{aligned}
-\{a_i\}=\textrm{tridiagonal}(&\{1,-1,-1,...,-1,1\}, \{0,c_1,c_2,\dots,c_n\},\\
+\{a_i\}=\texttt{tridiagonal}(&\{1,-1,-1,...,-1,1\}, \{0,c_1,c_2,\dots,c_n\},\\
 &\{b_1,b_2,\dots,b_n,0\}, \{a_0,d_1,d_2,\dots,d_n,a_{n+1}\}).
 \end{aligned}
 \]

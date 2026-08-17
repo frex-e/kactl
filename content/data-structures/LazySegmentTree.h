@@ -5,9 +5,10 @@
  * Source: mine.typ
  * Description: Recursive segment tree with range updates and
  *  range queries. Bounds are inclusive on both sides.
- *  Change $V$, $U$, $id$, $def$, $idU$, $binop$,
- *  $applyUpdate$, $mergeUpdate$. Default is range add and
- *  range max. Used by HLD.
+ *  Change \texttt{V}, \texttt{U}, \texttt{id}, \texttt{def},
+ *  \texttt{idU}, \texttt{binop}, \texttt{applyUpdate},
+ *  \texttt{mergeUpdate}. Default is range add and range max.
+ *  Used by HLD.
  * Time: $O(\log N)$
  * Status: stress-tested
  */

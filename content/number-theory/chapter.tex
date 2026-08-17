@@ -21,7 +21,7 @@
 	\kactlimport{CRT.h}
 
 	\subsection{Bézout's identity}
-	For $a \neq $, $b \neq 0$, then $d=gcd(a,b)$ is the smallest positive integer for which there are integer solutions to
+	For $a \neq 0$, $b \neq 0$, then $d=\gcd(a,b)$ is the smallest positive integer for which there are integer solutions to
 	$$ax+by=d$$
 	If $(x,y)$ is one solution, then all solutions are given by
 	$$\left(x+\frac{kb}{\gcd(a,b)}, y-\frac{ka}{\gcd(a,b)}\right), \quad k\in\mathbb{Z}$$
@@ -48,7 +48,7 @@
 \section{Estimates}
 	$\sum_{d|n} d = O(n \log \log n)$.
 
-	The number of divisors of $n$ is at most around 100 for $n < 5e4$, 500 for $n < 1e7$, 2000 for $n < 1e10$, 200\,000 for $n < 1e19$.
+	The number of divisors of $n$ is at most around 100 for $n < \texttt{5e4}$, 500 for $n < \texttt{1e7}$, 2000 for $n < \texttt{1e10}$, 200\,000 for $n < \texttt{1e19}$.
 
 \section{Mobius Function}
 \[

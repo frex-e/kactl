@@ -2,8 +2,8 @@
  * Author: Simon Lindholm
  * License: CC0
  * Source: Codeforces
- * Description: Given $a[i] = \min_{lo(i) \le k < hi(i)}(f(i, k))$ where the (minimal)
- *  optimal $k$ increases with $i$, computes $a[i]$ for $i = L..R-1$.
+ * Description: Given \texttt{a[i]} $=\min_{\texttt{lo(i)} \le k < \texttt{hi(i)}}(\texttt{f(i, k)})$ where the (minimal)
+ *  optimal $k$ increases with $i$, computes \texttt{a[i]} for \texttt{i = L..R-1}.
  *  Layered form (quadrangle on $C$ is sufficient):
  *  $\mathrm{dp}(t,j)=\min_{0\le k\le j}\mathrm{dp}(t-1,k-1)+C(k,j)$.
  *  See KnuthDP.h for quadrangle patterns.

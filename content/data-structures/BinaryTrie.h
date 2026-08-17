@@ -4,8 +4,8 @@
  * License: CC0
  * Source: mine.typ
  * Description: Binary trie over 32-bit values. Supports
- *  insert, XOR-max, and mex of values XOR $xr$.
- *  $size$ is only needed for mex.
+ *  \texttt{insert}, XOR-max (\texttt{maxxor}), and \texttt{mex}
+ *  of values XOR \texttt{xr}. \texttt{size} is only needed for mex.
  * Time: $O(B)$
  * Status: stress-tested
  */

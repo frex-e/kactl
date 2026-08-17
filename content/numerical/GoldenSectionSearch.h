@@ -5,7 +5,7 @@
  * Source: Numeriska algoritmer med matlab, Gerd Eriksson, NADA, KTH
  * Description: Finds the argument minimizing the function $f$ in the interval $[a,b]$
  * assuming $f$ is unimodal on the interval, i.e. has only one local minimum and no local
- * maximum. The maximum error in the result is $eps$. Works equally well for maximization
+ * maximum. The maximum error in the result is \texttt{eps}. Works equally well for maximization
  * with a small change in the code. See TernarySearch.h in the Various chapter for a
  * discrete version.
  * Usage:

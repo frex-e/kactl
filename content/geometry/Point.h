@@ -4,7 +4,7 @@
  * License: CC0
  * Source: My head with inspiration from tinyKACTL
  * Description: Class to handle points in the plane.
- * 	T can be e.g. double or long long. (Avoid int.)
+ * 	\texttt{T} can be e.g. \texttt{double} or \texttt{long long}. (Avoid \texttt{int}.)
  * Status: Works fine, used a lot
  */
 #pragma once

@@ -4,7 +4,7 @@
  * License: CC0
  * Source: folklore
  * Description: Zero-indexed max-tree. Bounds are inclusive to the left and exclusive to the right.
- * Can be changed by modifying T, f and unit.
+ * Can be changed by modifying \texttt{T}, \texttt{f} and \texttt{unit}.
  * Time: O(\log N)
  * Status: stress-tested
  */
