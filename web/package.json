@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "index": "python3 scripts/index-snippets.py",
+    "index": "PYTHONPATH=.. python3 -m tools.kactl preprocess",
     "copy-pdf": "test -f ../kactl.pdf && mkdir -p public && cp ../kactl.pdf public/kactl.pdf || true",
     "predev": "npm run index && npm run copy-pdf",
     "dev": "vite",

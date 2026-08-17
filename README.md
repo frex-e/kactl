@@ -45,7 +45,7 @@ The algorithms that are not included in the pdf are left commented out in `chapt
 
 To build the notebook, type `make kactl` (or `make fast`) on a \*nix machine -- this will update `kactl.pdf`.
 `make web-pdf` is the same two-pass PDF without `test-session.pdf`, and is what GitHub Pages uses.
-Both copy the PDF to `web/public/kactl.pdf` for the snippets site (that copy is gitignored).
+Both run `make preprocess` first (listings + `snippets.json`), then copy the PDF to `web/public/kactl.pdf` for the snippets site (that copy is gitignored).
 (Windows might work as well, but is not tested.) `doc/README` has a few more notes about this.
 
 Tips:

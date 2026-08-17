@@ -6,6 +6,7 @@ on:
     paths:
       - 'web/**'
       - 'content/**'
+      - 'tools/**'
       - 'Makefile'
       - '.github/workflows/pages.yml'
   workflow_dispatch:

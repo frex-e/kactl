@@ -16,8 +16,8 @@ npm install
 npm run dev
 ```
 
-`predev` / `prebuild` run `python3 scripts/index-snippets.py`, which writes
-`public/snippets.json` from the repo’s `content/` tree (repo root = parent of `web/`).
+`predev` / `prebuild` run `python3 -m tools.kactl preprocess` (via `PYTHONPATH=..`),
+which writes `public/snippets.json` from the repo’s `content/` tree.
 That JSON is gitignored. They also copy `kactl.pdf` from the repo root into
 `public/` when that file exists, so the sidebar **Latest PDF** link works locally.
 For a freshly typeset PDF, run `make web-pdf` (or `make kactl`) from the repo root

@@ -63,9 +63,9 @@
 	\end{center}
 }
 
-% Remove temp files from old failed runs
-\AtBeginDocument{\immediate\write18{rm -f \@builddir/header.tmp}}
-\AtEndDocument{\immediate\write18{rm -f \@builddir/header.tmp}\immediate\write18{rm -f \@builddir/header2.tmp}\immediate\write18{rm -f \@builddir/kactl.tmp}}
+% Restore the caption queue each pass (preprocess writes header.tmp.seed).
+\AtBeginDocument{\immediate\write18{cp -f \@builddir/header.tmp.seed \@builddir/header.tmp}}
+\AtEndDocument{\immediate\write18{rm -f \@builddir/header.tmp}\immediate\write18{rm -f \@builddir/header2.tmp}}
 
 % Include a list of source files at the top of every page. For the purpose
 % of recording those, we use eTeX marks. (We can't just append data directly to
@@ -259,7 +259,7 @@
   \endgroup
 }
 
-\newcommand{\kactlimport}[2][]{ % Using empty default parameter
+\newcommand{\kactlimport}[2][]{ % Optional #1 unused; language comes from preprocess.
 	\leftcaption{}\rightcaption{}
 	\setboolean{hasdescription}{false}
 	\setboolean{hasusage}{false}
@@ -269,9 +269,7 @@
 	\myneedspace{3\baselineskip}
 	\penalty-100
 	{\large #2}
-	\immediate\write18{rm -f \@builddir/kactl.tmp} % Don't include old kactl.tmp on failure.
-	\immediate\write18{python3 content/tex/preprocessor.py -i "\@kactldir/#2" -o \@builddir/kactl.tmp #1}
-	\immediate\input{\@builddir/kactl.tmp}
+	\immediate\input{"\@builddir/listings/\@kactlchapterid/#2.tex"}
 }
 
 \newcommand{\import}[1]{
@@ -281,11 +279,13 @@
 \newcommand{\kactlcontentdir}[1]{
 	\def\@kactlbasedir{#1}
 	\def\@kactldir{#1}
+	\def\@kactlchapterid{}
 }
 \kactlcontentdir{.}
 
 \newcommand{\kactlchapter}[1]{
 	\def\@kactldir{\@kactlbasedir/#1}
+	\def\@kactlchapterid{#1}
 	\input{"\@kactldir/chapter.tex"}
 	\def\@kactldir{\@kactlbasedir}
 }
