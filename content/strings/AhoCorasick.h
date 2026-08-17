@@ -21,9 +21,9 @@ struct AhoCorasick {
 	enum {alpha = 26, first = 'A'}; // change this!
 	struct Node {
 		int back, next[alpha];
-		int start = -1; // first word ending here
-		int end = -1; // longest word ending here
-		int nmatches = 0; // (optional)
+		int start = -1; // first word ending here; chains output links
+		int end = -1; // longest word ending here; find() result
+		int nmatches = 0; // #matches here, incl. suffixes (optional)
 		Node(int v) { memset(next, v, sizeof(next)); }
 	};
 	vector<Node> N;
