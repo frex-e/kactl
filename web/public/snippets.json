@@ -1210,7 +1210,7 @@
       "author": "chilli",
       "source": "https://cp-algorithms.com/graph/dinic.html",
       "dependencies": [],
-      "includedInPdf": false,
+      "includedInPdf": true,
       "code": "struct Dinic {\n\tstruct Edge {\n\t\tint to, rev;\n\t\tll c, oc;\n\t\tll flow() { return max(oc - c, 0LL); } // if you need flows\n\t};\n\tvi lvl, ptr, q;\n\tvector<vector<Edge>> adj;\n\tDinic(int n) : lvl(n), ptr(n), q(n), adj(n) {}\n\tvoid addEdge(int a, int b, ll c, ll rcap = 0) {\n\t\tadj[a].push_back({b, sz(adj[b]), c, c});\n\t\tadj[b].push_back({a, sz(adj[a]) - 1, rcap, rcap});\n\t}\n\tll dfs(int v, int t, ll f) {\n\t\tif (v == t || !f) return f;\n\t\tfor (int& i = ptr[v]; i < sz(adj[v]); i++) {\n\t\t\tEdge& e = adj[v][i];\n\t\t\tif (lvl[e.to] == lvl[v] + 1)\n\t\t\t\tif (ll p = dfs(e.to, t, min(f, e.c))) {\n\t\t\t\t\te.c -= p, adj[e.to][e.rev].c += p;\n\t\t\t\t\treturn p;\n\t\t\t\t}\n\t\t}\n\t\treturn 0;\n\t}\n\tll calc(int s, int t) {\n\t\tll flow = 0; q[0] = s;\n\t\trep(L,0,31) do { // 'int L=30' maybe faster for random data\n\t\t\tlvl = ptr = vi(sz(q));\n\t\t\tint qi = 0, qe = lvl[s] = 1;\n\t\t\twhile (qi < qe && !lvl[t]) {\n\t\t\t\tint v = q[qi++];\n\t\t\t\tfor (Edge e : adj[v])\n\t\t\t\t\tif (!lvl[e.to] && e.c >> (30 - L))\n\t\t\t\t\t\tq[qe++] = e.to, lvl[e.to] = lvl[v] + 1;\n\t\t\t}\n\t\t\twhile (ll p = dfs(s, t, LLONG_MAX)) flow += p;\n\t\t} while (lvl[t]);\n\t\treturn flow;\n\t}\n\tbool leftOfMinCut(int a) { return lvl[a] != 0; }\n};"
     },
     {
@@ -3740,7 +3740,7 @@
       "type": "snippet",
       "id": "graph/Dinic.h",
       "chapter": "graph",
-      "includedInPdf": false
+      "includedInPdf": true
     },
     {
       "type": "snippet",
