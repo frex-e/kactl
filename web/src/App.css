@@ -521,6 +521,7 @@ input {
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: 0.82rem;
   white-space: pre-wrap;
+  tab-size: 2;
 }
 
 .dep-row {
@@ -562,6 +563,7 @@ input {
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: 0.8rem;
   line-height: 1.5;
+  tab-size: 2;
 }
 
 .latex-text .katex-display {
