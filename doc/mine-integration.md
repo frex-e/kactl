@@ -11,7 +11,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/contest/Random.h` | RNG + how to draw random ints / odd hash bases |
 | `content/contest/Output.h` | `std::format` binary printing + fixed precision |
 | `content/data-structures/BinaryTrie.h` | insert, XOR-max, mex |
-| `content/data-structures/SparseSegmentTree.h` | implicit point-update tree |
+| `content/data-structures/SparseSegmentTree.h` | implicit point-update tree (PDF-excluded; use SparseLazy with `ql=qr`) |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree |
 | `content/data-structures/LiChao.h` | min Li Chao (kept alongside `LineContainer.h`) |
 | `content/number-theory/LinearSieve.h` | linear sieve + least prime factor (kept alongside Eratosthenes) |
