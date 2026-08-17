@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import MiniSearch from 'minisearch'
 import type { DocumentBlock, Snippet, SnippetIndex } from './lib/types'
 import { descriptionPreview } from './lib/latex'
+import { tokenizeIndexedText } from './lib/search'
 import { DocumentView } from './components/DocumentView'
 import './App.css'
 
@@ -195,8 +196,13 @@ export default function App() {
     const ms = new MiniSearch<SearchRecord>({
       fields: ['name', 'title', 'searchText', 'description', 'usage', 'code', 'id'],
       storeFields: ['id', 'kind', 'chapter', 'title', 'name'],
+      tokenize: tokenizeIndexedText,
       processTerm: (term) => term.toLowerCase(),
       searchOptions: {
+        // Keep query tokenization as MiniSearch default (space/punctuation only).
+        // CamelCase splitting is index-side so "segmenttree" still matches
+        // LazySegmentTree via the indexed compound, without OR-ing "tree".
+        tokenize: MiniSearch.getDefault('tokenize'),
         boost: { name: 4, title: 4, description: 2, searchText: 2 },
         prefix: true,
         fuzzy: 0.15,
