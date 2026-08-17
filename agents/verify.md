@@ -25,7 +25,7 @@ Keep the notebook at **25 pages + cover**. That is an ICPC policy cap, not a CI 
 
 `make test-compiles` → `doc/scripts/compile-all.sh`.
 
-For each `content/**/*.h` not in the skip list, it writes a tiny `build/temp.cpp` that includes [content/contest/template.cpp](../content/contest/template.cpp) then the header, and compiles with `-std=c++17 -Wall -Wextra -Wfatal-errors -Wconversion`.
+For each `content/**/*.h` not in the skip list, it writes a tiny `build/temp.cpp` that includes [content/contest/template.cpp](../content/contest/template.cpp) then the header, and compiles with `-std=c++20 -Wall -Wextra -Wfatal-errors -Wconversion`.
 
 Skip list: [doc/scripts/skip_headers](../doc/scripts/skip_headers) (filename only, one per line). On non-x86, `Pragmas.h` and `SIMD.h` are appended to the skip list because they need avx2.
 
@@ -35,7 +35,7 @@ Compiler: [doc/scripts/cxx.sh](../doc/scripts/cxx.sh). Prefers `g++-15`, then `g
 
 `make test` → `doc/scripts/run-all.sh`.
 
-- Finds every `stress-tests/**/*.cpp`, compiles with `-std=c++17 -O2 -Wall -Wfatal-errors -Wconversion`, runs `./a.out`.
+- Finds every `stress-tests/**/*.cpp`, compiles with `-std=c++20 -O2 -Wall -Wfatal-errors -Wconversion`, runs `./a.out`.
 - Raises the stack limit (`ulimit -s 524288`) for the 2-SAT test.
 - Needs `bc` for timing.
 

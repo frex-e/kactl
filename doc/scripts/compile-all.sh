@@ -6,7 +6,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 echo "Using CXX=$CXX"
 
 # use a precompiled header for the template to improve perf
-$CXX -Wall -Wextra -Wfatal-errors -Wconversion -std=c++17 -x c++-header $DIR/content/contest/template.cpp
+$CXX -Wall -Wextra -Wfatal-errors -Wconversion -std=c++20 -x c++-header $DIR/content/contest/template.cpp
 
 SKIP_FILE=$(mktemp)
 cleanup() {

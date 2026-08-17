@@ -9,6 +9,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | File | What |
 |---|---|
 | `content/contest/Random.h` | RNG + how to draw random ints / odd hash bases |
+| `content/contest/Output.h` | `std::format` binary printing + fixed precision |
 | `content/data-structures/BinaryTrie.h` | insert, XOR-max, mex |
 | `content/data-structures/SparseSegmentTree.h` | implicit point-update tree |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree |
@@ -20,7 +21,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/various/MemoryUsage.h` | `getrusage` RSS |
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 
-Also in chapter text (no new `.h`): contest I/O notes, Johnson’s algorithm, extra bit builtins.
+Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins.
 
 ## Replaced
 
@@ -42,12 +43,12 @@ Also in chapter text (no new `.h`): contest I/O notes, Johnson’s algorithm, ex
 | `content/various/DivideAndConquerDP.h` | layered recurrence + usage of `lo`/`hi`/`f`/`store` |
 | `content/graph/chapter.tex` | Johnson’s notes; Dinic included in the PDF |
 | `content/number-theory/chapter.tex` | Möbius code import; linear sieve; common moduli; highly composite numbers |
-| `content/contest/chapter.tex` | Random + I/O |
+| `content/contest/chapter.tex` | Random + Output.h |
 | `content/various/chapter.tex` | builtins, pragmas, memory |
 | `content/data-structures/chapter.tex` | new trees / Li Chao / trie |
 | `content/numerical/chapter.tex` | RREF, XOR basis |
 
-Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (override with `CXX=...`). The contest `.bashrc` `c` alias stays as `g++` for Linux contest VMs.
+Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (override with `CXX=...`), and use `-std=c++20`. The contest `.bashrc` `c` alias stays as `g++` for Linux contest VMs.
 `Pragmas.h` and `SIMD.h` are skipped in header compile tests on non-x86 (avx2 is invalid on ARM) and compiled on x86 Linux.
 
 ## Tests
