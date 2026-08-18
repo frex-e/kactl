@@ -3,6 +3,8 @@
 #include "../../content/data-structures/LazySegmentTree.h"
 #include "../../content/data-structures/SparseLazySegmentTree.h"
 
+static_assert(SparseLazyNode::id == INT_MIN);
+
 void testVsDense(int n, int iters) {
 	SparseLazyNode sp;
 	LazyUpdateTree tr(n);

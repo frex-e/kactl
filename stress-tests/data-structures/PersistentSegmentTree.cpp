@@ -2,6 +2,8 @@
 
 #include "../../content/data-structures/PersistentSegmentTree.h"
 
+static_assert(PersistNode::id == 0);
+
 void testSmall(int n, int iters) {
 	vector<PersistNode*> roots = {new PersistNode()};
 	vector<vi> hist = {vi(n)};
