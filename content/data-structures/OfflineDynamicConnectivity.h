@@ -7,7 +7,7 @@
  *  $[0, T)$. \texttt{add(l, r, a, b)} inserts undirected
  *  edge $a$--$b$ on time interval $[l, r)$.
  *  \texttt{run(f)} calls \texttt{f(t, uf)} at each time
- *  $t$ with the DSU of edges alive at $t$.
+ *  $t$ with the DSU of edges alive at $t$. Requires $T>0$.
  * Time: $O(K\log K\log N)$ for $K$ interval-edges
  * Status: stress-tested
  */
@@ -19,7 +19,9 @@ struct DynCon {
 	RollbackUF uf;
 	vector<vector<pii>> st;
 	int T;
-	DynCon(int n, int t) : uf(n), st(4 * max(t, 1)), T(t) {}
+	DynCon(int n, int t) : uf(n), st(4 * t), T(t) {
+		assert(t > 0);
+	}
 	void add(int l, int r, int a, int b,
 			int i = 1, int L = 0, int R = -1) {
 		if (R < 0) R = T;
