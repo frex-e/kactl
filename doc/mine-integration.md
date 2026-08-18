@@ -43,6 +43,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 | File | What |
 |---|---|
+| `content/data-structures/Treap.h` | subtree sum, lazy range add/reverse |
 | `content/graph/HLD.h` | uses `LazyUpdateTree`; converts half-open HLD ranges to inclusive `[l, r-1]` |
 | `content/various/KnuthDP.h` | quadrangle notes (verified patterns) + `knuthDP` implementation |
 | `content/various/DivideAndConquerDP.h` | layered recurrence + usage of `lo`/`hi`/`f`/`store` |
