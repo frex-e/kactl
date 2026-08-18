@@ -3,6 +3,15 @@
 #include "../../content/data-structures/LazySegmentTree.h"
 
 int main() {
+	{
+		LazyUpdateTree tr(5);
+		assert(tr.query(3, 1) == INT_MIN);
+		tr.update(3, 1, 10);
+		assert(tr.query(0, 4) == 0);
+		tr.set(-1, 7);
+		tr.set(5, 7);
+		assert(tr.query(0, 4) == 0);
+	}
 	rep(n,1,30) {
 		LazyUpdateTree tr(n);
 		vi v(n);

@@ -50,7 +50,6 @@ struct LazyUpdateTree {
 		arr[cur] = binop(arr[2 * cur], arr[2 * cur + 1]);
 	}
 	void update(int ql, int qr, U u) {
-		if (ql > qr) return;
 		update(1, 0, size - 1, ql, qr, u);
 	}
 	void set(int cur, int l, int r, int i, V v) {
@@ -72,7 +71,6 @@ struct LazyUpdateTree {
 			query(2 * cur + 1, mid + 1, r, ql, qr));
 	}
 	V query(int ql, int qr) {
-		if (ql > qr) return id;
 		return query(1, 0, size - 1, ql, qr);
 	}
 };
