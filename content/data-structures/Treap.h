@@ -3,8 +3,9 @@
  * Date: 2026-08-18
  * Source: folklore
  * Description: Implicit treap on a sequence. Split/merge by
- *  index in $O(\log N)$. Subtree sum and lazy range add.
- *  Half-open index ranges $[l,r)$.
+ *  index. \texttt{split(t, k)} puts the first $k$ elements
+ *  on the left. Subtree sum and lazy range add. Half-open
+ *  index ranges $[l,r)$.
  * Time: $O(\log N)$
  * Status: stress-tested
  */
@@ -40,7 +41,7 @@ void Node::recalc() {
 template<class F> void each(Node* n, F f) {
 	if (n) { n->push(); each(n->l, f); f(n->val); each(n->r, f); }
 }
-pair<Node*, Node*> split(Node* n, int k) {
+pair<Node*, Node*> split(Node* n, int k) { // left gets k nodes
 	if (!n) return {};
 	n->push();
 	if (cnt(n->l) >= k) { // "n->val >= k" for lower_bound(k)
