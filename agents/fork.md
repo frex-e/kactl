@@ -19,7 +19,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 ## Snippet API that diverges
 
-**Lazy segment tree.** [content/data-structures/LazySegmentTree.h](../content/data-structures/LazySegmentTree.h) is `LazyUpdateTree`, not upstream’s pointer `Node` with `set`/`add`. Bounds are **inclusive on both sides**. Default op is range add + range max; customize `V`/`U`/`binop`/`applyUpdate`/`mergeUpdate`.
+**Lazy segment tree.** [content/data-structures/LazySegmentTree.h](../content/data-structures/LazySegmentTree.h) is `LazyUpdateTree`, not upstream’s pointer `Node` with range `set`/`add`. Bounds are **inclusive on both sides**. Range `update`, point `set`, range `query`. Default op is range add + range max; customize `V`/`U`/`binop`/`applyUpdate`/`mergeUpdate`.
 
 **HLD.** [content/graph/HLD.h](../content/graph/HLD.h) uses `LazyUpdateTree`. Internal `process` still talks in half-open `[l, r)` then converts with `r - 1` for `tree.update` / `tree.query`. Do not “simplify” those calls back to half-open, and do not call a removed `tree->set` API. Subtree query is already inclusive: `pos[v] + VALS_EDGES` .. `pos[v] + siz[v] - 1`.
 
@@ -29,7 +29,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 ## Local additions (summary)
 
-Added (kept alongside related upstream files where noted): `Random.h`, `Output.h`, `BinaryTrie.h`, implicit `SparseSegmentTree.h` / `SparseLazySegmentTree.h`, `LiChao.h` (alongside `LineContainer.h`), `LinearSieve.h` (alongside Eratosthenes), `Mobius.h`, `RREF.h`, `XORBasis.h` (alongside `SolveLinearBinary.h`), `MemoryUsage.h`, `Pragmas.h`. Johnson’s algorithm notes, bit builtins; Dinic is included in the PDF.
+Added (kept alongside related upstream files where noted): `Random.h`, `Output.h`, `BinaryTrie.h`, implicit `SparseLazySegmentTree.h`, `LiChao.h` (alongside `LineContainer.h`), `LinearSieve.h` (alongside Eratosthenes), `Mobius.h`, `RREF.h`, `XORBasis.h` (alongside `SolveLinearBinary.h`), `MemoryUsage.h`, `Pragmas.h`. Johnson’s algorithm notes, bit builtins; Dinic is included in the PDF.
 
 Replaced/modified: contest template and vimrc; lazy tree as above; SuffixArray extras; HLD; Knuth DP and Divide-and-Conquer DP notes/code.
 

@@ -92,7 +92,7 @@ function uniquePreserve(terms: string[]): string[] {
 
 /**
  * Index an identifier so glued queries like "segmenttree" hit LazySegmentTree
- * and SparseSegmentTree, not only SegmentTree.h.
+ * and SparseLazySegmentTree, not only SegmentTree.h.
  *
  * Emits the original token, each camelCase/PascalCase part, every consecutive
  * compound (Segment+Tree → SegmentTree), and a 3+ letter acronym (FFT, NTT).

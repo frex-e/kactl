@@ -2,18 +2,37 @@
 
 #include "../../content/data-structures/LazySegmentTree.h"
 
+static_assert(LazyUpdateTree::id == INT_MIN);
+
 int main() {
+	{
+		LazyUpdateTree tr(5);
+		assert(tr.query(3, 1) == INT_MIN);
+		tr.update(3, 1, 10);
+		assert(tr.query(0, 4) == 0);
+		tr.set(-1, 7);
+		tr.set(5, 7);
+		assert(tr.query(0, 4) == 0);
+	}
 	rep(n,1,30) {
 		LazyUpdateTree tr(n);
 		vi v(n);
 		rep(it,0,20000) {
-			int l = rand() % n, r = rand() % n;
-			if (l > r) swap(l, r);
-			int x = rand() % 11 - 5;
-			if (rand() % 2) {
+			int op = rand() % 3;
+			if (op == 0) {
+				int l = rand() % n, r = rand() % n;
+				if (l > r) swap(l, r);
+				int x = rand() % 11 - 5;
 				tr.update(l, r, x);
 				rep(i,l,r+1) v[i] += x;
+			} else if (op == 1) {
+				int i = rand() % n;
+				int x = rand() % 21 - 10;
+				tr.set(i, x);
+				v[i] = x;
 			} else {
+				int l = rand() % n, r = rand() % n;
+				if (l > r) swap(l, r);
 				int got = tr.query(l, r);
 				int exp = INT_MIN;
 				rep(i,l,r+1) exp = max(exp, v[i]);
