@@ -70,14 +70,21 @@ void testLargeDomain() {
 	assert(tr.query(L, R, 10, 25) == 8);
 	tr.set(L, R, 42, 7);
 	assert(tr.query(L, R, 42, 42) == 7);
-	assert(tr.query(L, R, 0, 41) == 0);
-	tr.update(L, R, 40, 50, 3);
-	assert(tr.query(L, R, 42, 42) == 10);
-	assert(tr.query(L, R, 40, 40) == 3);
-	tr.set(L, R, 42, 1);
-	assert(tr.query(L, R, 42, 42) == 1);
-	assert(tr.query(L, R, 40, 40) == 3);
-	assert(tr.query(L, R, 40, 50) == 3);
+	assert(tr.query(L, R, 10, 25) == 8);
+	assert(tr.query(L, R, 10, 42) == 8);
+
+	SparseLazyNode tr2;
+	tr2.set(L, R, 42, 7);
+	assert(tr2.query(L, R, 42, 42) == 7);
+	assert(tr2.query(L, R, 0, 41) == 0);
+	assert(tr2.query(L, R, 43, 100) == 0);
+	tr2.update(L, R, 40, 50, 3);
+	assert(tr2.query(L, R, 42, 42) == 10);
+	assert(tr2.query(L, R, 40, 40) == 3);
+	tr2.set(L, R, 42, 1);
+	assert(tr2.query(L, R, 42, 42) == 1);
+	assert(tr2.query(L, R, 40, 40) == 3);
+	assert(tr2.query(L, R, 40, 50) == 3);
 }
 
 int main() {
