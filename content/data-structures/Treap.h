@@ -1,10 +1,11 @@
 /**
  * Author: someone on Codeforces
- * Date: 2017-03-14
+ * Date: 2026-08-18
  * Source: folklore
- * Description: A short self-balancing tree. It acts as a
- *  sequential container with log-time splits/joins, and
- *  is easy to augment with additional data.
+ * Description: Implicit treap on a sequence. Split/merge by
+ *  index. \texttt{split(t, k)} puts the first $k$ elements
+ *  on the left. Subtree sum and lazy range add. Half-open
+ *  index ranges $[l,r)$.
  * Time: $O(\log N)$
  * Status: stress-tested
  */
@@ -12,20 +13,37 @@
 
 struct Node {
 	Node *l = 0, *r = 0;
-	int val, y, c = 1;
-	Node(int val) : val(val), y(rand()) {}
+	ll val;
+	int y, c = 1;
+	ll sum = 0;
+	ll add = 0;
+	Node(ll val) : val(val), y(rand()), sum(val) {}
+	void applyAdd(ll x) {
+		val += x; sum += x * c; add += x;
+	}
+	void push() {
+		if (add) {
+			if (l) l->applyAdd(add);
+			if (r) r->applyAdd(add);
+			add = 0;
+		}
+	}
 	void recalc();
 };
 
 int cnt(Node* n) { return n ? n->c : 0; }
-void Node::recalc() { c = cnt(l) + cnt(r) + 1; }
-
-template<class F> void each(Node* n, F f) {
-	if (n) { each(n->l, f); f(n->val); each(n->r, f); }
+ll lsum(Node* n) { return n ? n->sum : 0; }
+void Node::recalc() {
+	c = cnt(l) + cnt(r) + 1;
+	sum = val + lsum(l) + lsum(r);
 }
 
-pair<Node*, Node*> split(Node* n, int k) {
+template<class F> void each(Node* n, F f) {
+	if (n) { n->push(); each(n->l, f); f(n->val); each(n->r, f); }
+}
+pair<Node*, Node*> split(Node* n, int k) { // left gets k nodes
 	if (!n) return {};
+	n->push();
 	if (cnt(n->l) >= k) { // "n->val >= k" for lower_bound(k)
 		auto [L,R] = split(n->l, k);
 		n->l = R;
@@ -43,9 +61,11 @@ Node* merge(Node* l, Node* r) {
 	if (!l) return r;
 	if (!r) return l;
 	if (l->y > r->y) {
+		l->push();
 		l->r = merge(l->r, r);
 		return l->recalc(), l;
 	} else {
+		r->push();
 		r->l = merge(l, r->l);
 		return r->recalc(), r;
 	}
