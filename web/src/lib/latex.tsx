@@ -1,5 +1,5 @@
 import katex from 'katex'
-import type { ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 
 const TEXT_ESCAPES: Record<string, string> = {
   _: '_',
@@ -470,7 +470,7 @@ function latexToHtml(src: string): string {
   return out
 }
 
-export function LatexText({
+export const LatexText = memo(function LatexText({
   text,
   className,
   as: Tag = 'div',
@@ -487,7 +487,7 @@ export function LatexText({
       dangerouslySetInnerHTML={{ __html: html }}
     />
   )
-}
+})
 
 /** One-line preview: strip display math, keep short. */
 export function descriptionPreview(desc: string, max = 120): string {

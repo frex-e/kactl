@@ -193,6 +193,14 @@ input {
   white-space: nowrap;
 }
 
+.result-count[data-pending='true'] {
+  opacity: 0.6;
+}
+
+.list-pane[aria-busy='true'] .list-item {
+  opacity: 0.72;
+}
+
 .content-split {
   display: grid;
   grid-template-columns: minmax(220px, 320px) 1fr;
