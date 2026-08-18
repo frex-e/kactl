@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import hljs from 'highlight.js/lib/core'
 import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
@@ -81,7 +81,7 @@ export function LazyCode({
   )
 }
 
-export function SnippetDetail({
+export const SnippetDetail = memo(function SnippetDetail({
   snippet,
   byId,
   onSelectDep,
@@ -209,4 +209,4 @@ export function SnippetDetail({
       </section>
     </article>
   )
-}
+})
