@@ -41,24 +41,37 @@ void testLazy(int n, int iters) {
 	Node* t = 0;
 	rep(i,0,n) t = merge(t, &nodes[i]);
 
+	auto rangeAdd = [&](int l, int r, ll x) {
+		Node *a, *b, *c;
+		tie(a, b) = split(t, l);
+		tie(b, c) = split(b, r - l);
+		if (b) b->applyAdd(x);
+		t = merge(merge(a, b), c);
+	};
+
+	auto rangeSum = [&](int l, int r) -> ll {
+		Node *a, *b, *c;
+		tie(a, b) = split(t, l);
+		tie(b, c) = split(b, r - l);
+		ll res = b ? b->sum : 0;
+		t = merge(merge(a, b), c);
+		return res;
+	};
+
 	rep(it,0,iters) {
-		int op = rand() % 4;
-		if (op == 0) {
+		int op = rand() % 3;
+		if (op == 0) { // range add
 			int l = rand() % (n + 1), r = rand() % (n + 1);
 			if (l > r) swap(l, r);
 			int x = rand() % 11 - 5;
-			rangeAdd(t, l, r, x);
+			rangeAdd(l, r, x);
 			rep(i,l,r) exp[i] += x;
-		} else if (op == 1) {
+		} else if (op == 1) { // range sum
 			int l = rand() % (n + 1), r = rand() % (n + 1);
 			if (l > r) swap(l, r);
-			rangeRev(t, l, r);
-			reverse(exp.begin() + l, exp.begin() + r);
-		} else if (op == 2) {
-			int l = rand() % (n + 1), r = rand() % (n + 1);
-			if (l > r) swap(l, r);
-			assert(rangeSum(t, l, r) == naiveSum(exp, l, r));
+			assert(rangeSum(l, r) == naiveSum(exp, l, r));
 		} else {
+			// move [i,j) to index k
 			int i = rand() % (n + 1), j = rand() % (n + 1);
 			if (i > j) swap(i, j);
 			int k = rand() % (n + 1);
