@@ -22,11 +22,9 @@ struct Node {
 		val += x; sum += x * c; add += x;
 	}
 	void push() {
-		if (add) {
-			if (l) l->applyAdd(add);
-			if (r) r->applyAdd(add);
-			add = 0;
-		}
+		if (l) l->applyAdd(add);
+		if (r) r->applyAdd(add);
+		add = 0;
 	}
 	void recalc();
 };
