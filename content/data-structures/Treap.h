@@ -50,13 +50,13 @@ template<class F> void each(Node* n, F f) {
 pair<Node*, Node*> split(Node* n, int k) {
 	if (!n) return {};
 	n->push();
-	if (cnt(n->l) >= k) {
+	if (cnt(n->l) >= k) { // "n->val >= k" for lower_bound(k)
 		auto [L,R] = split(n->l, k);
 		n->l = R;
 		n->recalc();
 		return {L, n};
 	} else {
-		auto [L,R] = split(n->r,k - cnt(n->l) - 1);
+		auto [L,R] = split(n->r,k - cnt(n->l) - 1); // and just "k"
 		n->r = L;
 		n->recalc();
 		return {n, R};
