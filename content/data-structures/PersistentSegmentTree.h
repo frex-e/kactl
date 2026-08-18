@@ -15,7 +15,7 @@
 
 struct PersistNode {
 	using V = int;
-	static const V id = 0;
+	static constexpr V id = 0;
 	V binop(V a, V b) { return a + b; }
 	V val = id;
 	PersistNode *lt = 0, *rt = 0;

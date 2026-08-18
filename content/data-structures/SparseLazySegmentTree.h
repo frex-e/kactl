@@ -16,9 +16,9 @@
 struct SparseLazyNode {
 	using V = int;
 	using U = int;
-	static const V id = INT_MIN;
-	static const V def = 0;
-	static const U idU = 0;
+	static constexpr V id = INT_MIN;
+	static constexpr V def = 0;
+	static constexpr U idU = 0;
 	V binop(V a, V b) { return max(a, b); }
 	V applyUpdate(U u, V v) { return v + u; }
 	U mergeUpdate(U oldU, U nw) { return oldU + nw; }

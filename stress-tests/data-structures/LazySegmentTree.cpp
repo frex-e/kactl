@@ -2,6 +2,8 @@
 
 #include "../../content/data-structures/LazySegmentTree.h"
 
+static_assert(LazyUpdateTree::id == INT_MIN);
+
 int main() {
 	{
 		LazyUpdateTree tr(5);

@@ -17,9 +17,9 @@
 struct LazyUpdateTree {
 	using V = int;
 	using U = int;
-	const V id = INT_MIN;
-	const V def = 0;
-	const U idU = 0;
+	static constexpr V id = INT_MIN;
+	static constexpr V def = 0;
+	static constexpr U idU = 0;
 	V binop(V a, V b) { return max(a, b); }
 	V applyUpdate(U u, V v) { return v + u; }
 	U mergeUpdate(U oldU, U nw) { return oldU + nw; }
