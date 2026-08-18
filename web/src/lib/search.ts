@@ -1,3 +1,69 @@
+import type { SnippetIndex } from './types'
+
+export type SearchRecord = {
+  id: string
+  kind: 'snippet' | 'heading' | 'prose'
+  chapter: string
+  name: string
+  title: string
+  searchText: string
+  description: string
+  usage: string
+  code: string
+}
+
+export type SearchWorkerRequest =
+  | { type: 'index'; records: SearchRecord[] }
+  | { type: 'search'; query: string }
+
+export type SearchWorkerResponse =
+  | { type: 'ready' }
+  | { type: 'results'; query: string; ids: string[] }
+
+export function toSearchRecords(data: SnippetIndex): SearchRecord[] {
+  const records: SearchRecord[] = data.snippets.map((s) => ({
+    id: s.id,
+    kind: 'snippet' as const,
+    chapter: s.chapter,
+    name: s.name,
+    title: s.name,
+    searchText: `${s.name} ${s.description} ${s.usage}`,
+    description: s.description,
+    usage: s.usage,
+    code: s.code,
+  }))
+  let lastHeading = ''
+  for (const block of data.document) {
+    if (block.type === 'heading') {
+      lastHeading = block.searchText || block.title
+      records.push({
+        id: block.id,
+        kind: 'heading',
+        chapter: block.chapter,
+        name: block.title,
+        title: block.title,
+        searchText: block.searchText,
+        description: '',
+        usage: '',
+        code: '',
+      })
+    } else if (block.type === 'prose') {
+      records.push({
+        id: block.id,
+        kind: 'prose',
+        chapter: block.chapter,
+        name: lastHeading || block.searchText.slice(0, 80),
+        title: lastHeading || 'Chapter text',
+        searchText: block.searchText,
+        description: block.searchText,
+        usage: '',
+        code: '',
+      })
+    }
+  }
+  return records
+}
+
 /** Split identifiers the way MiniSearch does: Unicode space or punctuation. */
 const SPACE_OR_PUNCTUATION = /[\n\r\p{Z}\p{P}]+/u
 

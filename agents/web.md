@@ -26,7 +26,7 @@ Running page headers during `pdflatex` are `python3 -m tools.kactl print-header`
 
 ## UI behavior worth knowing
 
-- Search matches snippet names, descriptions, code, and chapter headings/prose ([web/src/lib/search.ts](../web/src/lib/search.ts)). Identifier indexing splits camelCase and emits compounds so a query like `segmenttree` hits `LazySegmentTree` / `SparseSegmentTree`, not only `SegmentTree.h`.
+- Search matches snippet names, descriptions, code, and chapter headings/prose ([web/src/lib/search.ts](../web/src/lib/search.ts)). Identifier indexing splits camelCase and emits compounds so a query like `segmenttree` hits `LazySegmentTree` / `SparseSegmentTree`, not only `SegmentTree.h`. MiniSearch runs in a web worker ([web/src/lib/search.worker.ts](../web/src/lib/search.worker.ts)); the search box updates immediately and in-flight queries are dropped when the user keeps typing.
 - Copy vs copy-with-deps: [web/src/lib/copy.ts](../web/src/lib/copy.ts) walks `#include` dependencies in topological order, then the snippet itself.
 - Hash URLs: `#/<id>` (chapter-prefixed snippet or heading id). Jumping to an excluded snippet turns on the “show excluded” toggle.
 - Default view hides snippets that are commented out of the PDF.

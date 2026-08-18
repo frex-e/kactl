@@ -1,22 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import MiniSearch from 'minisearch'
 import type { DocumentBlock, Snippet, SnippetIndex } from './lib/types'
 import { descriptionPreview } from './lib/latex'
-import { tokenizeIndexedText } from './lib/search'
+import { toSearchRecords, type SearchRecord } from './lib/search'
+import { useDocumentSearch } from './lib/useDocumentSearch'
 import { DocumentView } from './components/DocumentView'
 import './App.css'
-
-type SearchRecord = {
-  id: string
-  kind: 'snippet' | 'heading' | 'prose'
-  chapter: string
-  name: string
-  title: string
-  searchText: string
-  description: string
-  usage: string
-  code: string
-}
 
 function parseHash(): { chapter: string | null; id: string | null } {
   const raw = window.location.hash.replace(/^#\/?/, '')
@@ -41,50 +29,6 @@ function cssEscape(value: string): string {
     return CSS.escape(value)
   }
   return value.replace(/"/g, '\\"')
-}
-
-function toSearchRecords(data: SnippetIndex): SearchRecord[] {
-  const records: SearchRecord[] = data.snippets.map((s) => ({
-    id: s.id,
-    kind: 'snippet' as const,
-    chapter: s.chapter,
-    name: s.name,
-    title: s.name,
-    searchText: `${s.name} ${s.description} ${s.usage}`,
-    description: s.description,
-    usage: s.usage,
-    code: s.code,
-  }))
-  let lastHeading = ''
-  for (const block of data.document) {
-    if (block.type === 'heading') {
-      lastHeading = block.searchText || block.title
-      records.push({
-        id: block.id,
-        kind: 'heading',
-        chapter: block.chapter,
-        name: block.title,
-        title: block.title,
-        searchText: block.searchText,
-        description: '',
-        usage: '',
-        code: '',
-      })
-    } else if (block.type === 'prose') {
-      records.push({
-        id: block.id,
-        kind: 'prose',
-        chapter: block.chapter,
-        name: lastHeading || block.searchText.slice(0, 80),
-        title: lastHeading || 'Chapter text',
-        searchText: block.searchText,
-        description: block.searchText,
-        usage: '',
-        code: '',
-      })
-    }
-  }
-  return records
 }
 
 function outlineFrom(
@@ -190,28 +134,7 @@ export default function App() {
   }, [data])
 
   const searchRecords = useMemo(() => (data ? toSearchRecords(data) : []), [data])
-
-  const searchEngine = useMemo(() => {
-    if (!searchRecords.length) return null
-    const ms = new MiniSearch<SearchRecord>({
-      fields: ['name', 'title', 'searchText', 'description', 'usage', 'code', 'id'],
-      storeFields: ['id', 'kind', 'chapter', 'title', 'name'],
-      tokenize: tokenizeIndexedText,
-      processTerm: (term) => term.toLowerCase(),
-      searchOptions: {
-        // Keep query tokenization as MiniSearch default (space/punctuation only).
-        // CamelCase splitting is index-side so "segmenttree" still matches
-        // LazySegmentTree via the indexed compound, without OR-ing "tree".
-        tokenize: MiniSearch.getDefault('tokenize'),
-        boost: { name: 4, title: 4, description: 2, searchText: 2 },
-        prefix: true,
-        fuzzy: 0.15,
-        processTerm: (term) => term.toLowerCase(),
-      },
-    })
-    ms.addAll(searchRecords)
-    return ms
-  }, [searchRecords])
+  const { hitIds, pending: searchPending } = useDocumentSearch(searchRecords, query)
 
   const visibleDocument = useMemo(() => {
     if (!data) return []
@@ -229,15 +152,9 @@ export default function App() {
   }, [searchRecords])
 
   const hits = useMemo(() => {
-    const q = query.trim()
-    if (!q || !searchEngine) return []
-    let list = searchEngine
-      .search(q, {
-        prefix: true,
-        fuzzy: 0.15,
-        boost: { name: 4, title: 4, description: 2, searchText: 2 },
-      })
-      .map((h) => recordById.get(h.id as string))
+    if (!query.trim()) return []
+    let list = hitIds
+      .map((id) => recordById.get(id))
       .filter((r): r is SearchRecord => !!r)
     if (!showExcluded) {
       list = list.filter((r) => {
@@ -246,7 +163,7 @@ export default function App() {
       })
     }
     return list
-  }, [query, searchEngine, recordById, showExcluded, byId])
+  }, [query, hitIds, recordById, showExcluded, byId])
 
   const outline = useMemo(() => outlineFrom(visibleDocument), [visibleDocument])
 
@@ -328,7 +245,9 @@ export default function App() {
   const searching = query.trim().length > 0
   const visibleSnippets = visibleDocument.filter((b) => b.type === 'snippet').length
   const countLabel = searching
-    ? `${hits.length} hits`
+    ? searchPending && hits.length === 0
+      ? 'Searching…'
+      : `${hits.length} hits`
     : visibleSnippets
       ? `${visibleSnippets} snippet${visibleSnippets === 1 ? '' : 's'}`
       : ''
@@ -387,14 +306,22 @@ export default function App() {
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Search document"
           />
-          <span className="result-count">
+          <span className="result-count" data-pending={searchPending ? 'true' : undefined}>
             {countLabel}
           </span>
         </div>
 
         <div className="content-split">
-          <div className="list-pane" role="listbox" aria-label={searching ? 'Search results' : 'Outline'}>
-            {searching && hits.length === 0 && <p className="empty">No matches.</p>}
+          <div
+            className="list-pane"
+            role="listbox"
+            aria-busy={searchPending}
+            aria-label={searching ? 'Search results' : 'Outline'}
+          >
+            {searching && searchPending && hits.length === 0 && (
+              <p className="empty">Searching…</p>
+            )}
+            {searching && !searchPending && hits.length === 0 && <p className="empty">No matches.</p>}
             {searching &&
               hits.map((hit) => (
                 <button
