@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { DocumentBlock, Snippet } from '../lib/types'
 import { LatexText } from '../lib/latex'
 import { SnippetDetail } from './SnippetViews'
@@ -9,7 +10,8 @@ const HEADING_TAG = {
   4: 'h4',
 } as const
 
-export function DocumentView({
+/** Memoized so search-box keystrokes in App do not re-typeset the document. */
+export const DocumentView = memo(function DocumentView({
   blocks,
   byId,
   selectedId,
@@ -59,4 +61,4 @@ export function DocumentView({
       })}
     </div>
   )
-}
+})

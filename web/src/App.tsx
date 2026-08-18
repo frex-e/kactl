@@ -363,7 +363,7 @@ export default function App() {
                 blocks={visibleDocument}
                 byId={byId}
                 selectedId={selectedId}
-                onSelectDep={(id) => jumpTo(id)}
+                onSelectDep={jumpTo}
                 scrollRoot={scrollRoot}
               />
             ) : (
