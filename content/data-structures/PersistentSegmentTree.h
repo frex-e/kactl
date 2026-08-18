@@ -3,11 +3,11 @@
  * Date: 2026-08-17
  * License: CC0
  * Source: folklore
- * Description: Persistent implicit segment tree. Same
- *  inclusive bounds and \texttt{binop} as
- *  SparseSegmentTree. Point set, range query. Update
- *  returns a new root; old roots stay valid. No destructor
- *  (nodes are shared).
+ * Description: Persistent implicit segment tree. Creates
+ *  children on demand. Bounds inclusive. Point set, range
+ *  query. Update returns a new root; old roots stay valid.
+ *  No destructor (nodes are shared). Change \texttt{V},
+ *  \texttt{id}, \texttt{binop}.
  * Time: $O(\log R)$
  * Status: stress-tested
  */

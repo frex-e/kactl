@@ -11,8 +11,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/contest/Random.h` | RNG + how to draw random ints / odd hash bases |
 | `content/contest/Output.h` | `std::format` binary printing + fixed precision |
 | `content/data-structures/BinaryTrie.h` | insert, XOR-max, mex |
-| `content/data-structures/SparseSegmentTree.h` | implicit point-update tree |
-| `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree |
+| `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
 | `content/data-structures/LiChao.h` | min Li Chao (kept alongside `LineContainer.h`) |
 | `content/number-theory/LinearSieve.h` | linear sieve + least prime factor (kept alongside Eratosthenes) |
 | `content/number-theory/Mobius.h` | Möbius sieve (formulas stay in `chapter.tex`) |
@@ -22,7 +21,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
 | `content/graph/Centroid.h` | centroid decomposition |
-| `content/data-structures/PersistentSegmentTree.h` | persistent twin of `SparseSegmentTree.h` |
+| `content/data-structures/PersistentSegmentTree.h` | persistent implicit point-update tree |
 | `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU |
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
 
@@ -61,5 +60,5 @@ Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
-- New stress tests: SparseLazySegmentTree, SparseSegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity
+- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`
