@@ -53,7 +53,7 @@ void testLazy(int n, int iters) {
 		Node *a, *b, *c;
 		tie(a, b) = split(t, l);
 		tie(b, c) = split(b, r - l);
-		ll res = b ? b->sum : 0;
+		ll res = lsum(b);
 		t = merge(merge(a, b), c);
 		return res;
 	};

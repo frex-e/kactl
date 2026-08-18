@@ -31,9 +31,10 @@ struct Node {
 };
 
 int cnt(Node* n) { return n ? n->c : 0; }
+ll lsum(Node* n) { return n ? n->sum : 0; }
 void Node::recalc() {
 	c = cnt(l) + cnt(r) + 1;
-	sum = val + (l ? l->sum : 0) + (r ? r->sum : 0);
+	sum = val + lsum(l) + lsum(r);
 }
 
 template<class F> void each(Node* n, F f) {
