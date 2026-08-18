@@ -33,7 +33,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 |---|---|
 | `content/contest/template.cpp` | `pb` / `fr` / `sc`; dropped `cin.exceptions` |
 | `content/contest/.vimrc` | personal settings; kept KACTL `:Hash` |
-| `content/data-structures/LazySegmentTree.h` | KACTL pointer `Node` (range set+add) → `LazyUpdateTree` (inclusive, generic `binop` / lazy) |
+| `content/data-structures/LazySegmentTree.h` | KACTL pointer `Node` (range set+add) → `LazyUpdateTree` (inclusive, generic `binop` / lazy, point set) |
 | `content/strings/SuffixArray.h` | same SA/LCP, plus rank, RMQ, `getLCP`, `cmpSubstr` |
 
 **Deleted behaviour:** KACTL’s lazy tree (`Node` with `set`/`add`, half-open, bump allocator). HLD now uses `LazyUpdateTree`.

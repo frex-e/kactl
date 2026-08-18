@@ -1,14 +1,14 @@
 /**
  * Author: me
- * Date: 2026-08-16
+ * Date: 2026-08-18
  * License: CC0
  * Source: mine.typ
- * Description: Recursive segment tree with range updates and
- *  range queries. Bounds are inclusive on both sides.
- *  Change \texttt{V}, \texttt{U}, \texttt{id}, \texttt{def},
- *  \texttt{idU}, \texttt{binop}, \texttt{applyUpdate},
- *  \texttt{mergeUpdate}. Default is range add and range max.
- *  Used by HLD.
+ * Description: Recursive segment tree with range updates,
+ *  point set, and range queries. Bounds inclusive on both
+ *  sides. Change \texttt{V}, \texttt{U}, \texttt{id},
+ *  \texttt{def}, \texttt{idU}, \texttt{binop},
+ *  \texttt{applyUpdate}, \texttt{mergeUpdate}. Default is
+ *  range add and range max. Used by HLD.
  * Time: $O(\log N)$
  * Status: stress-tested
  */
@@ -53,6 +53,16 @@ struct LazyUpdateTree {
 		if (ql > qr) return;
 		update(1, 0, size - 1, ql, qr, u);
 	}
+	void set(int cur, int l, int r, int i, V v) {
+		if (i < l || r < i) return;
+		if (l == r) { arr[cur] = v; lazy[cur] = idU; return; }
+		push(cur, l, r);
+		int mid = l + (r - l) / 2;
+		if (i <= mid) set(2 * cur, l, mid, i, v);
+		else set(2 * cur + 1, mid + 1, r, i, v);
+		arr[cur] = binop(arr[2 * cur], arr[2 * cur + 1]);
+	}
+	void set(int i, V v) { set(1, 0, size - 1, i, v); }
 	V query(int cur, int l, int r, int ql, int qr) {
 		if (qr < l || r < ql) return id;
 		if (ql <= l && r <= qr) return arr[cur];

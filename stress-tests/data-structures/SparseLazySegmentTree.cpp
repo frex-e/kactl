@@ -8,14 +8,23 @@ void testVsDense(int n, int iters) {
 	LazyUpdateTree tr(n);
 	vi v(n);
 	rep(it,0,iters) {
-		int l = rand() % n, r = rand() % n;
-		if (l > r) swap(l, r);
-		int x = rand() % 11 - 5;
-		if (rand() % 2) {
+		int op = rand() % 3;
+		if (op == 0) {
+			int l = rand() % n, r = rand() % n;
+			if (l > r) swap(l, r);
+			int x = rand() % 11 - 5;
 			sp.update(0, n - 1, l, r, x);
 			tr.update(l, r, x);
 			rep(i,l,r+1) v[i] += x;
+		} else if (op == 1) {
+			int i = rand() % n;
+			int x = rand() % 21 - 10;
+			sp.set(0, n - 1, i, x);
+			tr.set(i, x);
+			v[i] = x;
 		} else {
+			int l = rand() % n, r = rand() % n;
+			if (l > r) swap(l, r);
 			int gotSp = sp.query(0, n - 1, l, r);
 			int gotTr = tr.query(l, r);
 			int exp = INT_MIN;
