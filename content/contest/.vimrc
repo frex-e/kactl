@@ -1,4 +1,5 @@
 set smartindent
+set splitright
 syntax on
 set tabstop=2
 set shiftwidth=2
@@ -6,8 +7,6 @@ set number
 set smartcase
 set incsearch
 set hlsearch
-
-" optional
 set mouse=a
 set clipboard=unnamed #plus
 
