@@ -94,6 +94,8 @@ export default function App() {
   const [scrollRoot, setScrollRoot] = useState<Element | null>(null)
   const docPaneRef = useRef<HTMLDivElement>(null)
   const pendingScroll = useRef<{ id: string; smooth: boolean } | null>(null)
+  const queryRef = useRef(query)
+  queryRef.current = query
 
   useEffect(() => {
     const url = `${import.meta.env.BASE_URL}snippets.json`
@@ -120,6 +122,19 @@ export default function App() {
   useEffect(() => {
     setScrollRoot(docPaneRef.current)
   }, [data])
+
+  // Escape always clears search, even when the box is not focused.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.isComposing) return
+      if (e.altKey || e.ctrlKey || e.metaKey) return
+      if (!queryRef.current) return
+      e.preventDefault()
+      setQuery('')
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   const byId = useMemo(() => {
     const m = new Map<string, Snippet>()
