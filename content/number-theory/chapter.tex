@@ -50,13 +50,9 @@
 
 \section{Estimates}
 	$\sum_{d|n} d = O(n \log \log n)$.
-
-	The number of divisors of $n$ is at most around 100 for $n < \texttt{5e4}$, 500 for $n < \texttt{1e7}$, 2000 for $n < \texttt{1e10}$, 200\,000 for $n < \texttt{1e19}$.
-
-	Highly composite (max $d(n)$ at $10^5,10^9,10^{18}$):
-	$83160=2^3\cdot 3^3\cdot 5\cdot 7\cdot 11$ ($d=128$);
-	$735134400=2^6\cdot 3^3\cdot 5^2\cdot 7\cdot 11\cdot 13\cdot 17$ ($d=1344$);
-	$897612484786617600=2^8\cdot 3^4\cdot 5^2\cdot 7^2\cdot 11\cdot 13\cdot 17\cdot 19\cdot 23\cdot 29\cdot 31\cdot 37$ ($d=103680$).
+	Max $d(n)$ (highly composite): $128$ at $83160=2^3\cdot 3^3\cdot 5\cdot 7\cdot 11$ ($n\le 10^5$);
+	$1344$ at $735134400=2^6\cdot 3^3\cdot 5^2\cdot 7\cdot 11\cdot 13\cdot 17$ ($n\le 10^9$);
+	$103680$ at $897612484786617600=2^8\cdot 3^4\cdot 5^2\cdot 7^2\cdot 11\cdot 13\cdot 17\cdot 19\cdot 23\cdot 29\cdot 31\cdot 37$ ($n\le 10^{18}$).
 
 \section{Mobius Function}
 \[
