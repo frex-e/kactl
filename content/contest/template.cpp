@@ -4,6 +4,7 @@ using namespace std;
 #define all(x) begin(x), end(x)
 #define sz(x) (int)(x).size()
 #define pb push_back
+#define nl '\n'
 #define fr first
 #define sc second
 typedef long long ll;
