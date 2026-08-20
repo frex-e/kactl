@@ -17,6 +17,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/number-theory/Mobius.h` | Möbius sieve (formulas stay in `chapter.tex`) |
 | `content/numerical/RREF.h` | rectangular reduced row echelon form |
 | `content/numerical/XORBasis.h` | incremental XOR basis (kept alongside `SolveLinearBinary.h`) |
+| `content/numerical/QuadRoots.h` | stable real quadratic roots (from cactl / cp-geo) |
 | `content/numerical/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested; PDF import commented out) |
 | `content/various/MemoryUsage.h` | `getrusage` RSS |
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
@@ -64,5 +65,5 @@ Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
-- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, Blossom
+- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, Blossom
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`
