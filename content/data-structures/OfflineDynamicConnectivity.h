@@ -1,14 +1,15 @@
 /**
- * Author: me
- * Date: 2026-08-17
+ * Author: caterpillow, me
+ * Date: 2026-08-20
  * License: CC0
- * Source: folklore (D\&C on time + rollback DSU)
+ * Source: https://github.com/caterpillow/cactl Dynacon.h
  * Description: Offline dynamic connectivity. Times are
- *  $[0, T)$. \texttt{add(l, r, a, b)} inserts undirected
- *  edge $a$--$b$ on time interval $[l, r)$.
- *  \texttt{run(f)} calls \texttt{f(t, uf)} at each time
- *  $t$ with the DSU of edges alive at $t$. Requires $T>0$.
- * Time: $O(K\log K\log N)$ for $K$ interval-edges
+ *  operation indices. \texttt{toggle} adds or deletes an
+ *  undirected edge. \texttt{query} records a component-count
+ *  query. \texttt{ans} returns answers in order.
+ *  $q$ must be at least the number of \texttt{toggle}/
+ *  \texttt{query} calls.
+ * Time: $O(Q\log Q\log N)$
  * Status: stress-tested
  */
 #pragma once
@@ -18,34 +19,44 @@
 struct DynCon {
 	RollbackUF uf;
 	vector<vector<pii>> st;
-	int T;
-	DynCon(int n, int t) : uf(n), st(4 * t), T(t) {
-		assert(t > 0);
+	map<pii, int> eds;
+	int n, q, t = 0;
+	DynCon(int n, int q) : uf(n), n(n), q(1) {
+		while (this->q < max(q, 1)) this->q *= 2;
+		st.resize(2 * this->q);
 	}
-	void add(int l, int r, int a, int b,
-			int i = 1, int L = 0, int R = -1) {
-		if (R < 0) R = T;
-		if (l >= R || r <= L) return;
-		if (l <= L && R <= r) {
-			st[i].push_back({a, b});
-			return;
+	void add(int l, int r, pii e) {
+		for (l += q, r += q; l < r; l /= 2, r /= 2) {
+			if (l & 1) st[l++].push_back(e);
+			if (r & 1) st[--r].push_back(e);
 		}
-		int m = (L + R) / 2;
-		add(l, r, a, b, 2 * i, L, m);
-		add(l, r, a, b, 2 * i + 1, m, R);
 	}
-	template<class F>
-	void rec(int i, int L, int R, F& f) {
+	void toggle(int u, int v) {
+		assert(t < q);
+		if (u > v) swap(u, v);
+		pii e{u, v};
+		if (eds.count(e)) {
+			add(eds[e], t, e);
+			eds.erase(e);
+		} else eds[e] = t;
+		++t;
+	}
+	void query() {
+		assert(t < q);
+		st[q + t++].push_back({-1, -1});
+	}
+	void rec(int i, vi& res) {
 		int t0 = uf.time();
-		for (auto [a, b] : st[i]) uf.join(a, b);
-		if (L + 1 == R) f(L, uf);
-		else {
-			int m = (L + R) / 2;
-			rec(2 * i, L, m, f);
-			rec(2 * i + 1, m, R, f);
-		}
+		for (auto [a, b] : st[i]) if (a >= 0) uf.join(a, b);
+		for (auto [a, b] : st[i])
+			if (a < 0) res.push_back(n - uf.time() / 2);
+		if (i < q) rec(2 * i, res), rec(2 * i + 1, res);
 		uf.rollback(t0);
 	}
-	template<class F>
-	void run(F f) { rec(1, 0, T, f); }
+	vi ans() {
+		for (auto [e, s] : eds) add(s, t, e);
+		vi res;
+		rec(1, res);
+		return res;
+	}
 };

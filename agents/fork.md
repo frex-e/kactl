@@ -25,11 +25,15 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 **Suffix array.** Same SA/LCP as upstream, plus rank, RMQ, `getLCP`, `cmpSubstr`. Stress test covers the extras.
 
+**Offline dynamic connectivity.** [content/data-structures/OfflineDynamicConnectivity.h](../content/data-structures/OfflineDynamicConnectivity.h) is sequential: `toggle(u, v)` adds or deletes an undirected edge, `query()` records a component-count snapshot, `ans()` returns answers. $q$ is an upper bound on the number of `toggle`/`query` calls.
+
+**Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset insert, XOR-min/max, XOR-count, lazy XOR-all, mex, and merge. Values are in $[0,2^{30})$.
+
 **Unchanged on purpose.** Iterative [content/data-structures/SegmentTree.h](../content/data-structures/SegmentTree.h) (point updates) and geometry [content/geometry/Point.h](../content/geometry/Point.h) are still KACTL-style. Do not replace `Point` with a `complex` preamble unless asked.
 
 ## Local additions (summary)
 
-Added (kept alongside related upstream files where noted): `Random.h`, `Output.h`, `BinaryTrie.h`, implicit `SparseLazySegmentTree.h`, `LiChao.h` (alongside `LineContainer.h`), `LinearSieve.h` (alongside Eratosthenes), `Mobius.h`, `RREF.h`, `XORBasis.h` (alongside `SolveLinearBinary.h`), `MemoryUsage.h`, `Pragmas.h`. Johnson’s algorithm notes, bit builtins; Dinic is included in the PDF.
+Added (kept alongside related upstream files where noted): `Random.h`, `Output.h`, `BinaryTrie.h`, implicit `SparseLazySegmentTree.h`, `LiChao.h` (alongside `LineContainer.h`), `LinearSieve.h` (alongside Eratosthenes), `Mobius.h`, `RREF.h`, `XORBasis.h` (alongside `SolveLinearBinary.h`), `MemoryUsage.h`, `Pragmas.h`, `StaticRangeQuery.h`, `Blossom.h` (alongside `GeneralMatching.h`). Johnson’s algorithm notes, bit builtins; Dinic is included in the PDF.
 
 Replaced/modified: contest template and vimrc; lazy tree as above; SuffixArray extras; HLD; Knuth DP and Divide-and-Conquer DP notes/code.
 
