@@ -41,7 +41,7 @@ void test(int n, int ops) {
 			live.erase(it);
 		} else {
 			dc.query();
-			expect.pb(comps(n, live));
+			expect.push_back(comps(n, live));
 		}
 	}
 	vi got = dc.ans();

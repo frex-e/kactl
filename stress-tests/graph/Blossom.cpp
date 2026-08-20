@@ -24,7 +24,7 @@ void checkMatching(int n, const vector<pii>& ed, Blossom& b, int ans) {
 		assert(es.count({i, b.mate[i]}));
 }
 
-int brute(int n, const vector<pii>& ed) {
+int brute(const vector<pii>& ed) {
 	int m = sz(ed), best = 0;
 	rep(mask,0,1 << m) {
 		int used = 0, cnt = 0;
@@ -49,7 +49,7 @@ void testBrute() {
 		Blossom b(n);
 		for (auto [u, v] : ed) b.ae(u, v);
 		int ans = b.solve();
-		assert(ans == brute(n, ed));
+		assert(ans == brute(ed));
 		checkMatching(n, ed, b, ans);
 	}
 	rep(it,0,150) {
@@ -65,7 +65,7 @@ void testBrute() {
 		Blossom b(n);
 		for (auto [u, v] : ed) b.ae(u, v);
 		int ans = b.solve();
-		assert(ans == brute(n, ed));
+		assert(ans == brute(ed));
 		checkMatching(n, ed, b, ans);
 	}
 }

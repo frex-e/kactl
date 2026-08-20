@@ -115,12 +115,31 @@ void testXorAllAndMex() {
 	assert(t.maxxor(0) == 0);
 	t.insert(1); t.insert(2); t.insert(3);
 	t.xorAll(1);
-	assert(t.mex() == 0);
+	assert(t.mex() == 1);
 	assert(t.minxor(0) == 0);
-	assert(t.maxxor(0) == 2);
+	assert(t.maxxor(0) == 3);
 	t.xorAll(1);
 	assert(t.mex() == 0);
 	assert(t.maxxor(0) == 3);
+}
+
+void testXorAllRandom() {
+	rep(it,0,40) {
+		BinaryTrie t;
+		set<int> vals;
+		rep(i,0,30) {
+			int x = rand() % 64;
+			if (t.insert(x)) vals.insert(x);
+		}
+		int xr = rand() % 64;
+		t.xorAll(xr);
+		set<int> xored;
+		for (int v : vals) xored.insert(v ^ xr);
+		checkSet(t, xored, 0);
+		checkSet(t, xored, rand() % 64);
+		t.xorAll(xr);
+		checkSet(t, vals, 0);
+	}
 }
 
 void testMerge() {
@@ -157,7 +176,7 @@ void testDuplicatesAndEmpty() {
 	assert(t.maxxor(0) == 2);
 	assert(t.maxxor(1) == 3);
 	assert(t.minxor(0) == 0);
-	assert(t.minxor(7) == 4);
+	assert(t.minxor(7) == 5);
 	assert(t.erase(1));
 	assert(!t.erase(1));
 	assert(t.cnt == 2);
@@ -168,6 +187,7 @@ int main() {
 	testSetOps();
 	testMulti();
 	testXorAllAndMex();
+	testXorAllRandom();
 	testMerge();
 	cout << "Tests passed!" << endl;
 }

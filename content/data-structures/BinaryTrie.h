@@ -30,12 +30,16 @@ struct BinaryTrie {
 	void xorAll(int x) { lazy ^= x; }
 	int insert(int x, int i = B) {
 		push(i);
-		int add = i ? ch(x >> --i & 1)->insert(x, i) : !cnt;
+		if (!i) return cnt ? 0 : (cnt = 1);
+		int b = x >> --i & 1;
+		int add = ch(b)->insert(x, i);
 		return cnt += add, add;
 	}
 	void insertMulti(int x, int i = B) {
 		push(i);
-		if (i) ch(x >> --i & 1)->insertMulti(x, i);
+		if (!i) { cnt++; return; }
+		int b = x >> --i & 1;
+		ch(b)->insertMulti(x, i);
 		cnt++;
 	}
 	int erase(int x, int i = B) {
@@ -58,7 +62,7 @@ struct BinaryTrie {
 	int maxxor(int x, int i = B) {
 		if (!i || !cnt) return 0;
 		push(i);
-		int b = x >> --i & 1 ^ 1;
+		int b = (x >> --i & 1) ^ 1;
 		return cc(b) ? c[b]->maxxor(x, i) | 1 << i :
 			c[!b]->maxxor(x, i);
 	}
