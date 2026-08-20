@@ -23,7 +23,7 @@ This is a **build/test project, not a service**. There is no web server, API, da
 - `make kactl` and `make web-pdf` rewrite repo-root `kactl.pdf` and copy it to `web/public/kactl.pdf`. Dirty `kactl.pdf` is expected — **do not commit that churn** unless the task is to ship an updated PDF. `web/public/kactl.pdf` and `web/public/snippets.json` are gitignored.
 - Do not treat `web/` as something that must be “served” for algorithm or PDF work. The snippets site is a static SPA; see [web.md](web.md) only when changing it.
 - Do not blindly copy [upstream KACTL](https://github.com/kth-competitive-programming/kactl). This fork has branding, snippet, and API deltas — [fork.md](fork.md).
-- Keep the printed notebook to 25 pages + cover.
+- This fork does **not** keep the 25-page ICPC notebook cap. Include useful snippets even if the PDF grows.
 
 ## When to read what
 

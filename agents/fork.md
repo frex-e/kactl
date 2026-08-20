@@ -11,6 +11,8 @@ This is not a drop-in of [kth-competitive-programming/kactl](https://github.com/
 
 The snippets site is this fork’s addition (not upstream). See [web.md](web.md).
 
+This fork does **not** keep upstream’s 25-page ICPC notebook cap.
+
 ## Contest template
 
 [content/contest/template.cpp](../content/contest/template.cpp) defines `pb`, `fr`, `sc` and dropped `cin.exceptions`. [content/contest/.vimrc](../content/contest/.vimrc) is personal; `:Hash` is kept.
