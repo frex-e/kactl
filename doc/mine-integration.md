@@ -27,7 +27,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/query/ans) |
 | `content/data-structures/StaticRangeQuery.h` | disjoint sparse table, any associative op |
 | `content/data-structures/MonotonicMap.h` | prefix/suffix min/max with insertions (monotonic map) |
-| `content/graph/Blossom.h` | Edmonds matching, 0-indexed |
+| `content/graph/Blossom.h` | Gabow--Edmonds matching (ei1333 / LC), 0-indexed |
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
 
 Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, flow demands / lower bounds.

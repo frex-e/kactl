@@ -1,9 +1,11 @@
 /**
- * Author: idk, me
- * Date: 2025-09-01
+ * Author: ei1333 (adapted)
+ * Date: 2026-08-20
  * License: CC0
- * Source: https://github.com/caterpillow/cactl Blossom.h
- * Description: Maximum matching in general graphs.
+ * Source: https://github.com/ei1333/library GabowEdmonds
+ *  (Library Checker general\_matching; qiita.com/Kutimoti\_T)
+ * Description: Maximum matching in general graphs
+ *  (Gabow--Edmonds).
  *  0-indexed. \texttt{ae} adds an undirected edge.
  *  After \texttt{solve()}, \texttt{mate[u]} is the partner
  *  of $u$, or $-1$ if unmatched. Returns matching size.
@@ -13,65 +15,88 @@
 #pragma once
 
 struct Blossom {
-	int n, h, t, cnt;
+	struct Edge { int to, idx; };
+	int n;
+	vector<vector<Edge>> g;
 	vector<pii> edges;
-	vi vis, q, mt, col, fa, pre, he, mate;
-	int get(int u) {
-		return fa[u] == u ? u : fa[u] = get(fa[u]);
-	}
-	Blossom(int n) : n(n), cnt(0) {
-		vis = q = mt = col = fa = pre = he = vi(n + 1);
-		edges.push_back({0, 0});
-	}
+	vi mt, label, first, q, mate;
+	Blossom(int n) : n(n), g(n + 1), mt(n + 1),
+		label(n + 1, -1), first(n + 1) {}
 	void ae(int u, int v) {
 		if (u == v) return;
 		++u, ++v;
-		edges.push_back({he[u], v}); he[u] = sz(edges) - 1;
-		edges.push_back({he[v], u}); he[v] = sz(edges) - 1;
+		g[u].push_back({v, sz(edges) + n + 1});
+		g[v].push_back({u, sz(edges) + n + 1});
+		edges.emplace_back(u, v);
 	}
-	void aug(int u, int v) {
-		for (int p; u; u = p, v = pre[p])
-			p = mt[v], mt[mt[u] = v] = u;
+	int find(int x) {
+		return label[first[x]] < 0 ? first[x]
+			: first[x] = find(first[x]);
 	}
-	int lca(int u, int v) {
-		for (cnt++;; u = pre[mt[u]]) {
-			if (v) swap(u, v);
-			if (vis[u = get(u)] == cnt) return u;
-			vis[u] = cnt;
+	void rematch(int v, int w) {
+		int t = mt[v];
+		mt[v] = w;
+		if (mt[t] != v) return;
+		if (label[v] <= n) {
+			mt[t] = label[v];
+			rematch(label[v], t);
+		} else {
+			auto [x, y] = edges[label[v] - n - 1];
+			rematch(x, y);
+			rematch(y, x);
 		}
 	}
-	void blo(int u, int v, int f) {
-		for (int p; get(u) != f; v = p, u = pre[p]) {
-			p = mt[u]; pre[u] = v; fa[u] = fa[p] = f;
-			if (col[p] != 1) col[q[++t] = p] = 1;
+	void assign_label(int x, int y, int num) {
+		int r = find(x), s = find(y), join = 0;
+		if (r == s) return;
+		label[r] = label[s] = -num;
+		while (1) {
+			if (s) swap(r, s);
+			r = find(label[mt[r]]);
+			if (label[r] == -num) { join = r; break; }
+			label[r] = -num;
+		}
+		for (int v : {first[x], first[y]}) {
+			while (v != join) {
+				q.push_back(v);
+				label[v] = num;
+				first[v] = join;
+				v = first[label[mt[v]]];
+			}
 		}
 	}
-	bool bfs(int u) {
-		rep(i,1,n+1) col[i] = 0, fa[i] = i;
-		h = 0; q[t = 1] = u; col[u] = 1;
-		while (h != t) {
-			int x = q[++h];
-			for (int i = he[x]; i; i = edges[i].first) {
-				int y = edges[i].second;
-				if (!col[y]) {
-					if (!mt[y]) { aug(y, x); return 1; }
-					pre[y] = x;
-					col[y] = 2;
-					col[q[++t] = mt[y]] = 1;
-				} else if (col[y] == 1 && get(x) != get(y)) {
-					int p = lca(x, y);
-					blo(x, y, p);
-					blo(y, x, p);
+	bool augment(int u) {
+		q = {u};
+		first[u] = 0;
+		label[u] = 0;
+		for (int qi = 0; qi < sz(q); ++qi) {
+			int x = q[qi];
+			for (auto e : g[x]) {
+				int y = e.to;
+				if (!mt[y] && y != u) {
+					mt[y] = x;
+					rematch(x, y);
+					return 1;
+				} else if (label[y] >= 0)
+					assign_label(x, y, e.idx);
+				else if (label[mt[y]] < 0) {
+					label[mt[y]] = x;
+					first[mt[y]] = y;
+					q.push_back(mt[y]);
 				}
 			}
 		}
 		return 0;
 	}
 	int solve() {
+		rep(i,1,n+1) if (!mt[i] && augment(i))
+			label.assign(n + 1, -1);
 		int ans = 0;
-		rep(i,1,n+1) if (!mt[i]) ans += bfs(i);
 		mate.assign(n, -1);
-		rep(i,1,n+1) if (mt[i]) mate[i - 1] = mt[i] - 1;
+		rep(i,1,n+1) if (mt[i]) {
+			mate[i - 1] = mt[i] - 1;
+			if (i < mt[i]) ++ans;
+		}
 		return ans;
 	}
 };

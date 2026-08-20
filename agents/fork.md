@@ -35,7 +35,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 ## Local additions (summary)
 
-Added (kept alongside related upstream files where noted): `Random.h`, `Output.h`, `BinaryTrie.h`, implicit `SparseLazySegmentTree.h`, `LiChao.h` (alongside `LineContainer.h`), `LinearSieve.h` (alongside Eratosthenes), `Mobius.h`, `RREF.h`, `XORBasis.h` (alongside `SolveLinearBinary.h`), `MemoryUsage.h`, `Pragmas.h`, `StaticRangeQuery.h`, `MonotonicMap.h`, `Blossom.h` (alongside `GeneralMatching.h`). Johnson’s algorithm notes, bit builtins; Dinic is included in the PDF.
+Added (kept alongside related upstream files where noted): `Random.h`, `Output.h`, `BinaryTrie.h`, implicit `SparseLazySegmentTree.h`, `LiChao.h` (alongside `LineContainer.h`), `LinearSieve.h` (alongside Eratosthenes), `Mobius.h`, `RREF.h`, `XORBasis.h` (alongside `SolveLinearBinary.h`), `MemoryUsage.h`, `Pragmas.h`, `StaticRangeQuery.h`, `MonotonicMap.h`, `Blossom.h` (Gabow--Edmonds; `GeneralMatching.h` kept out of PDF). Johnson’s algorithm notes, bit builtins; Dinic is included in the PDF.
 
 Replaced/modified: contest template and vimrc; lazy tree as above; SuffixArray extras; HLD; Knuth DP and Divide-and-Conquer DP notes/code.
 
