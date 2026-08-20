@@ -2,7 +2,7 @@
  * Author: me
  * Date: 2026-08-16
  * License: CC0
- * Source: mine.typ
+ * Source: me
  * Description: Seeded RNG and drawing random integers.
  *  For string hashing, take a random odd 61-bit base.
  * Status: untested

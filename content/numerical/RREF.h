@@ -2,7 +2,7 @@
  * Author: me
  * Date: 2026-08-16
  * License: CC0
- * Source: mine.typ
+ * Source: me
  * Description: Partial-pivot reduced row echelon form of a
  *  (possibly rectangular) matrix. Returns \texttt{(rank, det)}.
  *  \texttt{det} is meaningful for square matrices. Use this when you

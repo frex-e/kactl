@@ -8,7 +8,7 @@ Two artifacts ship from this repo:
 - **Typeset notebook:** [kactl.pdf](https://frex-e.github.io/kactl/kactl.pdf) (rebuilt on every GitHub Pages deploy). A possibly older copy also lives at [kactl.pdf](./kactl.pdf) in this repo.
 - **Snippets site:** [frex-e.github.io/kactl](https://frex-e.github.io/kactl/) — a searchable, PDF-like view of the same `content/` tree (chapter order, prose, copy / copy-with-deps).
 
-Local algorithm changes relative to [upstream](https://github.com/kth-competitive-programming/kactl) are listed in [doc/mine-integration.md](./doc/mine-integration.md).
+Local algorithm changes relative to [upstream](https://github.com/kth-competitive-programming/kactl) are listed in [agents/fork.md](./agents/fork.md).
 
 ## Where to look
 
@@ -18,7 +18,7 @@ Local algorithm changes relative to [upstream](https://github.com/kth-competitiv
 | [web/](./web/) | Snippets site (Vite + React). See [web/README.md](./web/README.md) |
 | [stress-tests/](./stress-tests/) | Stress tests run by `make test` |
 | [agents/](./agents/) | Notes for coding agents working in this repo |
-| [doc/mine-integration.md](./doc/mine-integration.md) | Snippets added, replaced, or merged from `mine.typ` |
+| [agents/fork.md](./agents/fork.md) | Local snippet additions, replacements, and API deltas vs upstream |
 
 `make help` lists build and test targets.
 
@@ -90,4 +90,4 @@ Everything in `stress-tests` is implicitly CC0, except reference implementations
 
 ## Local additions
 
-Snippets taken from `mine.typ` (and which KACTL entries they replaced) are listed in [doc/mine-integration.md](./doc/mine-integration.md).
+Local snippet additions and replacements vs upstream are listed in [agents/fork.md](./agents/fork.md).

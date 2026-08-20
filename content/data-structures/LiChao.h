@@ -2,7 +2,7 @@
  * Author: me
  * Date: 2026-08-16
  * License: CC0
- * Source: mine.typ
+ * Source: me
  * Description: Li Chao tree for lines $ax+b$ on an integer
  *  domain $[L,R)$. Queries minimum. Negate \texttt{a}, \texttt{b}
  *  and the result for maximum. Unlike LineContainer, lines can

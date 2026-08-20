@@ -2,7 +2,7 @@
  * Author: me
  * Date: 2026-08-16
  * License: CC0
- * Source: mine.typ
+ * Source: me
  * Description: GCC pragmas. \texttt{Ofast} implies
  *  \texttt{-ffast-math} (can change floats).
  *  \texttt{avx2} can crash on old machines.

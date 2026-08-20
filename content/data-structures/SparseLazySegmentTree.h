@@ -2,7 +2,7 @@
  * Author: me
  * Date: 2026-08-18
  * License: CC0
- * Source: mine.typ
+ * Source: me
  * Description: Implicit segment tree with lazy range updates
  *  and point set. Creates children on demand. Bounds inclusive.
  *  Change \texttt{V}, \texttt{U}, \texttt{id}, \texttt{def},

@@ -2,7 +2,7 @@
  * Author: me
  * Date: 2026-08-16
  * License: CC0
- * Source: mine.typ
+ * Source: me
  * Description: Incremental XOR basis (span of vectors over
  *  $\mathbb F_2$). Insert online; \texttt{x} is in the span iff it
  *  reduces to 0. Span size is $2^{|\texttt{basis}|}$.
