@@ -26,6 +26,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/data-structures/PersistentSegmentTree.h` | persistent implicit lazy tree with point set |
 | `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/query/ans) |
 | `content/data-structures/StaticRangeQuery.h` | disjoint sparse table, any associative op |
+| `content/data-structures/SegmentTreeBeats.h` | range chmin/chmax/add + sum/min/max (12tqian) |
 | `content/graph/Blossom.h` | Edmonds matching, 0-indexed |
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
 
@@ -54,7 +55,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks |
 | `content/contest/chapter.tex` | Random + Output.h |
 | `content/various/chapter.tex` | builtins, pragmas, memory |
-| `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ |
+| `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ / beats |
 | `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, min-plus convolution; Fourier → Convolutions |
 | `content/geometry/chapter.tex` | half-plane intersection |
 
@@ -65,5 +66,5 @@ Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
-- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, Blossom
+- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, Blossom, SegmentTreeBeats
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`
