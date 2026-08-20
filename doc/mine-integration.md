@@ -55,7 +55,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/contest/chapter.tex` | Random + Output.h |
 | `content/various/chapter.tex` | builtins, pragmas, memory |
 | `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ |
-| `content/numerical/chapter.tex` | RREF, XOR basis, min-plus convolution; Fourier → Convolutions |
+| `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, min-plus convolution; Fourier → Convolutions |
 | `content/geometry/chapter.tex` | half-plane intersection |
 
 Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (override with `CXX=...`), and use `-std=c++20`. The contest `.bashrc` `c` alias stays as `g++` for Linux contest VMs.
