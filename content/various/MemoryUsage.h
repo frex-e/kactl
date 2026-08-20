@@ -2,7 +2,7 @@
  * Author: me
  * Date: 2026-08-16
  * License: CC0
- * Source: mine.typ
+ * Source: me
  * Description: Max RSS. Kilobytes on Linux, bytes on macOS.
  * Status: untested
  */

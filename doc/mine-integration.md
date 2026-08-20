@@ -1,6 +1,6 @@
 # Local snippet changes
 
-Notes which binder snippets were added, replaced, or merged from `mine.typ`.
+Notes which snippets were added, replaced, or merged relative to upstream KACTL.
 KACTL’s iterative `SegmentTree.h` is unchanged (simple point-update ops).
 Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 
@@ -59,9 +59,6 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ / beats / monotonic map |
 | `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, min-plus convolution; Fourier → Convolutions |
 | `content/geometry/chapter.tex` | half-plane intersection |
-
-Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (override with `CXX=...`), and use `-std=c++20`. The contest `.bashrc` `c` alias stays as `g++` for Linux contest VMs.
-`Pragmas.h` and `SIMD.h` are skipped in header compile tests on non-x86 (avx2 is invalid on ARM) and compiled on x86 Linux.
 
 ## Tests
 

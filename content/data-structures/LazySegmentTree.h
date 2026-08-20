@@ -2,7 +2,7 @@
  * Author: me
  * Date: 2026-08-18
  * License: CC0
- * Source: mine.typ
+ * Source: me
  * Description: Recursive segment tree with range updates,
  *  point set, and range queries. Bounds inclusive on both
  *  sides. Change \texttt{V}, \texttt{U}, \texttt{id},

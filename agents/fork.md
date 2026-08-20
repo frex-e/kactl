@@ -19,6 +19,8 @@ This fork does **not** keep upstream’s 25-page ICPC notebook cap.
 
 Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx.sh) and use `-std=c++20`. The contest `.bashrc` `c` alias stays `g++` for Linux contest VMs — do not “fix” that to `g++-15`.
 
+`Pragmas.h` and `SIMD.h` are skipped in header compile tests on non-x86 (avx2 is invalid on ARM).
+
 ## Snippet API that diverges
 
 **Lazy segment tree.** [content/data-structures/LazySegmentTree.h](../content/data-structures/LazySegmentTree.h) is `LazyUpdateTree`, not upstream’s pointer `Node` with range `set`/`add`. Bounds are **inclusive on both sides**. Range `update`, point `set`, range `query`. Default op is range add + range max; customize `V`/`U`/`binop`/`applyUpdate`/`mergeUpdate`.
@@ -32,13 +34,5 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 **Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset insert, XOR-min/max, XOR-count, lazy XOR-all, mex, and merge. Values are in $[0,2^{30})$.
 
 **Unchanged on purpose.** Iterative [content/data-structures/SegmentTree.h](../content/data-structures/SegmentTree.h) (point updates) and geometry [content/geometry/Point.h](../content/geometry/Point.h) are still KACTL-style. Do not replace `Point` with a `complex` preamble unless asked.
-
-## Local additions (summary)
-
-Added (kept alongside related upstream files where noted): `Random.h`, `Output.h`, `BinaryTrie.h`, implicit `SparseLazySegmentTree.h`, `LiChao.h` (alongside `LineContainer.h`), `LinearSieve.h` (alongside Eratosthenes), `Mobius.h`, `RREF.h`, `XORBasis.h` (alongside `SolveLinearBinary.h`), `MemoryUsage.h`, `Pragmas.h`, `StaticRangeQuery.h`, `MonotonicMap.h`, `Blossom.h` (Gabow--Edmonds; `GeneralMatching.h` kept out of PDF). Johnson’s algorithm notes, bit builtins; Dinic is included in the PDF.
-
-Replaced/modified: contest template and vimrc; lazy tree as above; SuffixArray extras; HLD; Knuth DP and Divide-and-Conquer DP notes/code.
-
-`Pragmas.h` and `SIMD.h` are skipped in header compile tests on non-x86.
 
 When porting an upstream patch, rebase it onto these APIs rather than overwriting the local files.

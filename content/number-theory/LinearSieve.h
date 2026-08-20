@@ -2,7 +2,7 @@
  * Author: me
  * Date: 2026-08-16
  * License: CC0
- * Source: mine.typ
+ * Source: me
  * Description: Linear sieve. \texttt{lp[i]} is the least
  *  prime factor of $i$; \texttt{pr} lists primes $\le N$.
  *  Factor $i$ by repeatedly dividing out \texttt{lp[i]}.
