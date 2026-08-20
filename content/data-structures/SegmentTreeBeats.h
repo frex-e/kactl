@@ -1,5 +1,5 @@
 /**
- * Author: me
+ * Author: Benjamin Qi, Dustin Miao
  * Date: 2026-08-20
  * License: CC0
  * Source: https://usaco.guide/adv/segtree-beats
