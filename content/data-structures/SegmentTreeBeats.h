@@ -2,8 +2,7 @@
  * Author: me
  * Date: 2026-08-20
  * License: CC0
- * Source: https://usaco.guide/adv/segtree-beats ,
- *  https://codeforces.com/blog/entry/57319
+ * Source: https://usaco.guide/adv/segtree-beats
  * Description: Segment tree beats. Range
  *  \texttt{chmin}/\texttt{chmax}/\texttt{add} and range
  *  sum/min/max. Bounds inclusive, 0-indexed.
