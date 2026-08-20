@@ -17,7 +17,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/number-theory/Mobius.h` | Möbius sieve (formulas stay in `chapter.tex`) |
 | `content/numerical/RREF.h` | rectangular reduced row echelon form |
 | `content/numerical/XORBasis.h` | incremental XOR basis (kept alongside `SolveLinearBinary.h`) |
-| `content/numerical/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested) |
+| `content/numerical/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested; PDF import commented out) |
 | `content/various/MemoryUsage.h` | `getrusage` RSS |
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
