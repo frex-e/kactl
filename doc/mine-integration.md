@@ -17,6 +17,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/number-theory/Mobius.h` | Möbius sieve (formulas stay in `chapter.tex`) |
 | `content/numerical/RREF.h` | rectangular reduced row echelon form |
 | `content/numerical/XORBasis.h` | incremental XOR basis (kept alongside `SolveLinearBinary.h`) |
+| `content/numerical/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested) |
 | `content/various/MemoryUsage.h` | `getrusage` RSS |
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
@@ -53,7 +54,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/contest/chapter.tex` | Random + Output.h |
 | `content/various/chapter.tex` | builtins, pragmas, memory |
 | `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ |
-| `content/numerical/chapter.tex` | RREF, XOR basis |
+| `content/numerical/chapter.tex` | RREF, XOR basis, min-plus convolution; Fourier → Convolutions |
 | `content/geometry/chapter.tex` | half-plane intersection |
 
 Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (override with `CXX=...`), and use `-std=c++20`. The contest `.bashrc` `c` alias stays as `g++` for Linux contest VMs.
