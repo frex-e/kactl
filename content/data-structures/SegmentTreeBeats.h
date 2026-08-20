@@ -1,197 +1,186 @@
 /**
- * Author: 12tqian
- * Date: 2022-07-21
- * Source: https://github.com/12tqian/cp-library
- * Description: Segment tree beats supporting range
+ * Author: me
+ * Date: 2026-08-20
+ * License: CC0
+ * Source: https://usaco.guide/adv/segtree-beats ,
+ *  https://codeforces.com/blog/entry/57319
+ * Description: Segment tree beats. Range
  *  \texttt{chmin}/\texttt{chmax}/\texttt{add} and range
- *  sum/min/max. Bounds inclusive, 0-indexed. Init to 0, or
- *  pass an array. \texttt{upd}: $t{=}0$ chmin, $t{=}1$
- *  chmax, $t{=}2$ add.
+ *  sum/min/max. Bounds inclusive, 0-indexed.
  * Time: $O(\log^2 N)$ amortized
  * Status: stress-tested
  */
 #pragma once
 
 struct SegmentTreeBeats {
-	using T = pair<pair<ll, ll>, int>;
-	const ll INF = numeric_limits<ll>::max();
-	vector<ll> mx_mod, mn_mod, mod, sum;
-	vector<T> mx, mn;
-	int n, sz;
+	static constexpr ll INF = LLONG_MAX / 4;
+	struct Node {
+		ll sum = 0, lazy = 0;
+		ll mx1 = 0, mx2 = -INF, mxc = 0;
+		ll mn1 = 0, mn2 = INF, mnc = 0;
+	};
+	vector<Node> t;
+	int n;
 
-	SegmentTreeBeats(int n) : n(n) {
-		sz = 1;
-		while (sz < n) sz *= 2;
-		mx_mod.assign(2 * sz, 0);
-		mn_mod.assign(2 * sz, 0);
-		mod.assign(2 * sz, 0);
-		sum.assign(2 * sz, 0);
-		mx.assign(2 * sz, {{0, 0}, 0});
-		mn.assign(2 * sz, {{0, 0}, 0});
-		build();
+	SegmentTreeBeats(int n) : t(4 * n + 4), n(n) {
+		build(1, 0, n - 1, nullptr);
 	}
 	SegmentTreeBeats(const vector<ll>& a) :
-		SegmentTreeBeats(sz(a)) {
-		rep(i,0,n) {
-			ll v = a[i];
-			int ind = sz + i;
-			mx[ind] = {{v, -INF}, 1};
-			mn[ind] = {{v, INF}, 1};
-			sum[ind] = v;
-		}
-		for (int i = sz - 1; i >= 1; --i) pull(i);
+		t(4 * sz(a) + 4), n(sz(a)) {
+		build(1, 0, n - 1, &a);
 	}
 
-	void build(int ind = 1, int L = 0, int R = -1) {
-		if (R == -1) R += sz;
-		mx_mod[ind] = INF, mn_mod[ind] = -INF, mod[ind] = 0;
-		if (L == R) {
-			mx[ind] = {{0, -INF}, 1};
-			mn[ind] = {{0, INF}, 1};
-			sum[ind] = 0;
+	void pull(int i) {
+		Node &u = t[i], &l = t[i << 1], &r = t[i << 1 | 1];
+		u.sum = l.sum + r.sum;
+		if (l.mx1 == r.mx1) {
+			u.mx1 = l.mx1;
+			u.mx2 = max(l.mx2, r.mx2);
+			u.mxc = l.mxc + r.mxc;
+		} else if (l.mx1 > r.mx1) {
+			u.mx1 = l.mx1;
+			u.mx2 = max(l.mx2, r.mx1);
+			u.mxc = l.mxc;
+		} else {
+			u.mx1 = r.mx1;
+			u.mx2 = max(l.mx1, r.mx2);
+			u.mxc = r.mxc;
+		}
+		if (l.mn1 == r.mn1) {
+			u.mn1 = l.mn1;
+			u.mn2 = min(l.mn2, r.mn2);
+			u.mnc = l.mnc + r.mnc;
+		} else if (l.mn1 < r.mn1) {
+			u.mn1 = l.mn1;
+			u.mn2 = min(l.mn2, r.mn1);
+			u.mnc = l.mnc;
+		} else {
+			u.mn1 = r.mn1;
+			u.mn2 = min(l.mn1, r.mn2);
+			u.mnc = r.mnc;
+		}
+	}
+	void applyAdd(int i, int l, int r, ll v) {
+		if (!v) return;
+		Node& u = t[i];
+		u.sum += (r - l + 1) * v;
+		u.mx1 += v;
+		if (u.mx2 != -INF) u.mx2 += v;
+		u.mn1 += v;
+		if (u.mn2 != INF) u.mn2 += v;
+		u.lazy += v;
+	}
+	void applyChmin(int i, ll v, bool leaf) {
+		Node& u = t[i];
+		if (v >= u.mx1) return;
+		u.sum -= (u.mx1 - v) * u.mxc;
+		u.mx1 = v;
+		if (leaf) u.mn1 = v;
+		else if (v <= u.mn1) u.mn1 = v;
+		else if (v < u.mn2) u.mn2 = v;
+	}
+	void applyChmax(int i, ll v, bool leaf) {
+		Node& u = t[i];
+		if (v <= u.mn1) return;
+		u.sum += (v - u.mn1) * u.mnc;
+		u.mn1 = v;
+		if (leaf) u.mx1 = v;
+		else if (v >= u.mx1) u.mx1 = v;
+		else if (v > u.mx2) u.mx2 = v;
+	}
+	void push(int i, int l, int r) {
+		if (l == r) return;
+		int m = (l + r) >> 1;
+		applyAdd(i << 1, l, m, t[i].lazy);
+		applyAdd(i << 1 | 1, m + 1, r, t[i].lazy);
+		t[i].lazy = 0;
+		applyChmin(i << 1, t[i].mx1, l == m);
+		applyChmin(i << 1 | 1, t[i].mx1, m + 1 == r);
+		applyChmax(i << 1, t[i].mn1, l == m);
+		applyChmax(i << 1 | 1, t[i].mn1, m + 1 == r);
+	}
+
+	void build(int i, int l, int r, const vector<ll>* a) {
+		t[i].lazy = 0;
+		if (l == r) {
+			ll v = a ? (*a)[l] : 0;
+			t[i].sum = t[i].mx1 = t[i].mn1 = v;
+			t[i].mxc = t[i].mnc = 1;
+			t[i].mx2 = -INF;
+			t[i].mn2 = INF;
 			return;
 		}
-		int M = (L + R) / 2;
-		build(2 * ind, L, M);
-		build(2 * ind + 1, M + 1, R);
-		pull(ind);
+		int m = (l + r) >> 1;
+		build(i << 1, l, m, a);
+		build(i << 1 | 1, m + 1, r, a);
+		pull(i);
 	}
 
-	T comb_mn(T a, T b) {
-		if (a > b) swap(a, b);
-		if (a.fr.fr == b.fr.fr)
-			return {{a.fr.fr, min(a.fr.sc, b.fr.sc)},
-				a.sc + b.sc};
-		return {{a.fr.fr, min(a.fr.sc, b.fr.fr)}, a.sc};
+	void add(int ql, int qr, ll v,
+		int i = 1, int l = 0, int r = -1) {
+		if (r == -1) r = n - 1;
+		if (qr < l || r < ql) return;
+		if (ql <= l && r <= qr) {
+			applyAdd(i, l, r, v); return;
+		}
+		push(i, l, r);
+		int m = (l + r) >> 1;
+		add(ql, qr, v, i << 1, l, m);
+		add(ql, qr, v, i << 1 | 1, m + 1, r);
+		pull(i);
 	}
-	T comb_mx(T a, T b) {
-		if (a < b) swap(a, b);
-		if (a.fr.fr == b.fr.fr)
-			return {{a.fr.fr, max(a.fr.sc, b.fr.sc)},
-				a.sc + b.sc};
-		return {{a.fr.fr, max(a.fr.sc, b.fr.fr)}, a.sc};
+	void chmin(int ql, int qr, ll v,
+		int i = 1, int l = 0, int r = -1) {
+		if (r == -1) r = n - 1;
+		if (qr < l || r < ql || v >= t[i].mx1) return;
+		if (ql <= l && r <= qr && v > t[i].mx2) {
+			applyChmin(i, v, l == r); return;
+		}
+		push(i, l, r);
+		int m = (l + r) >> 1;
+		chmin(ql, qr, v, i << 1, l, m);
+		chmin(ql, qr, v, i << 1 | 1, m + 1, r);
+		pull(i);
 	}
-	void pull(int ind) {
-		sum[ind] = sum[2 * ind] + sum[2 * ind + 1];
-		mn[ind] = comb_mn(mn[2 * ind], mn[2 * ind + 1]);
-		mx[ind] = comb_mx(mx[2 * ind], mx[2 * ind + 1]);
+	void chmax(int ql, int qr, ll v,
+		int i = 1, int l = 0, int r = -1) {
+		if (r == -1) r = n - 1;
+		if (qr < l || r < ql || v <= t[i].mn1) return;
+		if (ql <= l && r <= qr && v < t[i].mn2) {
+			applyChmax(i, v, l == r); return;
+		}
+		push(i, l, r);
+		int m = (l + r) >> 1;
+		chmax(ql, qr, v, i << 1, l, m);
+		chmax(ql, qr, v, i << 1 | 1, m + 1, r);
+		pull(i);
 	}
 
-	void push(int ind, int L, int R) {
-		auto chk = [](ll& a, ll b, ll c) {
-			if (a == b) a = c;
-		};
-		if (mn_mod[ind] != -INF) {
-			if (mn_mod[ind] > mn[ind].fr.fr) {
-				sum[ind] += (mn_mod[ind] - mn[ind].fr.fr)
-					* mn[ind].sc;
-				chk(mx[ind].fr.fr, mn[ind].fr.fr, mn_mod[ind]);
-				chk(mx[ind].fr.sc, mn[ind].fr.fr, mn_mod[ind]);
-				mn[ind].fr.fr = mn_mod[ind];
-				if (L != R) rep(i,0,2) {
-					int pos = 2 * ind + i;
-					mn_mod[pos] = max(mn_mod[pos],
-						mn_mod[ind] - mod[pos]);
-					mx_mod[pos] = max(mx_mod[pos], mn_mod[pos]);
-				}
-			}
-			mn_mod[ind] = -INF;
-		}
-		if (mx_mod[ind] != INF) {
-			if (mx_mod[ind] < mx[ind].fr.fr) {
-				sum[ind] += (mx_mod[ind] - mx[ind].fr.fr)
-					* mx[ind].sc;
-				chk(mn[ind].fr.fr, mx[ind].fr.fr, mx_mod[ind]);
-				chk(mn[ind].fr.sc, mx[ind].fr.fr, mx_mod[ind]);
-				mx[ind].fr.fr = mx_mod[ind];
-				if (L != R) rep(i,0,2) {
-					int pos = 2 * ind + i;
-					mx_mod[pos] = min(mx_mod[pos],
-						mx_mod[ind] - mod[pos]);
-					mn_mod[pos] = min(mn_mod[pos], mx_mod[pos]);
-				}
-			}
-			mx_mod[ind] = INF;
-		}
-		if (mod[ind] != 0) {
-			sum[ind] += mod[ind] * (R - L + 1);
-			auto inc = [&](T& a, ll b) {
-				if (abs(a.fr.fr) != INF) a.fr.fr += b;
-				if (abs(a.fr.sc) != INF) a.fr.sc += b;
-			};
-			inc(mx[ind], mod[ind]);
-			inc(mn[ind], mod[ind]);
-			if (L != R) {
-				mod[2 * ind] += mod[ind];
-				mod[2 * ind + 1] += mod[ind];
-			}
-			mod[ind] = 0;
-		}
+	ll qsum(int ql, int qr, int i = 1, int l = 0, int r = -1) {
+		if (r == -1) r = n - 1;
+		if (qr < l || r < ql) return 0;
+		if (ql <= l && r <= qr) return t[i].sum;
+		push(i, l, r);
+		int m = (l + r) >> 1;
+		return qsum(ql, qr, i << 1, l, m)
+			+ qsum(ql, qr, i << 1 | 1, m + 1, r);
 	}
-
-	ll qsum(int lo, int hi, int ind = 1, int L = 0, int R = -1) {
-		if (R == -1) R += sz;
-		push(ind, L, R);
-		if (R < lo || hi < L) return 0;
-		if (lo <= L && R <= hi) return sum[ind];
-		int M = (L + R) / 2;
-		return qsum(lo, hi, 2 * ind, L, M)
-			+ qsum(lo, hi, 2 * ind + 1, M + 1, R);
+	ll qmax(int ql, int qr, int i = 1, int l = 0, int r = -1) {
+		if (r == -1) r = n - 1;
+		if (qr < l || r < ql) return -INF;
+		if (ql <= l && r <= qr) return t[i].mx1;
+		push(i, l, r);
+		int m = (l + r) >> 1;
+		return max(qmax(ql, qr, i << 1, l, m),
+			qmax(ql, qr, i << 1 | 1, m + 1, r));
 	}
-	ll qmax(int lo, int hi, int ind = 1, int L = 0, int R = -1) {
-		if (R == -1) R += sz;
-		push(ind, L, R);
-		if (R < lo || hi < L) return -INF;
-		if (lo <= L && R <= hi) return mx[ind].fr.fr;
-		int M = (L + R) / 2;
-		return max(qmax(lo, hi, 2 * ind, L, M),
-			qmax(lo, hi, 2 * ind + 1, M + 1, R));
+	ll qmin(int ql, int qr, int i = 1, int l = 0, int r = -1) {
+		if (r == -1) r = n - 1;
+		if (qr < l || r < ql) return INF;
+		if (ql <= l && r <= qr) return t[i].mn1;
+		push(i, l, r);
+		int m = (l + r) >> 1;
+		return min(qmin(ql, qr, i << 1, l, m),
+			qmin(ql, qr, i << 1 | 1, m + 1, r));
 	}
-	ll qmin(int lo, int hi, int ind = 1, int L = 0, int R = -1) {
-		if (R == -1) R += sz;
-		push(ind, L, R);
-		if (R < lo || hi < L) return INF;
-		if (lo <= L && R <= hi) return mn[ind].fr.fr;
-		int M = (L + R) / 2;
-		return min(qmin(lo, hi, 2 * ind, L, M),
-			qmin(lo, hi, 2 * ind + 1, M + 1, R));
-	}
-
-	void upd(int t, int lo, int hi, ll b,
-		int ind = 1, int L = 0, int R = -1) {
-		if (R == -1) R += sz;
-		push(ind, L, R);
-		if (R < lo || hi < L) return;
-		if (t == 0) {
-			if (b >= mx[ind].fr.fr) return;
-		} else if (t == 1) {
-			if (b <= mn[ind].fr.fr) return;
-		}
-		if (lo <= L && R <= hi) {
-			if (t == 0) {
-				if (b > mx[ind].fr.sc) {
-					mx_mod[ind] = b;
-					push(ind, L, R);
-					return;
-				}
-			} else if (t == 1) {
-				if (b < mn[ind].fr.sc) {
-					mn_mod[ind] = b;
-					push(ind, L, R);
-					return;
-				}
-			} else {
-				mod[ind] = b;
-				push(ind, L, R);
-				return;
-			}
-		}
-		int M = (L + R) / 2;
-		upd(t, lo, hi, b, 2 * ind, L, M);
-		upd(t, lo, hi, b, 2 * ind + 1, M + 1, R);
-		pull(ind);
-	}
-	void chmin(int l, int r, ll x) { upd(0, l, r, x); }
-	void chmax(int l, int r, ll x) { upd(1, l, r, x); }
-	void add(int l, int r, ll x) { upd(2, l, r, x); }
 };

@@ -1,8 +1,5 @@
 #include "../utilities/template.h"
 
-#define fr first
-#define sc second
-
 #include "../../content/data-structures/SegmentTreeBeats.h"
 
 int main() {

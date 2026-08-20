@@ -26,7 +26,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/data-structures/PersistentSegmentTree.h` | persistent implicit lazy tree with point set |
 | `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/query/ans) |
 | `content/data-structures/StaticRangeQuery.h` | disjoint sparse table, any associative op |
-| `content/data-structures/SegmentTreeBeats.h` | range chmin/chmax/add + sum/min/max (12tqian) |
+| `content/data-structures/SegmentTreeBeats.h` | range chmin/chmax/add + sum/min/max (USACO Guide / CF) |
 | `content/graph/Blossom.h` | Edmonds matching, 0-indexed |
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
 
