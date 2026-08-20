@@ -1,6 +1,5 @@
 #include "../utilities/template.h"
 
-#define pb push_back
 #define fr first
 #define sc second
 

@@ -1,7 +1,6 @@
 /**
  * Author: 12tqian
  * Date: 2022-07-21
- * License: Unknown
  * Source: https://github.com/12tqian/cp-library
  * Description: Segment tree beats supporting range
  *  \texttt{chmin}/\texttt{chmax}/\texttt{add} and range
