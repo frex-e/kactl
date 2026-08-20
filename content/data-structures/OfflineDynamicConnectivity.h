@@ -1,5 +1,5 @@
 /**
- * Author: caterpillow
+ * Author: caterpillow, me
  * Date: 2026-08-20
  * License: CC0
  * Source: https://github.com/caterpillow/cactl Dynacon.h

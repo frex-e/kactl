@@ -1,5 +1,5 @@
 /**
- * Author: idk
+ * Author: idk, me
  * Date: 2025-09-01
  * License: CC0
  * Source: https://github.com/caterpillow/cactl Blossom.h
