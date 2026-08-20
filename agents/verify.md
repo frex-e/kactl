@@ -19,7 +19,7 @@ TeX packages needed: `texlive-latex-base`, `texlive-latex-recommended`, `texlive
 
 Dirty repo-root `kactl.pdf` after a build is expected. **Do not commit it** unless the task is to update the shipped PDF. `web/public/kactl.pdf` and `web/public/snippets.json` are gitignored.
 
-Keep the notebook at **25 pages + cover**. That is an ICPC policy cap, not a CI check.
+This fork does **not** keep the 25-page ICPC notebook cap. Do not drop or comment out snippets just to shrink the PDF.
 
 ## Header compile check
 

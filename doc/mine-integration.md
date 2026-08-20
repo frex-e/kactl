@@ -10,7 +10,7 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 |---|---|
 | `content/contest/Random.h` | RNG + how to draw random ints / odd hash bases |
 | `content/contest/Output.h` | `std::format` binary printing + fixed precision |
-| `content/data-structures/BinaryTrie.h` | insert, XOR-max, mex |
+| `content/data-structures/BinaryTrie.h` | insert/erase, XOR-min/max, count, lazy XOR, mex, merge |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
 | `content/data-structures/LiChao.h` | min Li Chao (kept alongside `LineContainer.h`) |
 | `content/number-theory/LinearSieve.h` | linear sieve + least prime factor (kept alongside Eratosthenes) |
@@ -22,7 +22,9 @@ Geometry still uses KACTL `Point.h` (the `complex` preamble was not added).
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
 | `content/graph/Centroid.h` | centroid decomposition |
 | `content/data-structures/PersistentSegmentTree.h` | persistent implicit lazy tree with point set |
-| `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU |
+| `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/query/ans) |
+| `content/data-structures/StaticRangeQuery.h` | disjoint sparse table, any associative op |
+| `content/graph/Blossom.h` | Edmonds matching, 0-indexed |
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
 
 Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, flow demands / lower bounds.
@@ -46,11 +48,11 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/graph/HLD.h` | uses `LazyUpdateTree`; converts half-open HLD ranges to inclusive `[l, r-1]` |
 | `content/various/KnuthDP.h` | quadrangle notes (verified patterns) + `knuthDP` implementation |
 | `content/various/DivideAndConquerDP.h` | layered recurrence + usage of `lo`/`hi`/`f`/`store` |
-| `content/graph/chapter.tex` | Johnson’s notes; Dinic; centroid; demands / lower bounds |
+| `content/graph/chapter.tex` | Johnson’s notes; Dinic; centroid; demands / lower bounds; blossom |
 | `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks |
 | `content/contest/chapter.tex` | Random + Output.h |
 | `content/various/chapter.tex` | builtins, pragmas, memory |
-| `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon |
+| `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ |
 | `content/numerical/chapter.tex` | RREF, XOR basis |
 | `content/geometry/chapter.tex` | half-plane intersection |
 
@@ -61,5 +63,5 @@ Compile scripts (`doc/scripts/*.sh`) pick `g++-15` if present, otherwise `g++` (
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
-- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity
+- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, Blossom
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`

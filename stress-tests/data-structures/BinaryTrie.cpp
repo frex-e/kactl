@@ -2,56 +2,162 @@
 
 #include "../../content/data-structures/BinaryTrie.h"
 
-unsigned bruteMex(const set<unsigned>& vals, unsigned xr) {
-	set<unsigned> xored;
-	for (unsigned v : vals) xored.insert(v ^ xr);
-	unsigned m = 0;
+int bruteMex(const set<int>& vals, int xr) {
+	set<int> xored;
+	for (int v : vals) xored.insert(v ^ xr);
+	int m = 0;
 	while (xored.count(m)) m++;
 	return m;
 }
 
-unsigned bruteMaxxor(const set<unsigned>& vals, unsigned xr) {
-	unsigned best = 0;
-	for (unsigned v : vals) best = max(best, v ^ xr);
+int bruteMinxor(const multiset<int>& vals, int xr) {
+	if (vals.empty()) return 0;
+	int best = INT_MAX;
+	for (int v : vals) best = min(best, v ^ xr);
 	return best;
 }
 
-unsigned randU() {
-	return (unsigned)rand() ^ ((unsigned)rand() << 15);
+int bruteMaxxor(const multiset<int>& vals, int xr) {
+	if (vals.empty()) return 0;
+	int best = 0;
+	for (int v : vals) best = max(best, v ^ xr);
+	return best;
 }
 
-void testRandom(int n, int queries) {
-	BinaryTrie t;
-	set<unsigned> vals;
-	rep(i,0,n) {
-		unsigned x = randU();
-		bool added = t.insert(x);
-		assert(added == !vals.count(x));
-		vals.insert(x);
-		assert(t.size == (unsigned)sz(vals));
+int bruteCount(const multiset<int>& vals, int xr, int k, int sgn) {
+	int c = 0;
+	for (int v : vals) {
+		int x = v ^ xr;
+		c += sgn ? x > k : x < k;
 	}
-	rep(q,0,queries) {
-		unsigned xr = rand() % 2 ? randU() : (unsigned)(rand() % 32);
-		assert(t.mex(xr) == bruteMex(vals, xr));
-		assert(t.maxxor(xr) == bruteMaxxor(vals, xr));
+	return c;
+}
+
+int randVal() { return rand() & ((1 << 20) - 1); }
+
+void checkSet(BinaryTrie& t, const set<int>& vals, int xr) {
+	assert(t.cnt == sz(vals));
+	assert(t.mex(xr) == bruteMex(vals, xr));
+	multiset<int> ms(all(vals));
+	assert(t.minxor(xr) == bruteMinxor(ms, xr));
+	assert(t.maxxor(xr) == bruteMaxxor(ms, xr));
+	rep(it,0,8) {
+		int k = randVal();
+		assert(t.count<0>(xr, k) == bruteCount(ms, xr, k, 0));
+		assert(t.count<1>(xr, k) == bruteCount(ms, xr, k, 1));
 	}
 }
 
-void testConsecutive() {
-	rep(k,0,200) {
+void testSetOps() {
+	rep(it,0,80) {
 		BinaryTrie t;
-		rep(i,0,k) assert(t.insert((unsigned)i));
-		assert(t.mex(0) == (unsigned)k);
-		if (k)
-			assert(t.maxxor(0) == (unsigned)(k - 1));
-		else
-			assert(t.maxxor(0) == 0);
-		rep(xr,0,min(k + 3, 20)) {
-			set<unsigned> vals;
-			rep(i,0,k) vals.insert((unsigned)i);
-			assert(t.mex((unsigned)xr) == bruteMex(vals, (unsigned)xr));
-			assert(t.maxxor((unsigned)xr) == bruteMaxxor(vals, (unsigned)xr));
+		set<int> vals;
+		rep(q,0,80) {
+			int x = rand() % 64;
+			if (rand() % 3 == 0 && !vals.empty()) {
+				int y = *next(vals.begin(), rand() % sz(vals));
+				int sub = t.erase(y);
+				assert(sub == 1);
+				vals.erase(y);
+			} else {
+				int add = t.insert(x);
+				assert(add == !vals.count(x));
+				vals.insert(x);
+			}
+			int xr = rand() % 2 ? rand() % 32 : 0;
+			checkSet(t, vals, xr);
 		}
+	}
+}
+
+void testMulti() {
+	rep(it,0,40) {
+		BinaryTrie t;
+		multiset<int> vals;
+		rep(q,0,60) {
+			int x = rand() % 32;
+			if (rand() % 3 == 0 && !vals.empty()) {
+				int y = *next(vals.begin(), rand() % sz(vals));
+				assert(t.erase(y) == 1);
+				vals.erase(vals.find(y));
+			} else {
+				t.insertMulti(x);
+				vals.insert(x);
+			}
+			assert(t.cnt == sz(vals));
+			int xr = rand() % 16;
+			assert(t.minxor(xr) == bruteMinxor(vals, xr));
+			assert(t.maxxor(xr) == bruteMaxxor(vals, xr));
+			int k = rand() % 64;
+			assert(t.count<0>(xr, k) == bruteCount(vals, xr, k, 0));
+			assert(t.count<1>(xr, k) == bruteCount(vals, xr, k, 1));
+		}
+	}
+}
+
+void testXorAllAndMex() {
+	rep(k,0,80) {
+		BinaryTrie t;
+		set<int> vals;
+		rep(i,0,k) {
+			assert(t.insert(i));
+			vals.insert(i);
+		}
+		assert(t.mex() == k);
+		rep(xr,0,min(k + 5, 20)) {
+			assert(t.mex(xr) == bruteMex(vals, xr));
+			assert(t.maxxor(xr) == bruteMaxxor(multiset<int>(all(vals)), xr));
+		}
+	}
+	BinaryTrie t;
+	assert(t.mex() == 0);
+	assert(t.minxor(0) == 0);
+	assert(t.maxxor(0) == 0);
+	t.insert(1); t.insert(2); t.insert(3);
+	t.xorAll(1);
+	assert(t.mex() == 1);
+	assert(t.minxor(0) == 0);
+	assert(t.maxxor(0) == 3);
+	t.xorAll(1);
+	assert(t.mex() == 0);
+	assert(t.maxxor(0) == 3);
+}
+
+void testXorAllRandom() {
+	rep(it,0,40) {
+		BinaryTrie t;
+		set<int> vals;
+		rep(i,0,30) {
+			int x = rand() % 64;
+			if (t.insert(x)) vals.insert(x);
+		}
+		int xr = rand() % 64;
+		t.xorAll(xr);
+		set<int> xored;
+		for (int v : vals) xored.insert(v ^ xr);
+		checkSet(t, xored, 0);
+		checkSet(t, xored, rand() % 64);
+		t.xorAll(xr);
+		checkSet(t, vals, 0);
+	}
+}
+
+void testMerge() {
+	rep(it,0,50) {
+		BinaryTrie a, b;
+		set<int> vals;
+		rep(i,0,40) {
+			int x = randVal();
+			if (rand() % 2) {
+				if (a.insert(x)) vals.insert(x);
+			} else {
+				if (b.insert(x)) vals.insert(x);
+			}
+		}
+		a.merge(b);
+		assert(b.cnt == 0);
+		checkSet(a, vals, randVal());
+		checkSet(a, vals, 0);
 	}
 }
 
@@ -61,7 +167,7 @@ void testDuplicatesAndEmpty() {
 	assert(t.maxxor(0) == 0);
 	assert(t.insert(0));
 	assert(!t.insert(0));
-	assert(t.size == 1);
+	assert(t.cnt == 1);
 	assert(t.mex(0) == 1);
 	assert(t.insert(2));
 	assert(t.mex(0) == 1);
@@ -69,12 +175,19 @@ void testDuplicatesAndEmpty() {
 	assert(t.mex(0) == 3);
 	assert(t.maxxor(0) == 2);
 	assert(t.maxxor(1) == 3);
+	assert(t.minxor(0) == 0);
+	assert(t.minxor(7) == 5);
+	assert(t.erase(1));
+	assert(!t.erase(1));
+	assert(t.cnt == 2);
 }
 
 int main() {
 	testDuplicatesAndEmpty();
-	testConsecutive();
-	rep(n,0,40) testRandom(n, 50);
-	rep(it,0,20) testRandom(200, 30);
+	testSetOps();
+	testMulti();
+	testXorAllAndMex();
+	testXorAllRandom();
+	testMerge();
 	cout << "Tests passed!" << endl;
 }

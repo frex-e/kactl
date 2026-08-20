@@ -12,37 +12,53 @@ struct DSU {
 		a = find(a), b = find(b);
 		if (a != b) e[a] = b;
 	}
-	bool same(int a, int b) { return find(a) == find(b); }
 };
 
-void test(int n, int T, int k) {
-	struct E { int l, r, a, b; };
-	vector<E> es;
-	rep(i,0,k) {
-		int l = rand() % T, r = rand() % T + 1;
-		if (l > r) swap(l, r);
-		if (l == r) r = min(T, r + 1);
-		es.push_back({l, r, rand()%n, rand()%n});
+int comps(int n, const set<pii>& es) {
+	DSU d(n);
+	for (auto [a, b] : es) d.join(a, b);
+	int c = 0;
+	rep(i,0,n) if (d.find(i) == i) c++;
+	return c;
+}
+
+void test(int n, int ops) {
+	DynCon dc(n, ops + 1);
+	set<pii> live;
+	vi expect;
+	rep(i,0,ops) {
+		int ty = rand() % 3;
+		if (ty == 0 || live.empty()) {
+			int a = rand() % n, b = rand() % n;
+			pii e = {min(a, b), max(a, b)};
+			dc.toggle(a, b);
+			if (live.count(e)) live.erase(e);
+			else live.insert(e);
+		} else if (ty == 1) {
+			auto it = live.begin();
+			advance(it, rand() % sz(live));
+			dc.toggle(it->first, it->second);
+			live.erase(it);
+		} else {
+			dc.query();
+			expect.push_back(comps(n, live));
+		}
 	}
-	DynCon dc(n, T);
-	for (auto e : es) dc.add(e.l, e.r, e.a, e.b);
-	vector<vi> got(T, vi(n));
-	dc.run([&](int t, RollbackUF& uf) {
-		rep(i,0,n) got[t][i] = uf.find(i);
-	});
-	rep(t,0,T) {
-		DSU d(n);
-		for (auto e : es) if (e.l <= t && t < e.r)
-			d.join(e.a, e.b);
-		rep(i,0,n) rep(j,0,n)
-			assert(d.same(i, j) ==
-				(got[t][i] == got[t][j]));
-	}
+	vi got = dc.ans();
+	assert(got == expect);
 }
 
 int main() {
-	rep(n,1,12) rep(T,1,15) rep(it,0,30)
-		test(n, T, rand() % 20);
-	test(20, 40, 80);
+	rep(n,1,12) rep(it,0,80) test(n, rand() % 25 + 1);
+	test(20, 80);
+	DynCon dc(3, 8);
+	dc.toggle(0, 1);
+	dc.query();
+	dc.toggle(1, 2);
+	dc.query();
+	dc.toggle(0, 1);
+	dc.query();
+	vi got = dc.ans();
+	assert((got == vi{2, 1, 2}));
 	cout << "Tests passed!" << endl;
 }

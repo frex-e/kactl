@@ -52,7 +52,7 @@ The 6-char hash is `content/contest/hash.sh`: `cpp -dD -P -fpreprocessed`, strip
 
 1. Put the file in the right `content/<chapter>/` directory.
 2. Add a header block (Author + Description at minimum).
-3. Add `\kactlimport{YourFile.h}` in that chapter’s `chapter.tex` (or leave it commented if it should stay out of the 25-page PDF).
+3. Add `\kactlimport{YourFile.h}` in that chapter’s `chapter.tex` (or leave it commented if it should stay out of the PDF).
 4. Add a stress test under `stress-tests/<chapter>/` when the algorithm is non-trivial (see [verify.md](verify.md)).
 5. If it is a local addition or replacement of upstream, update [doc/mine-integration.md](../doc/mine-integration.md).
 6. Rebuild: `make kactl` or `make web-pdf` for the PDF (both run preprocess). The snippets site picks it up after `make preprocess` (or `npm run dev` / `npm run build`, whose `predev`/`prebuild` call that same Make target).

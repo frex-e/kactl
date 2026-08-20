@@ -1,7 +1,7 @@
 # KACTL (Monash team fork)
 
 This is the contest notebook for **A Succulent Chinese Algorithm** (Indra Kusumah-Kasim, Alex Yu, and Parsa Pordastan) at [Monash University](https://www.monash.edu/).
-It is a personal/team fork of [KACTL](https://github.com/kth-competitive-programming/kactl), [KTH](https://en.wikipedia.org/wiki/KTH_Royal_Institute_of_Technology)'s ICPC team reference: copy-pasteable C++ for ICPC-style contests, kept to 25 pages plus a cover.
+It is a personal/team fork of [KACTL](https://github.com/kth-competitive-programming/kactl), [KTH](https://en.wikipedia.org/wiki/KTH_Royal_Institute_of_Technology)'s ICPC team reference: copy-pasteable C++ for ICPC-style contests. Unlike upstream, this notebook is **not** kept to a 25-page cap.
 
 Two artifacts ship from this repo:
 
@@ -26,13 +26,12 @@ Local algorithm changes relative to [upstream](https://github.com/kth-competitiv
 
 KACTL algorithms should be: useful, short, fast enough, well tested, and if relevant, readable and easy to modify.
 They should *not* be overly generic, since code is manually typed and that just adds overhead.
-Due to space issues, we also exclude algorithms that are very common/simple (e.g., Dijkstra), or very uncommon (general weighted matching).
+This fork does not drop snippets just to stay under upstream’s 25-page ICPC limit.
 
 ## Customizing KACTL
 
 While KACTL is usable as is, it's also easy to modify if you want to create a personalized copy.
-In particular, you may want to change the cover page, or make your own choice of algorithms to include --
-due to space concerns, not all algorithms in the repo are included in the pdf.
+In particular, you may want to change the cover page, or make your own choice of algorithms to include.
 You may also want to enable colored syntax highlighting.
 
 `content/kactl.tex` is the main file of KACTL, and can be edited to change team name, logo, syntax highlighting, etc.
@@ -67,7 +66,7 @@ Each algorithm contains a header with the author of the code, the date it
 was added, a description of the algorithm, its testing status, and preferably also
 source, license and time complexity.
 
-kactl.pdf is to be kept to 25 pages + cover page.
+This fork does not keep `kactl.pdf` to upstream’s 25-page ICPC cap.
 Occasionally the generated kactl.pdf is committed to the repo for convenience, but not too often because it makes git operations slower.
 
 ## Testing

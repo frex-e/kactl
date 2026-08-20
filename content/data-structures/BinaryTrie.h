@@ -1,53 +1,102 @@
 /**
- * Author: me
- * Date: 2026-08-16
+ * Author: caterpillow, me
+ * Date: 2026-08-20
  * License: CC0
- * Source: mine.typ
- * Description: Binary trie over 32-bit values. Supports
- *  \texttt{insert}, XOR-max (\texttt{maxxor}), and \texttt{mex}
- *  of values XOR \texttt{xr}. \texttt{size} is only needed for mex.
- * Time: $O(B)$
+ * Source: https://github.com/caterpillow/cactl Trie.h
+ * Description: Binary trie on $[0,2^B)$. Set \texttt{insert}/
+ *  \texttt{erase}, multiset \texttt{insertMulti}, XOR-min/max,
+ *  count $x\oplus y<k$ (\texttt{count<0>}) or $>k$
+ *  (\texttt{count<1>}), lazy XOR-all, mex (set), merge.
+ *  \texttt{cnt} is the size. mex assumes unique values.
+ * Time: $O(B)$ per op
  * Status: stress-tested
  */
 #pragma once
 
 struct BinaryTrie {
-	typedef unsigned U;
-	BinaryTrie *nxt[2];
-	U size = 0;
-	BinaryTrie() { nxt[0] = nxt[1] = 0; }
-	bool insert(U x, int ind = 31) {
-		if (ind < 0) {
-			if (size == 0) return (size = 1);
-			return false;
+	static const int B = 30;
+	int cnt = 0, lazy = 0;
+	BinaryTrie *c[2] = {};
+	BinaryTrie*& ch(int b) {
+		return c[b] ? c[b] : c[b] = new BinaryTrie();
+	}
+	int cc(int b) { return c[b] ? c[b]->cnt : 0; }
+	void push(int i) {
+		if (!lazy) return;
+		if (i && (lazy >> (i - 1) & 1)) swap(c[0], c[1]);
+		rep(b,0,2) if (c[b]) c[b]->lazy ^= lazy;
+		lazy = 0;
+	}
+	void xorAll(int x) { lazy ^= x; }
+	int insert(int x, int i = B) {
+		push(i);
+		if (!i) return cnt ? 0 : (cnt = 1);
+		int b = x >> --i & 1;
+		int add = ch(b)->insert(x, i);
+		return cnt += add, add;
+	}
+	void insertMulti(int x, int i = B) {
+		push(i);
+		if (!i) { cnt++; return; }
+		int b = x >> --i & 1;
+		ch(b)->insertMulti(x, i);
+		cnt++;
+	}
+	int erase(int x, int i = B) {
+		if (!cnt) return 0;
+		push(i);
+		int sub = 1;
+		if (i) {
+			int b = x >> --i & 1;
+			sub = c[b] ? c[b]->erase(x, i) : 0;
 		}
-		int bit = (x >> ind) & 1;
-		if (!nxt[bit]) nxt[bit] = new BinaryTrie();
-		bool res = nxt[bit]->insert(x, ind - 1);
-		size += res;
-		return res;
+		return cnt -= sub, sub;
 	}
-	U mex(U xr, U cur = 0, int ind = 31) {
-		if (ind < 0) return cur;
-		int bit = (xr >> ind) & 1;
-		if (nxt[bit] && nxt[bit]->size == (1u << ind)) {
-			if (nxt[!bit])
-				return nxt[!bit]->mex(xr, cur | (1u << ind),
-					ind - 1);
-			return cur | (1u << ind);
-		} else if (nxt[bit])
-			return nxt[bit]->mex(xr, cur, ind - 1);
-		return cur;
+	int minxor(int x, int i = B) {
+		if (!i || !cnt) return 0;
+		push(i);
+		int b = x >> --i & 1;
+		return cc(b) ? c[b]->minxor(x, i) :
+			c[!b]->minxor(x, i) | 1 << i;
 	}
-	U maxxor(U xr, U cur = 0, int ind = 31) {
-		if (ind < 0) return cur;
-		int bit = (xr >> ind) & 1;
-		if (nxt[!bit])
-			return nxt[!bit]->maxxor(xr, cur | (1u << ind),
-				ind - 1);
-		if (nxt[bit])
-			return nxt[bit]->maxxor(xr, cur, ind - 1);
-		return cur;
+	int maxxor(int x, int i = B) {
+		if (!i || !cnt) return 0;
+		push(i);
+		int b = (x >> --i & 1) ^ 1;
+		return cc(b) ? c[b]->maxxor(x, i) | 1 << i :
+			c[!b]->maxxor(x, i);
 	}
-	~BinaryTrie() { delete nxt[0]; delete nxt[1]; }
+	template<int sgn = 0>
+	int count(int x, int k, int i = B) {
+		if (!i || !cnt) return 0;
+		push(i);
+		int b = (x ^ k) >> --i & 1;
+		return ((k >> i & 1) ^ sgn ? cc(!b) : 0) +
+			(c[b] ? c[b]->count<sgn>(x, k, i) : 0);
+	}
+	int mex(int xr = 0, int i = B) {
+		if (!i) return 0;
+		push(i);
+		int b = xr >> --i & 1;
+		if (cc(b) == 1 << i)
+			return (c[!b] ? c[!b]->mex(xr, i) : 0) | 1 << i;
+		return c[b] ? c[b]->mex(xr, i) : 0;
+	}
+	void merge(BinaryTrie& o, int i = B) {
+		push(i); o.push(i);
+		if (!o.cnt) return;
+		if (!cnt) {
+			swap(c[0], o.c[0]); swap(c[1], o.c[1]);
+			swap(cnt, o.cnt); swap(lazy, o.lazy);
+			return;
+		}
+		if (!i) { cnt += o.cnt; o.cnt = 0; return; }
+		rep(b,0,2) {
+			if (!c[b]) c[b] = o.c[b], o.c[b] = 0;
+			else if (o.c[b]) c[b]->merge(*o.c[b], i - 1);
+		}
+		cnt = cc(0) + cc(1);
+		o.cnt = 0;
+	}
+	~BinaryTrie() { delete c[0]; delete c[1]; }
 };
