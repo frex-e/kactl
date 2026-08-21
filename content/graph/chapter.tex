@@ -29,6 +29,13 @@
 		$S\to T$ equals $\sum_{d>0} d(v)$. A circulation is
 		this check after the lower-bound rewrite (then
 		$d\equiv 0$ except for the forced $L$ units).
+
+		Max $s$--$t$ flow with lower bounds: after the rewrite,
+		binary search on value $F$; for each $F$ set
+		\texttt{demand[s]-=F}, \texttt{demand[t]+=F} and check
+		feasibility (circulation of value $F$). Equivalently,
+		add edge $t\to s$ with lower bound $F$ (cap $\infty$)
+		and test circulation; maximize $F$.
 	\kactlimport{MinCut.h}
 	\kactlimport{GlobalMinCut.h}
 	\kactlimport{GomoryHu.h}
