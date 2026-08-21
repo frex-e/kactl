@@ -22,20 +22,20 @@
 		then replace the edge by capacity $R-L$.
 		($L=0$ is an ordinary capacity-$R$ edge.)
 
-		Vertex demand $d(v)$ (positive = must receive $d$ more
-		inflow than outflow): add source $S$ and sink $T$,
-		edge $S\to v$ cap $d(v)$ if $d>0$, $v\to T$ cap
-		$-d(v)$ if $d<0$. Feasible iff $\sum d=0$ and max flow
-		$S\to T$ equals $\sum_{d>0} d(v)$. A circulation is
-		this check after the lower-bound rewrite (then
-		$d\equiv 0$ except for the forced $L$ units).
+		$d(v)$ = forced net inflow (positive = excess $d$;
+		residual flow must send net outflow $d$): add source
+		$S$ and sink $T$, edge $S\to v$ cap $d(v)$ if $d>0$,
+		$v\to T$ cap $-d(v)$ if $d<0$. Feasible iff $\sum d=0$
+		and max flow $S\to T$ equals $\sum_{d>0} d(v)$. A
+		circulation is this check after the lower-bound
+		rewrite.
 
-		Max $s$--$t$ flow with lower bounds: after the rewrite,
-		binary search on value $F$; for each $F$ set
-		\texttt{demand[s]-=F}, \texttt{demand[t]+=F} and check
-		feasibility (circulation of value $F$). Equivalently,
-		add edge $t\to s$ with lower bound $F$ (cap $\infty$)
-		and test circulation; maximize $F$.
+		Max $s$--$t$ flow with lower bounds: add $t\to s$
+		cap $\infty$, find a feasible circulation, then
+		max-augment $s\to t$ in residual. Or binary search
+		on $F$ with lower bound $F$ on $t\to s$ (same as
+		\texttt{demand[s]+=F}, \texttt{demand[t]-=F} after
+		the rewrite); maximize feasible $F$.
 	\kactlimport{MinCut.h}
 	\kactlimport{GlobalMinCut.h}
 	\kactlimport{GomoryHu.h}
