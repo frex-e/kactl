@@ -33,6 +33,10 @@
 		Max $s$--$t$ flow with lower bounds: add $t\to s$
 		cap $\infty$, find a feasible circulation, delete $S$
 		and $T$, then max-augment $s\to t$ in the residual.
+
+		Min $s$--$t$ flow with lower bounds: binary search on
+		the capacity $C$ of $t\to s$; feasible circulation iff
+		a flow of value $\le C$ exists. Minimize $C$.
 	\kactlimport{MinCut.h}
 	\kactlimport{GlobalMinCut.h}
 	\kactlimport{GomoryHu.h}
