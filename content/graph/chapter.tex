@@ -22,13 +22,21 @@
 		then replace the edge by capacity $R-L$.
 		($L=0$ is an ordinary capacity-$R$ edge.)
 
-		Vertex demand $d(v)$ (positive = must receive $d$ more
-		inflow than outflow): add source $S$ and sink $T$,
-		edge $S\to v$ cap $d(v)$ if $d>0$, $v\to T$ cap
-		$-d(v)$ if $d<0$. Feasible iff $\sum d=0$ and max flow
-		$S\to T$ equals $\sum_{d>0} d(v)$. A circulation is
-		this check after the lower-bound rewrite (then
-		$d\equiv 0$ except for the forced $L$ units).
+		$d(v)$ = forced net inflow (positive = excess $d$;
+		residual flow must send net outflow $d$): add source
+		$S$ and sink $T$, edge $S\to v$ cap $d(v)$ if $d>0$,
+		$v\to T$ cap $-d(v)$ if $d<0$. Feasible iff $\sum d=0$
+		and max flow $S\to T$ equals $\sum_{d>0} d(v)$. A
+		circulation is this check after the lower-bound
+		rewrite.
+
+		Max $s$--$t$ flow with lower bounds: add $t\to s$
+		cap $\infty$, find a feasible circulation, delete $S$
+		and $T$, then max-augment $s\to t$ in the residual.
+
+		Min $s$--$t$ flow with lower bounds: binary search on
+		the capacity $C$ of $t\to s$; feasible circulation iff
+		a flow of value $\le C$ exists. Minimize $C$.
 	\kactlimport{MinCut.h}
 	\kactlimport{GlobalMinCut.h}
 	\kactlimport{GomoryHu.h}
