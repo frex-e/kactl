@@ -31,11 +31,8 @@
 		rewrite.
 
 		Max $s$--$t$ flow with lower bounds: add $t\to s$
-		cap $\infty$, find a feasible circulation, then
-		max-augment $s\to t$ in residual. Or binary search
-		on $F$ with lower bound $F$ on $t\to s$ (same as
-		\texttt{demand[s]+=F}, \texttt{demand[t]-=F} after
-		the rewrite); maximize feasible $F$.
+		cap $\infty$, find a feasible circulation, delete $S$
+		and $T$, then max-augment $s\to t$ in the residual.
 	\kactlimport{MinCut.h}
 	\kactlimport{GlobalMinCut.h}
 	\kactlimport{GomoryHu.h}
