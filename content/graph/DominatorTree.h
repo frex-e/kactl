@@ -7,21 +7,18 @@
  * Description: Dominator tree of a directed graph.
  *  Assumes every node is reachable from $root$. $a$
  *  dominates $b$ iff every path from $root$ to $b$
- *  passes through $a$. After \texttt{init(root)},
- *  \texttt{ans[u]} holds the children of $u$ in the
- *  dominator tree (nodes with immediate dominator $u$).
- *  Nodes are 0-indexed; use \texttt{Dominator<MAXN>}.
+ *  passes through $a$. Construct with the adjacency
+ *  list and root; then \texttt{ans[u]} holds the
+ *  children of $u$ in the dominator tree.
  * Time: $O(M\log N)$
  * Status: stress-tested
  */
 #pragma once
 
-template<int SZ> struct Dominator {
-	vi adj[SZ], ans[SZ]; // input edges, dominator-tree edges
-	vi radj[SZ], child[SZ], sdomChild[SZ];
-	int label[SZ], rlabel[SZ], sdom[SZ], dom[SZ], co = 0;
-	int par[SZ], bes[SZ];
-	void ae(int a, int b) { adj[a].pb(b); }
+struct Dominator {
+	int n, co = 0;
+	vector<vi> adj, ans, radj, child, sdomChild;
+	vi label, rlabel, sdom, dom, par, bes;
 	int get(int x) { // DSU with path compression
 		// vertex with smallest sdom on path to root
 		if (par[x] != x) {
@@ -40,9 +37,10 @@ template<int SZ> struct Dominator {
 			radj[label[y]].pb(label[x]);
 		}
 	}
-	void init(int root) {
-		fill_n(label, SZ, -1);
-		co = 0;
+	Dominator(const vector<vi>& g, int root) : n(sz(g)),
+		adj(g), ans(n), radj(n), child(n), sdomChild(n),
+		label(n, -1), rlabel(n), sdom(n),
+		dom(n), par(n), bes(n) {
 		dfs(root);
 		for (int i = co - 1; i >= 0; --i) {
 			for (int j : radj[i])

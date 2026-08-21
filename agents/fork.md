@@ -64,7 +64,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/data-structures/SegmentTreeBeats.h` | range chmin/chmax/add + sum/min/max (USACO Guide) |
 | `content/data-structures/MonotonicMap.h` | prefix/suffix min/max with insertions (monotonic map) |
 | `content/graph/Blossom.h` | Gabow--Edmonds matching (ei1333 / LC), 0-indexed |
-| `content/graph/DominatorTree.h` | Lengauer--Tarjan dominator tree (from cactl / Benq) |
+| `content/graph/DominatorTree.h` | Lengauer--Tarjan dominator tree (from cactl / Benq); runtime $n$, ctor takes adj+root |
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
 
 Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, flow demands / lower bounds.

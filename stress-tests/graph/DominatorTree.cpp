@@ -51,10 +51,7 @@ vi idomsBrute(const vector<vi>& g, int root) {
 
 void check(const vector<vi>& g, int root) {
 	int n = sz(g);
-	assert(n <= N);
-	Dominator<N> D{};
-	rep(u,0,n) for (int v : g[u]) D.ae(u, v);
-	D.init(root);
+	Dominator D(g, root);
 	assert(D.co == n);
 
 	vi idom(n, -1);
