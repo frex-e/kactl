@@ -3,7 +3,7 @@
 #define pb push_back
 #include "../../content/graph/DominatorTree.h"
 
-const int MX = 12;
+const int N = 12;
 
 bool reachable(const vector<vi>& g, int src, int dst, int blocked) {
 	if (src == blocked) return false;
@@ -51,8 +51,8 @@ vi idomsBrute(const vector<vi>& g, int root) {
 
 void check(const vector<vi>& g, int root) {
 	int n = sz(g);
-	assert(n <= MX);
-	Dominator<MX> D{};
+	assert(n <= N);
+	Dominator<N> D{};
 	rep(u,0,n) for (int v : g[u]) D.ae(u, v);
 	D.init(root);
 	assert(D.co == n);
@@ -92,7 +92,7 @@ int main() {
 	}
 
 	mt19937 rng(123456);
-	rep(n,1,MX+1) rep(it,0,200) {
+	rep(n,1,N+1) rep(it,0,200) {
 		vector<vi> g(n);
 		int m = n == 1 ? 0 : int(rng() % (n * n + 1));
 		rep(e,0,m) {

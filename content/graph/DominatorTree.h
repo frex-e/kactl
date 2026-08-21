@@ -10,6 +10,7 @@
  *  passes through $a$. After \texttt{init(root)},
  *  \texttt{ans[u]} holds the children of $u$ in the
  *  dominator tree (nodes with immediate dominator $u$).
+ *  Nodes are 0-indexed; use \texttt{Dominator<MAXN>}.
  * Time: $O(M\log N)$
  * Status: stress-tested
  */
@@ -29,21 +30,24 @@ template<int SZ> struct Dominator {
 		}
 		return bes[x];
 	}
-	void dfs(int x) { // create DFS tree
-		label[x] = ++co; rlabel[co] = x;
+	void dfs(int x) { // create DFS tree; labels 0..n-1
+		label[x] = co; rlabel[co] = x;
 		sdom[co] = par[co] = bes[co] = co;
+		++co;
 		for (int y : adj[x]) {
-			if (!label[y]) {
+			if (label[y] < 0) {
 				dfs(y); child[label[x]].pb(label[y]); }
 			radj[label[y]].pb(label[x]);
 		}
 	}
 	void init(int root) {
+		fill_n(label, SZ, -1);
+		co = 0;
 		dfs(root);
-		for (int i = co; i >= 1; --i) {
+		for (int i = co - 1; i >= 0; --i) {
 			for (int j : radj[i])
 				sdom[i] = min(sdom[i], sdom[get(j)]);
-			if (i > 1) sdomChild[sdom[i]].pb(i);
+			if (i) sdomChild[sdom[i]].pb(i);
 			for (int j : sdomChild[i]) {
 				int k = get(j);
 				if (sdom[j] == sdom[k]) dom[j] = sdom[j];
@@ -51,7 +55,7 @@ template<int SZ> struct Dominator {
 			}
 			for (int j : child[i]) par[j] = i;
 		}
-		rep(i,2,co+1) {
+		rep(i,1,co) {
 			if (dom[i] != sdom[i]) dom[i] = dom[dom[i]];
 			ans[rlabel[dom[i]]].pb(rlabel[i]);
 		}
