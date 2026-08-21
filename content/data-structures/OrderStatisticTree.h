@@ -16,6 +16,7 @@ using namespace __gnu_pbds;
 template<class T>
 using Tree = tree<T, null_type, less<T>, rb_tree_tag,
     tree_order_statistics_node_update>;
+// MEGA WARNING: use A.swap(B) instead of swap(A, B)!
 
 void example() {
 	Tree<int> t, t2; t.insert(8);
