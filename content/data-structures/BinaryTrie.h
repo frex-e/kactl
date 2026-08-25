@@ -1,13 +1,14 @@
 /**
  * Author: caterpillow, me
- * Date: 2026-08-20
+ * Date: 2026-08-25
  * License: CC0
  * Source: https://github.com/caterpillow/cactl Trie.h
  * Description: Binary trie on $[0,2^B)$. Set \texttt{insert}/
  *  \texttt{erase}, multiset \texttt{insertMulti}, XOR-min/max,
  *  count $x\oplus y<k$ (\texttt{count<0>}) or $>k$
- *  (\texttt{count<1>}), lazy XOR-all, mex (set), merge.
- *  \texttt{cnt} is the size. mex assumes unique values.
+ *  (\texttt{count<1>}), lazy XOR-all, mex (set).
+ *  \texttt{cnt} is the size. \texttt{merge} is set-union;
+ *  \texttt{merge<1>} adds counts. mex needs unique values.
  * Time: $O(B)$ per op
  * Status: stress-tested
  */
@@ -83,6 +84,7 @@ struct BinaryTrie {
 			return (c[!b] ? c[!b]->mex(xr, i) : 0) | 1 << i;
 		return c[b] ? c[b]->mex(xr, i) : 0;
 	}
+	template<int ms = 0>
 	void merge(T& o, int i = B) {
 		push(i); o.push(i);
 		if (!o.cnt) return;
@@ -91,10 +93,13 @@ struct BinaryTrie {
 			swap(cnt, o.cnt); swap(lazy, o.lazy);
 			return;
 		}
-		if (!i) { cnt += o.cnt; o.cnt = 0; return; }
+		if (!i) {
+			cnt = ms ? cnt + o.cnt : 1;
+			o.cnt = 0; return;
+		}
 		rep(b,0,2) {
 			if (!c[b]) c[b] = o.c[b], o.c[b] = 0;
-			else if (o.c[b]) c[b]->merge(*o.c[b], i - 1);
+			else if (o.c[b]) c[b]->merge<ms>(*o.c[b], i - 1);
 		}
 		cnt = cc(0) + cc(1);
 		o.cnt = 0;

@@ -159,6 +159,94 @@ void testMerge() {
 		checkSet(a, vals, randVal());
 		checkSet(a, vals, 0);
 	}
+	rep(it,0,80) {
+		BinaryTrie a, b;
+		set<int> vals;
+		rep(i,0,40) {
+			int x = rand() % 16;
+			if (rand() % 2) {
+				if (a.insert(x)) vals.insert(x);
+			} else {
+				if (b.insert(x)) vals.insert(x);
+			}
+		}
+		int xr = rand() % 32;
+		if (rand() % 2) {
+			a.xorAll(xr);
+			b.xorAll(xr);
+			set<int> xored;
+			for (int v : vals) xored.insert(v ^ xr);
+			vals.swap(xored);
+		}
+		a.merge(b);
+		assert(b.cnt == 0);
+		checkSet(a, vals, 0);
+		checkSet(a, vals, rand() % 32);
+		if (!vals.empty()) {
+			int y = *next(vals.begin(), rand() % sz(vals));
+			assert(a.insert(y) == 0);
+			assert(a.cnt == sz(vals));
+			assert(a.erase(y) == 1);
+			vals.erase(y);
+			assert(a.cnt == sz(vals));
+			assert(a.mex() == bruteMex(vals, 0));
+		}
+	}
+}
+
+void testMergeMulti() {
+	rep(it,0,50) {
+		BinaryTrie a, b;
+		multiset<int> vals;
+		rep(i,0,40) {
+			int x = rand() % 16;
+			if (rand() % 2) {
+				a.insertMulti(x);
+			} else {
+				b.insertMulti(x);
+			}
+			vals.insert(x);
+		}
+		a.merge<1>(b);
+		assert(b.cnt == 0);
+		assert(a.cnt == sz(vals));
+		int xr = rand() % 16;
+		assert(a.minxor(xr) == bruteMinxor(vals, xr));
+		assert(a.maxxor(xr) == bruteMaxxor(vals, xr));
+		int k = rand() % 32;
+		assert(a.count<0>(xr, k) == bruteCount(vals, xr, k, 0));
+		assert(a.count<1>(xr, k) == bruteCount(vals, xr, k, 1));
+	}
+}
+
+void testMergeOverlapMex() {
+	BinaryTrie a, b;
+	assert(a.insert(0) && a.insert(1));
+	assert(b.insert(0) && b.insert(2));
+	a.merge(b);
+	assert(b.cnt == 0);
+	assert(a.cnt == 3);
+	assert(a.mex() == 3);
+	assert(!a.insert(0));
+	assert(a.erase(0) == 1);
+	assert(a.cnt == 2);
+	assert(a.mex() == 0);
+
+	BinaryTrie c, d;
+	assert(c.insert(0) && c.insert(1));
+	assert(d.insert(0));
+	c.merge(d);
+	assert(c.cnt == 2);
+	assert(c.mex() == 2);
+
+	BinaryTrie e, f;
+	e.insertMulti(5); e.insertMulti(5);
+	f.insertMulti(5); f.insertMulti(7);
+	e.merge<1>(f);
+	assert(e.cnt == 4);
+	assert(e.minxor(0) == 5);
+	e.merge(f);
+	assert(e.cnt == 4);
 }
 
 void testDuplicatesAndEmpty() {
@@ -189,5 +277,7 @@ int main() {
 	testXorAllAndMex();
 	testXorAllRandom();
 	testMerge();
+	testMergeMulti();
+	testMergeOverlapMex();
 	cout << "Tests passed!" << endl;
 }
