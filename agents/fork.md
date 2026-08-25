@@ -33,7 +33,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 **Offline dynamic connectivity.** [content/data-structures/OfflineDynamicConnectivity.h](../content/data-structures/OfflineDynamicConnectivity.h) is sequential: `toggle(u, v)` adds or deletes an undirected edge, `query()` records a component-count snapshot, `ans()` returns answers. $q$ is an upper bound on the number of `toggle`/`query` calls.
 
-**Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset insert, XOR-min/max, XOR-count, lazy XOR-all, mex, and merge. `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s); `merge<1>` adds multiplicities from `insertMulti`. Values are in $[0,2^{30})$.
+**Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset insert, XOR-min/max, XOR-count, lazy XOR-all, mex, and merge. XOR queries (`minxor`/`maxxor`/`count`/`mex`) take `xr` (default 0). `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s) and destroys the other trie; `merge<1>` adds multiplicities from `insertMulti`. Values are in $[0,2^{30})$.
 
 **Unchanged on purpose.** Iterative [content/data-structures/SegmentTree.h](../content/data-structures/SegmentTree.h) (point updates) and geometry [content/geometry/Point.h](../content/geometry/Point.h) are still KACTL-style. Do not replace `Point` with a `complex` preamble unless asked.
 

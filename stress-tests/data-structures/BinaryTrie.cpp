@@ -111,13 +111,15 @@ void testXorAllAndMex() {
 	}
 	BinaryTrie t;
 	assert(t.mex() == 0);
-	assert(t.minxor(0) == 0);
-	assert(t.maxxor(0) == 0);
+	assert(t.minxor() == 0);
+	assert(t.maxxor() == 0);
+	assert(t.count<0>() == 0);
+	assert(t.count<1>() == 0);
 	t.insert(1); t.insert(2); t.insert(3);
 	t.xorAll(1);
 	assert(t.mex() == 1);
-	assert(t.minxor(0) == 0);
-	assert(t.maxxor(0) == 3);
+	assert(t.minxor() == 0);
+	assert(t.maxxor() == 3);
 	t.xorAll(1);
 	assert(t.mex() == 0);
 	assert(t.maxxor(0) == 3);
@@ -247,6 +249,17 @@ void testMergeOverlapMex() {
 	assert(e.minxor(0) == 5);
 	e.merge(f);
 	assert(e.cnt == 4);
+
+	BinaryTrie g, h;
+	assert(g.insert(1) && g.insert(2));
+	assert(g.erase(1) && g.erase(2));
+	assert(g.cnt == 0);
+	assert(h.insert(3) && h.insert(4));
+	g.merge(h);
+	assert(h.cnt == 0);
+	assert(g.cnt == 2);
+	assert(g.mex() == 0);
+	assert(g.minxor(0) == 3);
 }
 
 void testDuplicatesAndEmpty() {
@@ -260,10 +273,10 @@ void testDuplicatesAndEmpty() {
 	assert(t.insert(2));
 	assert(t.mex(0) == 1);
 	assert(t.insert(1));
-	assert(t.mex(0) == 3);
-	assert(t.maxxor(0) == 2);
+	assert(t.mex() == 3);
+	assert(t.maxxor() == 2);
 	assert(t.maxxor(1) == 3);
-	assert(t.minxor(0) == 0);
+	assert(t.minxor() == 0);
 	assert(t.minxor(7) == 5);
 	assert(t.erase(1));
 	assert(!t.erase(1));
