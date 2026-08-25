@@ -88,9 +88,10 @@ struct BinaryTrie {
 	void merge(T& o, int i = B) {
 		if (!o.cnt) return;
 		push(i); o.push(i);
-		if (i) rep(b,0,2)
+		if (i) rep(b,0,2) {
 			if (!c[b]) swap(c[b], o.c[b]);
 			else if (o.c[b]) c[b]->merge<ms>(*o.c[b], i - 1);
+		}
 		cnt = i ? cc(0) + cc(1) : (ms ? cnt + o.cnt : 1);
 		o.cnt = 0;
 	}
