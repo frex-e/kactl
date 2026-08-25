@@ -86,22 +86,12 @@ struct BinaryTrie {
 	}
 	template<int ms = 0>
 	void merge(T& o, int i = B) {
-		push(i); o.push(i);
 		if (!o.cnt) return;
-		if (!cnt) {
-			swap(c[0], o.c[0]); swap(c[1], o.c[1]);
-			swap(cnt, o.cnt); swap(lazy, o.lazy);
-			return;
-		}
-		if (!i) {
-			cnt = ms ? cnt + o.cnt : 1;
-			o.cnt = 0; return;
-		}
-		rep(b,0,2) {
-			if (!c[b]) c[b] = o.c[b], o.c[b] = 0;
+		push(i); o.push(i);
+		if (i) rep(b,0,2)
+			if (!c[b]) swap(c[b], o.c[b]);
 			else if (o.c[b]) c[b]->merge<ms>(*o.c[b], i - 1);
-		}
-		cnt = cc(0) + cc(1);
+		cnt = i ? cc(0) + cc(1) : (ms ? cnt + o.cnt : 1);
 		o.cnt = 0;
 	}
 	~BinaryTrie() { delete c[0]; delete c[1]; }

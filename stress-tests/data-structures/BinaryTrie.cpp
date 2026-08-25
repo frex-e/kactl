@@ -247,6 +247,17 @@ void testMergeOverlapMex() {
 	assert(e.minxor(0) == 5);
 	e.merge(f);
 	assert(e.cnt == 4);
+
+	BinaryTrie g, h;
+	assert(g.insert(1) && g.insert(2));
+	assert(g.erase(1) && g.erase(2));
+	assert(g.cnt == 0);
+	assert(h.insert(3) && h.insert(4));
+	g.merge(h);
+	assert(h.cnt == 0);
+	assert(g.cnt == 2);
+	assert(g.mex() == 0);
+	assert(g.minxor(0) == 3);
 }
 
 void testDuplicatesAndEmpty() {
