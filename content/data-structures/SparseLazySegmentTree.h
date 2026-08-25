@@ -13,16 +13,17 @@
  */
 #pragma once
 
-struct SparseLazyNode {
+struct Node {
 	using V = int;
 	using U = int;
+	using T = Node;
 	static constexpr V id = INT_MIN;
 	static constexpr V def = 0;
 	static constexpr U idU = 0;
 	V binop(V a, V b) { return max(a, b); }
 	V applyUpdate(U u, V v) { return v + u; }
 	U mergeUpdate(U oldU, U nw) { return oldU + nw; }
-	SparseLazyNode *lt = 0, *rt = 0;
+	T *lt = 0, *rt = 0;
 	V val = def;
 	U lazy = idU;
 	void updateNode(int, int, U u) {
@@ -31,8 +32,8 @@ struct SparseLazyNode {
 	}
 	void push(int l, int r) {
 		if (!lt) {
-			lt = new SparseLazyNode();
-			rt = new SparseLazyNode();
+			lt = new T();
+			rt = new T();
 		}
 		int mid = l + (r - l) / 2;
 		lt->updateNode(l, mid, lazy);
@@ -68,5 +69,5 @@ struct SparseLazyNode {
 		return binop(lt->query(l, mid, ql, qr),
 			rt->query(mid + 1, r, ql, qr));
 	}
-	~SparseLazyNode() { delete lt; delete rt; }
+	~Node() { delete lt; delete rt; }
 };

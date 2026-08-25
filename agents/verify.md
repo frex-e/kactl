@@ -39,7 +39,7 @@ Compiler: [doc/scripts/cxx.sh](../doc/scripts/cxx.sh). Prefers `g++-15`, then `g
 - Raises the stack limit (`ulimit -s 524288`) for the 2-SAT test.
 - Needs `bc` for timing.
 
-A typical test includes `../utilities/template.h` (**not** the contest template — no `pb`/`fr`/`sc`) and the header under test, then prints `Tests passed!` on success. Mirror the chapter path, e.g. `content/data-structures/LiChao.h` → `stress-tests/data-structures/LiChao.cpp`.
+A typical test includes `../utilities/template.h` (**not** the contest template — no `pb`/`fr`/`sc`) and the header under test, then prints `Tests passed!` on success. Mirror the chapter path, e.g. `content/data-structures/LiChao.h` → `stress-tests/data-structures/LiChao.cpp`. If two snippets both define `Node` (or another common name), wrap each `#include` in a namespace, as in `PersistentSegmentTree.cpp` and `SegmentTree.cpp`.
 
 Helpers live in `stress-tests/utilities/` (`template.h`, graph generators, etc.).
 

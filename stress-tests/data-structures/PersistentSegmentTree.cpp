@@ -1,13 +1,21 @@
 #include "../utilities/template.h"
 
 #include "../../content/data-structures/LazySegmentTree.h"
-#include "../../content/data-structures/SparseLazySegmentTree.h"
-#include "../../content/data-structures/PersistentSegmentTree.h"
 
-static_assert(PersistNode::id == INT_MIN);
+namespace sparse {
+#include "../../content/data-structures/SparseLazySegmentTree.h"
+}
+namespace persist {
+#include "../../content/data-structures/PersistentSegmentTree.h"
+}
+
+using persist::Node;
+using Sparse = sparse::Node;
+
+static_assert(Node::id == INT_MIN);
 
 void testSmall(int n, int iters) {
-	vector<PersistNode*> roots = {new PersistNode()};
+	vector<Node*> roots = {new Node()};
 	vector<vi> hist = {vi(n)};
 	rep(it,0,iters) {
 		int ver = rand() % sz(roots);
@@ -41,8 +49,8 @@ void testSmall(int n, int iters) {
 }
 
 void testVsSparse(int n, int iters) {
-	PersistNode* p = new PersistNode();
-	SparseLazyNode sp;
+	Node* p = new Node();
+	Sparse sp;
 	LazyUpdateTree tr(n);
 	vi v(n);
 	rep(it,0,iters) {
@@ -76,17 +84,17 @@ void testVsSparse(int n, int iters) {
 
 void testLargeDomain() {
 	const int L = 0, R = 1'000'000'000;
-	PersistNode* t0 = new PersistNode();
+	Node* t0 = new Node();
 	assert(t0->query(L, R, 0, 0) == 0);
-	PersistNode* t1 = t0->set(L, R, 42, 7);
+	Node* t1 = t0->set(L, R, 42, 7);
 	assert(t0->query(L, R, 0, R) == 0);
 	assert(t1->query(L, R, 42, 42) == 7);
 	assert(t1->query(L, R, 0, 41) == 0);
-	PersistNode* t2 = t1->update(L, R, 40, 50, 3);
+	Node* t2 = t1->update(L, R, 40, 50, 3);
 	assert(t1->query(L, R, 42, 42) == 7);
 	assert(t2->query(L, R, 42, 42) == 10);
 	assert(t2->query(L, R, 40, 40) == 3);
-	PersistNode* t3 = t2->set(L, R, 42, 1);
+	Node* t3 = t2->set(L, R, 42, 1);
 	assert(t2->query(L, R, 42, 42) == 10);
 	assert(t3->query(L, R, 42, 42) == 1);
 	assert(t3->query(L, R, 40, 40) == 3);

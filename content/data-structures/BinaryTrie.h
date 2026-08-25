@@ -14,11 +14,12 @@
 #pragma once
 
 struct BinaryTrie {
+	using T = BinaryTrie;
 	static const int B = 30;
 	int cnt = 0, lazy = 0;
-	BinaryTrie *c[2] = {};
-	BinaryTrie*& ch(int b) {
-		return c[b] ? c[b] : c[b] = new BinaryTrie();
+	T *c[2] = {};
+	T*& ch(int b) {
+		return c[b] ? c[b] : c[b] = new T();
 	}
 	int cc(int b) { return c[b] ? c[b]->cnt : 0; }
 	void push(int i) {
@@ -82,7 +83,7 @@ struct BinaryTrie {
 			return (c[!b] ? c[!b]->mex(xr, i) : 0) | 1 << i;
 		return c[b] ? c[b]->mex(xr, i) : 0;
 	}
-	void merge(BinaryTrie& o, int i = B) {
+	void merge(T& o, int i = B) {
 		push(i); o.push(i);
 		if (!o.cnt) return;
 		if (!cnt) {
