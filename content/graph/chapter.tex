@@ -31,12 +31,18 @@
 		rewrite.
 
 		Max $s$--$t$ flow with lower bounds: add $t\to s$
-		cap $\infty$, find a feasible circulation, delete $S$
-		and $T$, then max-augment $s\to t$ in the residual.
+		cap $\infty$, find a feasible circulation. Let $F$ be
+		the flow on $t\to s$; delete $S$, $T$, and $t\to s$,
+		then max-augment $s\to t$. Value $= F+$ extra max
+		flow.
 
 		Min $s$--$t$ flow with lower bounds: binary search on
 		the capacity $C$ of $t\to s$; feasible circulation iff
-		a flow of value $\le C$ exists. Minimize $C$.
+		a flow of value $\le C$ exists. Minimize $C$; the
+		$s$--$t$ value is $C$ (flow on $t\to s$).
+
+		Original edge flow is $L$ plus the flow on the
+		rewritten cap-$(R-L)$ edge.
 	\kactlimport{MinCut.h}
 	\kactlimport{GlobalMinCut.h}
 	\kactlimport{GomoryHu.h}
