@@ -273,7 +273,7 @@ void testDuplicatesAndEmpty() {
 	assert(t.insert(2));
 	assert(t.mex(0) == 1);
 	assert(t.insert(1));
-	assert(t.mex() == 0);
+	assert(t.mex() == 3);
 	assert(t.maxxor() == 2);
 	assert(t.maxxor(1) == 3);
 	assert(t.minxor() == 0);
