@@ -47,6 +47,7 @@ The 6-char hash is `content/contest/hash.sh`: `cpp -dD -P -fpreprocessed`, strip
 - Line width **63 characters**, **tabs** for indentation (tab = 2 spaces in the PDF).
 - Terse contest macros from [content/contest/template.cpp](../content/contest/template.cpp): `rep`, `all`, `sz`, `pb`, `fr`, `sc`, `ll`, `pii`, `vi`. This fork’s template uses `pb` / `fr` / `sc` and does **not** use `cin.exceptions`.
 - Do not make APIs overly generic; the code is typed by hand in contest.
+- Recursive pointer structs: use a short name (`Node`, or `BinaryTrie` at the call site) and `using T = ...` for self-references. Do not invent `PersistNode`-style names to dodge test clashes — wrap colliding `#include`s in namespaces instead.
 
 ## Adding a snippet
 

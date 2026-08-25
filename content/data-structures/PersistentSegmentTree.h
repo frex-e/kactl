@@ -15,16 +15,17 @@
  */
 #pragma once
 
-struct PersistNode {
+struct Node {
 	using V = int;
 	using U = int;
+	using T = Node;
 	static constexpr V id = INT_MIN;
 	static constexpr V def = 0;
 	static constexpr U idU = 0;
 	V binop(V a, V b) { return max(a, b); }
 	V applyUpdate(U u, V v) { return v + u; }
 	U mergeUpdate(U oldU, U nw) { return oldU + nw; }
-	PersistNode *lt = 0, *rt = 0;
+	T *lt = 0, *rt = 0;
 	V val = def;
 	U lazy = idU;
 	void updateNode(int, int, U u) {
@@ -33,15 +34,15 @@ struct PersistNode {
 	}
 	void push(int l, int r) {
 		int mid = l + (r - l) / 2;
-		lt = new PersistNode(lt ? *lt : PersistNode());
-		rt = new PersistNode(rt ? *rt : PersistNode());
+		lt = new T(lt ? *lt : T());
+		rt = new T(rt ? *rt : T());
 		lt->updateNode(l, mid, lazy);
 		rt->updateNode(mid + 1, r, lazy);
 		lazy = idU;
 	}
-	PersistNode* update(int l, int r, int ql, int qr, U u) {
+	T* update(int l, int r, int ql, int qr, U u) {
 		if (qr < l || r < ql) return this;
-		PersistNode* n = new PersistNode(*this);
+		T* n = new T(*this);
 		if (ql <= l && r <= qr) {
 			n->updateNode(l, r, u);
 			return n;
@@ -53,9 +54,9 @@ struct PersistNode {
 		n->val = binop(n->lt->val, n->rt->val);
 		return n;
 	}
-	PersistNode* set(int l, int r, int i, V v) {
+	T* set(int l, int r, int i, V v) {
 		if (i < l || r < i) return this;
-		PersistNode* n = new PersistNode(*this);
+		T* n = new T(*this);
 		if (l == r) { n->val = v; n->lazy = idU; return n; }
 		n->push(l, r);
 		int mid = l + (r - l) / 2;
@@ -68,8 +69,8 @@ struct PersistNode {
 		if (qr < l || r < ql) return id;
 		if (ql <= l && r <= qr) return val;
 		int mid = l + (r - l) / 2;
-		PersistNode a = lt ? *lt : PersistNode();
-		PersistNode b = rt ? *rt : PersistNode();
+		T a = lt ? *lt : T();
+		T b = rt ? *rt : T();
 		a.updateNode(l, mid, lazy);
 		b.updateNode(mid + 1, r, lazy);
 		return binop(a.query(l, mid, ql, qr),

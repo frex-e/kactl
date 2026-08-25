@@ -3,10 +3,10 @@
 #include "../../content/data-structures/LazySegmentTree.h"
 #include "../../content/data-structures/SparseLazySegmentTree.h"
 
-static_assert(SparseLazyNode::id == INT_MIN);
+static_assert(Node::id == INT_MIN);
 
 void testVsDense(int n, int iters) {
-	SparseLazyNode sp;
+	Node sp;
 	LazyUpdateTree tr(n);
 	vi v(n);
 	rep(it,0,iters) {
@@ -38,7 +38,7 @@ void testVsDense(int n, int iters) {
 }
 
 void testMixed(int n, int iters) {
-	SparseLazyNode sp;
+	Node sp;
 	vi v(n);
 	rep(it,0,iters) {
 		int op = rand() % 3;
@@ -66,7 +66,7 @@ void testMixed(int n, int iters) {
 
 void testLargeDomain() {
 	const int L = 0, R = 1'000'000'000;
-	SparseLazyNode tr;
+	Node tr;
 	assert(tr.query(L, R, 0, 0) == 0);
 	tr.update(L, R, 10, 20, 5);
 	assert(tr.query(L, R, 10, 20) == 5);
@@ -84,7 +84,7 @@ void testLargeDomain() {
 	assert(tr.query(L, R, 10, 25) == 8);
 	assert(tr.query(L, R, 10, 42) == 8);
 
-	SparseLazyNode tr2;
+	Node tr2;
 	tr2.set(L, R, 42, 7);
 	assert(tr2.query(L, R, 42, 42) == 7);
 	assert(tr2.query(L, R, 0, 41) == 0);
