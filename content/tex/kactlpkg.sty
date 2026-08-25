@@ -353,8 +353,8 @@
 	\ifthenelse{\boolean{hasusage}}{\codeheader{Usage}{\@defusage}}{}
 	\ifthenelse{\boolean{hasmemory}}{\codeheader{Memory}{\@defmemory}}{}
 	\ifthenelse{\boolean{hastime}}{\codeheader{Time}{\@deftime}}{}
-	\par\noindent
-	{\tiny\texttt{\@leftcaption}\hfill\@rightcaption\par}%
+	\par\nobreak\vspace{2pt}\noindent
+	{\tiny\strut\texttt{\@leftcaption}\hfill\@rightcaption\par}%
 }
 
 \newcommand{\bigo}[1] {\ensuremath{\mathcal{O} \left( #1 \right)}}
