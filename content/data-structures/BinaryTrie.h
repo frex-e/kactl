@@ -4,11 +4,12 @@
  * License: CC0
  * Source: https://github.com/caterpillow/cactl Trie.h
  * Description: Binary trie on $[0,2^B)$. Set \texttt{insert}/
- *  \texttt{erase}, multiset \texttt{insertMulti}, XOR-min/max,
- *  count $x\oplus y<k$ (\texttt{count<0>}) or $>k$
- *  (\texttt{count<1>}), lazy XOR-all, mex (set).
- *  \texttt{cnt} is the size. \texttt{merge} is set-union;
- *  \texttt{merge<1>} adds counts. mex needs unique values.
+ *  \texttt{erase}, multiset \texttt{insertMulti}, min/max,
+ *  count $x<k$ (\texttt{count<0>}) or $>k$
+ *  (\texttt{count<1>}), lazy XOR-all, mex (set). Query
+ *  $v\oplus x$ via \texttt{xorAll}. \texttt{cnt} is the size.
+ *  \texttt{merge} is set-union; \texttt{merge<1>} adds counts.
+ *  mex needs unique values.
  * Time: $O(B)$ per op
  * Status: stress-tested
  */
@@ -54,35 +55,35 @@ struct BinaryTrie {
 		}
 		return cnt -= sub, sub;
 	}
-	int minxor(int x, int i = B) {
+	int minxor(int i = B) {
 		if (!i || !cnt) return 0;
 		push(i);
-		int b = x >> --i & 1;
-		return cc(b) ? c[b]->minxor(x, i) :
-			c[!b]->minxor(x, i) | 1 << i;
+		--i;
+		return cc(0) ? c[0]->minxor(i) :
+			c[1]->minxor(i) | 1 << i;
 	}
-	int maxxor(int x, int i = B) {
+	int maxxor(int i = B) {
 		if (!i || !cnt) return 0;
 		push(i);
-		int b = (x >> --i & 1) ^ 1;
-		return cc(b) ? c[b]->maxxor(x, i) | 1 << i :
-			c[!b]->maxxor(x, i);
+		--i;
+		return cc(1) ? c[1]->maxxor(i) | 1 << i :
+			c[0]->maxxor(i);
 	}
 	template<int sgn = 0>
-	int count(int x, int k, int i = B) {
+	int count(int k, int i = B) {
 		if (!i || !cnt) return 0;
 		push(i);
-		int b = (x ^ k) >> --i & 1;
-		return ((k >> i & 1) ^ sgn ? cc(!b) : 0) +
-			(c[b] ? c[b]->count<sgn>(x, k, i) : 0);
+		int b = k >> --i & 1;
+		return (b ^ sgn ? cc(!b) : 0) +
+			(c[b] ? c[b]->count<sgn>(k, i) : 0);
 	}
-	int mex(int xr = 0, int i = B) {
+	int mex(int i = B) {
 		if (!i) return 0;
 		push(i);
-		int b = xr >> --i & 1;
-		if (cc(b) == 1 << i)
-			return (c[!b] ? c[!b]->mex(xr, i) : 0) | 1 << i;
-		return c[b] ? c[b]->mex(xr, i) : 0;
+		--i;
+		if (cc(0) == 1 << i)
+			return (c[1] ? c[1]->mex(i) : 0) | 1 << i;
+		return c[0] ? c[0]->mex(i) : 0;
 	}
 	template<int ms = 0>
 	void merge(T& o, int i = B) {
