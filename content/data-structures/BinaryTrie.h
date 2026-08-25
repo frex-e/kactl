@@ -7,7 +7,8 @@
  *  \texttt{erase}, multiset \texttt{insertMulti}, XOR-min/max,
  *  count $x\oplus y<k$ (\texttt{count<0>}) or $>k$
  *  (\texttt{count<1>}), lazy XOR-all, mex (set).
- *  \texttt{cnt} is the size. \texttt{merge} is set-union;
+ *  XOR queries take $xr$ (default 0). \texttt{cnt} is the
+ *  size. \texttt{merge} is set-union (destroys $o$);
  *  \texttt{merge<1>} adds counts. mex needs unique values.
  * Time: $O(B)$ per op
  * Status: stress-tested
@@ -54,27 +55,27 @@ struct BinaryTrie {
 		}
 		return cnt -= sub, sub;
 	}
-	int minxor(int x, int i = B) {
+	int minxor(int xr = 0, int i = B) {
 		if (!i || !cnt) return 0;
 		push(i);
-		int b = x >> --i & 1;
-		return cc(b) ? c[b]->minxor(x, i) :
-			c[!b]->minxor(x, i) | 1 << i;
+		int b = xr >> --i & 1;
+		return cc(b) ? c[b]->minxor(xr, i) :
+			c[!b]->minxor(xr, i) | 1 << i;
 	}
-	int maxxor(int x, int i = B) {
+	int maxxor(int xr = 0, int i = B) {
 		if (!i || !cnt) return 0;
 		push(i);
-		int b = (x >> --i & 1) ^ 1;
-		return cc(b) ? c[b]->maxxor(x, i) | 1 << i :
-			c[!b]->maxxor(x, i);
+		int b = (xr >> --i & 1) ^ 1;
+		return cc(b) ? c[b]->maxxor(xr, i) | 1 << i :
+			c[!b]->maxxor(xr, i);
 	}
 	template<int sgn = 0>
-	int count(int x, int k, int i = B) {
+	int count(int xr = 0, int k = 0, int i = B) {
 		if (!i || !cnt) return 0;
 		push(i);
-		int b = (x ^ k) >> --i & 1;
+		int b = (xr ^ k) >> --i & 1;
 		return ((k >> i & 1) ^ sgn ? cc(!b) : 0) +
-			(c[b] ? c[b]->count<sgn>(x, k, i) : 0);
+			(c[b] ? c[b]->count<sgn>(xr, k, i) : 0);
 	}
 	int mex(int xr = 0, int i = B) {
 		if (!i) return 0;
@@ -85,7 +86,7 @@ struct BinaryTrie {
 		return c[b] ? c[b]->mex(xr, i) : 0;
 	}
 	template<int ms = 0>
-	void merge(T& o, int i = B) {
+	void merge(T& o, int i = B) { // destroys o
 		if (!o.cnt) return;
 		push(i); o.push(i);
 		if (i) rep(b,0,2) {
