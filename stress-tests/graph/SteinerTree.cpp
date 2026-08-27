@@ -155,7 +155,12 @@ void checkRecon(const Graph& g, const vi& t, ll cost,
 
 void check(int n, const vector<array<ll, 3>>& ed, vi t) {
 	Graph g = fromEdges(n, ed);
-	auto [cost, rec] = steinerTree(g, t);
+	auto [cost, idx] = steinerTree(n, t, ed);
+	vector<pii> rec;
+	for (int i : idx) {
+		assert(0 <= i && i < sz(ed));
+		rec.pb({(int)ed[i][0], (int)ed[i][1]});
+	}
 	checkRecon(g, t, cost, rec);
 	if (n <= 8) assert(cost == bruteMST(n, ed, t));
 	if (n <= 12 && sz(t) <= 8) assert(cost == apspSteiner(g, t));
@@ -221,7 +226,9 @@ int main() {
 		shuffle_vec(t);
 		t.resize(k);
 		Graph g = fromEdges(n, ed);
-		auto [cost, rec] = steinerTree(g, t);
+		auto [cost, idx] = steinerTree(n, t, ed);
+		vector<pii> rec;
+		for (int i : idx) rec.pb({(int)ed[i][0], (int)ed[i][1]});
 		checkRecon(g, t, cost, rec);
 		assert(cost == treeSteiner(n, el, wt, t));
 	}
