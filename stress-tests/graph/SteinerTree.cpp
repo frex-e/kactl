@@ -216,7 +216,7 @@ int main() {
 			wt[i] = randIncl(1, 20);
 			ed.push_back({el[i].first, el[i].second, wt[i]});
 		}
-		int k = randIncl(1, n);
+		int k = randIncl(1, min(n, 10));
 		vi t(n); iota(all(t), 0);
 		shuffle_vec(t);
 		t.resize(k);

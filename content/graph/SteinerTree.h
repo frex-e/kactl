@@ -21,6 +21,7 @@ pair<ll, vector<pii>> steinerTree(
 	vector<vector<pair<int, ll>>>& g, vi t) {
 	int n = sz(g), k = sz(t);
 	if (!k) return {0, {}};
+	typedef pair<ll, int> pli;
 	int N = 1 << k;
 	vector<vector<ll>> dp(N, vector<ll>(n, inf));
 	vector<vector<pii>> pr(N, vector<pii>(n, {-1,-1}));
@@ -32,7 +33,6 @@ pair<ll, vector<pii>> steinerTree(
 				if (a < inf && b < inf && a + b < dp[m][v])
 					dp[m][v] = a + b, pr[m][v] = {s, -1};
 			}
-		typedef pair<ll, int> pli;
 		priority_queue<pli, vector<pli>, greater<pli>> q;
 		rep(v,0,n) if (dp[m][v] < inf) q.push({dp[m][v], v});
 		while (!q.empty()) {
