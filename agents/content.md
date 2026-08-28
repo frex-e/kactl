@@ -28,7 +28,7 @@ C++/Java/Python snippets start with a `/** ... */` (or `'''` / `"""`) metadata c
 
 Unknown keys are a PDF build error (`\kactlerror`). Description/Usage/Time appear above the listing; `#include`s become the left caption; a 6-char hash and line count become the right caption.
 
-Geometry snippets that ship a figure use two minipages: prose at `\dimexpr\linewidth-16mm\relax` and a 15mm image, with `%` between them so they stay on one line. Do not restore the old `{75mm}`+`{15mm}` pair — that is wider than a column after the 1.0cm side margins.
+Geometry snippets that ship a figure use two top-aligned minipages: prose at `\dimexpr\linewidth-16mm\relax` and a 15mm image, with `%` between them so they stay on one line. Do not restore the old `{75mm}`+`{15mm}` pair — that is wider than a column after the 1.0cm side margins.
 
 Prefer `Status: stress-tested` when there is a matching file under `stress-tests/`.
 

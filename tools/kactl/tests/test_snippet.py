@@ -102,7 +102,7 @@ class TestChapterParse(unittest.TestCase):
         path = CONTENT / "geometry" / "lineDistance.h"
         processed = process_path(path)
         desc = processed.commands["Description"]
-        self.assertIn(r"\dimexpr\linewidth-16mm\relax", desc)
+        self.assertIn(r"\begin{minipage}[t]{\dimexpr\linewidth-16mm\relax}", desc)
         self.assertIn(r"\end{minipage}%", desc)
         self.assertNotIn("{75mm}", desc)
         stripped = strip_figures(desc)
