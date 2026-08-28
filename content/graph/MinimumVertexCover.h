@@ -2,8 +2,9 @@
  * Author: Johan Sannemo, Simon Lindholm
  * Date: 2016-12-15
  * License: CC0
- * Description: Minimum vertex cover in a bipartite graph (Kőnig:
- *  size equals max matching). Complement is a max independent set.
+ * Description: Vertex cover: a set of vertices incident to every
+ *  edge. Min cover in a bipartite graph (Kőnig: size equals max
+ *  matching). Complement is a max independent set.
  * Status: stress-tested
  */
 #pragma once
