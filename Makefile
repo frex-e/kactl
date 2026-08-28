@@ -1,5 +1,6 @@
 LATEXCMD = pdflatex -shell-escape -output-directory build/
 export TEXINPUTS=.:content/tex/:
+export TEXMFHOME := $(CURDIR)/texmf
 export max_print_line = 1048576
 
 help:

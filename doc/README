@@ -6,7 +6,7 @@ Use the Makefile from the repo root (`make help`). Agent-oriented notes: `agents
 
 - Python 3
 - GNU Make
-- `pdflatex` (TeX Live: `texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`, `texlive-plain-generic`, `texlive-fonts-recommended`)
+- `pdflatex` (TeX Live: `texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`, `texlive-plain-generic`, `texlive-fonts-recommended`). Listings use Inconsolata from the repo-local `texmf/` tree (`TEXMFHOME`); no extra TeX Live font package is required.
 - `g++` and `bc` for compile/stress tests
 
 ## Commands

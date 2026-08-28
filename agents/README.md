@@ -10,6 +10,7 @@ This is a **build/test project, not a service**. There is no web server, API, da
 |---|---|
 | `content/` | Notebook source. One subdirectory per chapter; `content/kactl.tex` is the root TeX file (team page, chapter order). |
 | `content/tex/` | LaTeX package (`kactlpkg.sty`). Page headers still `write18` to `python3 -m tools.kactl print-header`. |
+| `texmf/` | Vendored Inconsolata (zi4) typewriter font. `make` sets `TEXMFHOME` here. |
 | `tools/kactl/` | One mill: snippet stripping, chapter parse, listings, `snippets.json`, print-header. |
 | `web/` | Searchable snippets SPA. Consumes `web/public/snippets.json` from `make preprocess`. |
 | `stress-tests/` | Stress tests (`make test`). Utilities in `stress-tests/utilities/`. |
