@@ -12,7 +12,11 @@
 \usepackage{tocloft}                    % Custom Table of Contents
 \usepackage{titletoc}                   % Design control over Table of Contents
 \usepackage{ifthen}                     % To enable some conditional programming in LaTeX
-\usepackage{courier}                    % To get bold typewriter typeface
+% Inconsolata (vendored in texmf/): varl = tailed l, slashed 0 by default,
+% varqu = upright quotes. Distinguishes 1/l/I and 0/O at listing size.
+% Stay on OT1 so body text keeps Type1 Computer Modern (T1 would need cm-super).
+\usepackage[varl,varqu]{inconsolata}
+\pdfmapfile{+zi4.map}
 \usepackage{graphicx}                   % To rotate page numbers
 \usepackage{fix-cm}                     % Large font sizes
 \usepackage{paralist}                   % For compact enumerations
@@ -154,33 +158,26 @@
 \renewcommand\cftchapfont{\large\bfseries}
 \renewcommand{\cftdotsep}{4.5}
 
-% Proper carets and tildes
+% Use font slots + \normalfont so these work inside italic comments
+% (\{ / \mathtt{\sim} pick OMS/cmsy, not Inconsolata).
 \newcommand*{\caret}{%
-  \begingroup
-    \fontencoding{T1}%
-    \fontfamily{pcr}% Courier
-    \selectfont
-    \string^%
+  \begingroup\normalfont\ttfamily\selectfont\string^%
   \endgroup
 }
-\renewcommand*{\tilde}{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
+\renewcommand*{\tilde}{\raise.17ex\hbox{\normalfont\ttfamily\char`\~}}
 
 % Fatter {} which are more distinguishable from ()
 % Makes pdf compile time 5-10% slower, but probably worth it still?
 \newcommand*{\nicelbrace}{%
   \begingroup
-    \fontencoding{T1}%
-    \fontfamily{pcr}% Courier
-    \selectfont
-	\scalebox{1.5}[1]{\color{black!80}{\{}}%
+    \normalfont\ttfamily\selectfont
+	\scalebox{1.5}[1]{\color{black!80}{\char`\{}}%
   \endgroup
 }
 \newcommand*{\nicerbrace}{%
   \begingroup
-    \fontencoding{T1}%
-    \fontfamily{pcr}% Courier
-    \selectfont
-	\scalebox{1.5}[1]{\color{black!80}{\}}}%
+    \normalfont\ttfamily\selectfont
+	\scalebox{1.5}[1]{\color{black!80}{\char`\}}}%
   \endgroup
 }
 

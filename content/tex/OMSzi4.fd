@@ -1,0 +1,7 @@
+% Inconsolata has no OMS cut; math fallbacks (\{ in captions, etc.) use cmsy.
+\DeclareFontFamily{OMS}{zi4}{\hyphenchar\font\m@ne}
+\DeclareFontShape{OMS}{zi4}{m}{n}{<-> ssub * cmsy/m/n}{}
+\DeclareFontShape{OMS}{zi4}{m}{it}{<-> ssub * cmsy/m/n}{}
+\DeclareFontShape{OMS}{zi4}{b}{n}{<-> ssub * cmsy/b/n}{}
+\DeclareFontShape{OMS}{zi4}{b}{it}{<-> ssub * cmsy/b/n}{}
+\DeclareFontShape{OMS}{zi4}{bx}{n}{<-> ssub * cmsy/b/n}{}

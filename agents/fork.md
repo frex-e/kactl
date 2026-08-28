@@ -11,6 +11,8 @@ KACTL’s iterative `SegmentTree.h` is unchanged (simple point-update ops). Geom
 - University: Monash / Monash University / `monash`
 - Team: **A Succulent Chinese Algorithm** — Indra Kusumah-Kasim, Alex Yu, and Parsa Pordastan
 
+Code listings use **Inconsolata** (`varl` + `varqu`, vendored under [`texmf/`](../texmf/README.md)) instead of Courier, so `1` / `l` / `I` and `0` / `O` stay distinct in the printed notebook.
+
 The snippets site is this fork’s addition (not upstream). See [web.md](web.md).
 
 This fork does **not** keep upstream’s 25-page ICPC notebook cap.

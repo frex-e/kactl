@@ -20,7 +20,8 @@ prefer those instead of duplicating them.
 - System dependencies are provided by the base image/snapshot, **not** by the update script:
   TeX Live (`texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`,
   `texlive-plain-generic` — needed for `ulem.sty`, `texlive-fonts-recommended`), `g++`, and
-  `bc`. There are no language package managers, lockfiles, or `.env`/secrets in this repo.
+  `bc`. Listing typewriter font is Inconsolata from repo-local `texmf/` (no extra apt
+  font package). There are no language package managers, lockfiles, or `.env`/secrets in this repo.
 - `pdflatex` is invoked with `-shell-escape` (required: page headers shell out to
   `python3 -m tools.kactl print-header`). Make copies `header.tmp.seed` to
   `header.tmp` before each pass. Snippet listings are generated first by
