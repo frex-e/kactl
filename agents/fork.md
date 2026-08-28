@@ -56,7 +56,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/numerical/XORBasis.h` | incremental XOR basis (kept alongside `SolveLinearBinary.h`) |
 | `content/numerical/QuadRoots.h` | stable real quadratic roots (from cactl / cp-geo) |
 | `content/numerical/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested; PDF import commented out) |
-| `content/various/MemoryUsage.h` | `getrusage` RSS |
+| `content/various/MemoryUsage.h` | `getrusage` peak RSS (lifetime, not current) |
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
 | `content/graph/Centroid.h` | centroid decomposition |
