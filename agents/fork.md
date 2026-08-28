@@ -55,7 +55,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/numerical/RREF.h` | rectangular reduced row echelon form |
 | `content/numerical/XORBasis.h` | incremental XOR basis (kept alongside `SolveLinearBinary.h`) |
 | `content/numerical/QuadRoots.h` | stable real quadratic roots (from cactl / cp-geo) |
-| `content/numerical/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested; PDF import commented out) |
+| `content/numerical/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested) |
 | `content/various/MemoryUsage.h` | `getrusage` peak RSS (lifetime, not current) |
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
@@ -98,7 +98,8 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/contest/chapter.tex` | Random + Output.h |
 | `content/various/chapter.tex` | builtins, pragmas, memory |
 | `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ / beats / monotonic map |
-| `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, min-plus convolution; Fourier → Convolutions |
+| `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, min-plus convolution, MatrixInverse-mod; Fourier → Convolutions |
+| `content/strings/chapter.tex` | Hashing-codeforces in the PDF (alongside `Hashing.h`) |
 | `content/geometry/chapter.tex` | half-plane intersection |
 | geometry figure captions | same glued 15mm minipages as upstream (with their `\vspace`); text width is `\linewidth-15mm` instead of `75mm` so they fit the printable-margin columns |
 
