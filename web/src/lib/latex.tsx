@@ -401,6 +401,18 @@ export function latexToHtml(src: string): string {
           i = skipIncludeGraphics(src, afterCmd)
           continue
         }
+        if (cmd === 'kactlfigdesc') {
+          while (src[afterCmd] === ' ') afterCmd++
+          const g1 = readBraceGroup(src, afterCmd)
+          if (g1) {
+            out += latexToHtml(g1[0])
+            afterCmd = g1[1]
+            while (src[afterCmd] === ' ') afterCmd++
+            const g2 = readBraceGroup(src, afterCmd)
+            i = g2 ? g2[1] : afterCmd
+            continue
+          }
+        }
         if (cmd === 'hline' || cmd === 'newline') {
           i = afterCmd
           continue

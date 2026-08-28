@@ -34,6 +34,10 @@ assert.match(html, /<code class="ltx-tt">mat\[b\]\[b\]\+\+<\/code>/)
 assert.match(html, /katex/)
 
 assert.equal(latexToHtml('\\texttt{\\{u,v,w\\}}'), '<code class="ltx-tt">{u,v,w}</code>')
+assert.equal(
+  latexToHtml('\\kactlfigdesc{signed distance \\texttt{p}}{content/geometry/lineDistance}'),
+  'signed distance <code class="ltx-tt">p</code>',
+)
 assert.equal(latexToHtml('/usr/lib/gcc/{*}/4.9/include/'), '/usr/lib/gcc/*/4.9/include/')
 assert.equal(unescapeLatexText('\\~user'), '~user')
 assert.equal(unescapeLatexText('a\\_b'), 'a_b')

@@ -162,8 +162,38 @@ def strip_tex_comment(line: str) -> str:
     return "".join(out).rstrip()
 
 
+def unwrap_kactlfigdesc(text: str) -> str:
+    """Keep description text from \\kactlfigdesc{text}{figure}; drop the figure path."""
+    out: list[str] = []
+    i = 0
+    needle = r"\kactlfigdesc"
+    while True:
+        j = text.find(needle, i)
+        if j < 0:
+            out.append(text[i:])
+            break
+        out.append(text[i:j])
+        p = j + len(needle)
+        while p < len(text) and text[p].isspace():
+            p += 1
+        g1 = read_brace_group(text, p) if p < len(text) and text[p] == "{" else None
+        if not g1:
+            out.append(text[j:])
+            break
+        body, p = g1
+        while p < len(text) and text[p].isspace():
+            p += 1
+        g2 = read_brace_group(text, p) if p < len(text) and text[p] == "{" else None
+        if g2:
+            _path, p = g2
+        out.append(body)
+        i = p
+    return "".join(out)
+
+
 def strip_figures(text: str) -> str:
     """Drop includegraphics and unwrap minipage wrappers in snippet headers."""
+    text = unwrap_kactlfigdesc(text)
     text = INCLUDEGRAPHICS_RE.sub("", text)
     text = BEGIN_MINIPAGE_RE.sub("\n", text)
     text = text.replace(r"\end{minipage}", "\n")

@@ -3,16 +3,11 @@
  * Date: 2019-05-05
  * License: CC0
  * Source: https://vlecomte.github.io/cp-geo.pdf
- * Description:\\
-\begin{minipage}{75mm}
-If a unique intersection point of the lines going through \texttt{s1,e1} and \texttt{s2,e2} exists \texttt{\{1, point\}} is returned.
+ * Description:
+\kactlfigdesc{If a unique intersection point of the lines going through \texttt{s1,e1} and \texttt{s2,e2} exists \texttt{\{1, point\}} is returned.
 If no intersection point exists \texttt{\{0, (0,0)\}} is returned and if infinitely many exists \texttt{\{-1, (0,0)\}} is returned.
 The wrong position will be returned if \texttt{P} is \texttt{Point<ll>} and the intersection point does not have integer coordinates.
-Products of three coordinates are used in intermediate steps so watch out for overflow if using \texttt{int} or \texttt{ll}.
-\end{minipage}
-\begin{minipage}{15mm}
-\includegraphics[width=\textwidth]{content/geometry/lineIntersection}
-\end{minipage}
+Products of three coordinates are used in intermediate steps so watch out for overflow if using \texttt{int} or \texttt{ll}.}{content/geometry/lineIntersection}
  * Usage:
  * 	auto res = lineInter(s1,e1,s2,e2);
  * 	if (res.first == 1)

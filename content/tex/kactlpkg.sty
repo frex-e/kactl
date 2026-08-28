@@ -315,6 +315,18 @@
 \defdescription{}
 \setboolean{hasdescription}{false}
 
+% Description text + native 15mm figure, locked to the column width.
+% A wrapping paragraph (parfillskip from parskip) used to drop the figure
+% onto the text; an \hbox cannot wrap. Leave 5mm between text and figure.
+\newcommand{\kactlfigdesc}[2]{%
+	\par\noindent
+	\hbox to \linewidth{%
+		\begin{minipage}[t]{\dimexpr\linewidth-20mm\relax}#1\end{minipage}%
+		\hfill
+		\begin{minipage}[t]{15mm}\includegraphics[width=\linewidth,clip]{#2}\end{minipage}%
+	}%
+}
+
 \newboolean{hasusage}
 \newcommand{\defusage}[1]{
 	\def\@defusage{\texttt{#1}}
