@@ -35,7 +35,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 **Offline dynamic connectivity.** [content/data-structures/OfflineDynamicConnectivity.h](../content/data-structures/OfflineDynamicConnectivity.h) is sequential: `toggle(u, v)` adds or deletes an undirected edge, `query()` records a component-count snapshot, `ans()` returns answers. $q$ is an upper bound on the number of `toggle`/`query` calls.
 
-**Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset insert, XOR-min/max, XOR-count, lazy XOR-all, mex, and merge. XOR queries (`minxor`/`maxxor`/`count`/`mex`) take `xr` (default 0). `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s) and destroys the other trie; `merge<1>` adds multiplicities from `insertMulti`. Values are in $[0,2^{30})$.
+**Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset `insert<1>`, XOR-min/max, XOR-count, lazy XOR-all, mex, `each`, and merge. XOR queries (`minxor`/`maxxor`/`count`/`mex`) take `xr` (default 0). `each(f)` calls `f(x, cnt)` for each stored value. `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s) and destroys the other trie (safe to delete); `merge<1>` adds multiplicities from `insert<1>`. Values are in $[0,2^{30})$.
 
 **Unchanged on purpose.** Iterative [content/data-structures/SegmentTree.h](../content/data-structures/SegmentTree.h) (point updates) and geometry [content/geometry/Point.h](../content/geometry/Point.h) are still KACTL-style. Do not replace `Point` with a `complex` preamble unless asked.
 
@@ -47,7 +47,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 |---|---|
 | `content/contest/Random.h` | RNG + random ints / shuffle / odd hash bases |
 | `content/contest/Output.h` | `std::format` binary printing + fixed precision |
-| `content/data-structures/BinaryTrie.h` | insert/erase, XOR-min/max, count, lazy XOR, mex, set-union merge / `merge<1>` |
+| `content/data-structures/BinaryTrie.h` | insert/`insert<1>`/erase, XOR-min/max, count, lazy XOR, mex, each, set-union merge / `merge<1>` |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
 | `content/data-structures/LiChao.h` | min Li Chao (kept alongside `LineContainer.h`) |
 | `content/number-theory/LinearSieve.h` | linear sieve + least prime factor (kept alongside Eratosthenes) |

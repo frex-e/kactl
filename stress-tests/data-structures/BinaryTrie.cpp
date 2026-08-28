@@ -35,12 +35,28 @@ int bruteCount(const multiset<int>& vals, int xr, int k, int sgn) {
 
 int randVal() { return rand() & ((1 << 20) - 1); }
 
+map<int, int> collect(BinaryTrie& t) {
+	map<int, int> got;
+	t.each([&](int x, int c) { got[x] += c; });
+	int tot = 0;
+	for (auto [x, c] : got) tot += c;
+	assert(tot == t.cnt);
+	return got;
+}
+
+void checkEach(BinaryTrie& t, const multiset<int>& vals) {
+	map<int, int> want;
+	for (int v : vals) want[v]++;
+	assert(collect(t) == want);
+}
+
 void checkSet(BinaryTrie& t, const set<int>& vals, int xr) {
 	assert(t.cnt == sz(vals));
 	assert(t.mex(xr) == bruteMex(vals, xr));
 	multiset<int> ms(all(vals));
 	assert(t.minxor(xr) == bruteMinxor(ms, xr));
 	assert(t.maxxor(xr) == bruteMaxxor(ms, xr));
+	checkEach(t, ms);
 	rep(it,0,8) {
 		int k = randVal();
 		assert(t.count<0>(xr, k) == bruteCount(ms, xr, k, 0));
@@ -81,10 +97,11 @@ void testMulti() {
 				assert(t.erase(y) == 1);
 				vals.erase(vals.find(y));
 			} else {
-				t.insertMulti(x);
+				assert(t.insert<1>(x) == 1);
 				vals.insert(x);
 			}
 			assert(t.cnt == sz(vals));
+			checkEach(t, vals);
 			int xr = rand() % 16;
 			assert(t.minxor(xr) == bruteMinxor(vals, xr));
 			assert(t.maxxor(xr) == bruteMaxxor(vals, xr));
@@ -203,15 +220,16 @@ void testMergeMulti() {
 		rep(i,0,40) {
 			int x = rand() % 16;
 			if (rand() % 2) {
-				a.insertMulti(x);
+				a.insert<1>(x);
 			} else {
-				b.insertMulti(x);
+				b.insert<1>(x);
 			}
 			vals.insert(x);
 		}
 		a.merge<1>(b);
 		assert(b.cnt == 0);
 		assert(a.cnt == sz(vals));
+		checkEach(a, vals);
 		int xr = rand() % 16;
 		assert(a.minxor(xr) == bruteMinxor(vals, xr));
 		assert(a.maxxor(xr) == bruteMaxxor(vals, xr));
@@ -242,8 +260,8 @@ void testMergeOverlapMex() {
 	assert(c.mex() == 2);
 
 	BinaryTrie e, f;
-	e.insertMulti(5); e.insertMulti(5);
-	f.insertMulti(5); f.insertMulti(7);
+	e.insert<1>(5); e.insert<1>(5);
+	f.insert<1>(5); f.insert<1>(7);
 	e.merge<1>(f);
 	assert(e.cnt == 4);
 	assert(e.minxor(0) == 5);
@@ -281,6 +299,40 @@ void testDuplicatesAndEmpty() {
 	assert(t.erase(1));
 	assert(!t.erase(1));
 	assert(t.cnt == 2);
+	checkEach(t, {0, 2});
+}
+
+void testEachAndDeleteAfterMerge() {
+	BinaryTrie empty;
+	int calls = 0;
+	empty.each([&](int, int) { calls++; });
+	assert(calls == 0);
+
+	BinaryTrie *a = new BinaryTrie(), *b = new BinaryTrie();
+	assert(a->insert(1) && a->insert(4));
+	assert(b->insert(1) && b->insert(2) && b->insert(8));
+	a->merge(*b);
+	assert(b->cnt == 0);
+	delete b;
+	checkEach(*a, {1, 2, 4, 8});
+	assert(a->cnt == 4);
+	assert(a->mex() == 0);
+	a->xorAll(1);
+	checkEach(*a, {0, 3, 5, 9});
+	delete a;
+
+	BinaryTrie *c = new BinaryTrie(), *d = new BinaryTrie();
+	assert(c->insert<1>(3) == 1);
+	assert(c->insert<1>(3) == 1);
+	assert(d->insert<1>(3) == 1);
+	assert(d->insert<1>(5) == 1);
+	c->merge<1>(*d);
+	delete d;
+	checkEach(*c, {3, 3, 3, 5});
+	assert(c->cnt == 4);
+	assert(c->erase(3) == 1);
+	checkEach(*c, {3, 3, 5});
+	delete c;
 }
 
 int main() {
@@ -292,5 +344,6 @@ int main() {
 	testMerge();
 	testMergeMulti();
 	testMergeOverlapMex();
+	testEachAndDeleteAfterMerge();
 	cout << "Tests passed!" << endl;
 }
