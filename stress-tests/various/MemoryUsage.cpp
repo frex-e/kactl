@@ -4,11 +4,16 @@
 
 #include <sys/mman.h>
 
-static ll currentRssKb() {
+static ll procKb(const string& field) {
 	ifstream in("/proc/self/status");
-	string key, val;
-	while (in >> key >> val) {
-		if (key == "VmRSS:") return stoll(val);
+	string line;
+	while (getline(in, line)) {
+		if (line.rfind(field, 0) != 0) continue;
+		stringstream ss(line);
+		string key, unit;
+		ll kb;
+		ss >> key >> kb >> unit;
+		return kb;
 	}
 	return -1;
 }
@@ -16,7 +21,7 @@ static ll currentRssKb() {
 int main() {
 	const size_t N = 32ull << 20; // 32 MiB, touched so it counts toward RSS
 	ll peak0 = getMemoryUsage();
-	ll rss0 = currentRssKb();
+	ll rss0 = procKb("VmRSS:");
 
 	void* p = mmap(nullptr, N, PROT_READ | PROT_WRITE,
 		MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -24,13 +29,13 @@ int main() {
 	memset(p, 1, N);
 
 	ll peak1 = getMemoryUsage();
-	ll rss1 = currentRssKb();
+	ll rss1 = procKb("VmRSS:");
 	assert(peak1 > peak0);
 
 	munmap(p, N);
 
 	ll peak2 = getMemoryUsage();
-	ll rss2 = currentRssKb();
+	ll rss2 = procKb("VmRSS:");
 	assert(peak2 >= peak1); // lifetime high-water mark; does not drop
 
 	cout << "ru_maxrss (lifetime peak): " << peak0 << " -> " << peak1
