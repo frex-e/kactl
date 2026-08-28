@@ -3,8 +3,9 @@
  * Date: 2026-08-16
  * License: CC0
  * Source: me
- * Description: Max RSS. Kilobytes on Linux, bytes on macOS.
- * Status: untested
+ * Description: Maximum RSS over the lifetime of the program
+ * so far, not current RSS. Kilobytes on Linux, bytes on macOS.
+ * Status: stress-tested
  */
 #pragma once
 
