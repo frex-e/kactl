@@ -183,6 +183,9 @@ int main() {
 	// two nodes
 	check(2, {{0,1,7}}, {0, 1});
 	check(1, {}, {0});
+	// terminals are not vertices 0..k-1
+	check(5, {{0,1,1},{1,2,1},{2,3,1},{3,4,1}}, {4, 2});
+	check(5, {{0,1,1},{1,2,1},{2,3,1},{3,4,1}}, {4, 3, 1});
 
 	rep(it,0,200) {
 		int n = randIncl(1, 8);
