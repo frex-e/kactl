@@ -1,5 +1,6 @@
 #include "../utilities/template.h"
 
+#define pb push_back
 #include "../../content/strings/Duval.h"
 #include "../../content/strings/MinRotation.h"
 
