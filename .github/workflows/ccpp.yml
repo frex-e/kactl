@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ccpp-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
 
@@ -14,6 +18,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Install pdflatex
       run: |
         sudo apt-get update
@@ -30,4 +36,9 @@ jobs:
     - name: Run compiles
       run: make test-compiles
     - name: Run stress tests
-      run: make test
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          make test-relevant BASE="${{ github.event.pull_request.base.sha }}"
+        else
+          make test
+        fi

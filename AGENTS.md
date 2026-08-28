@@ -15,6 +15,8 @@ prefer those instead of duplicating them.
 - `make test-compiles` — compile-check every `content/**/*.h` header (~143 headers).
 - `make test` — build and run every stress test in `stress-tests/` (~81 tests, takes a
   couple of minutes; it raises the stack limit via `ulimit -s` for the 2-SAT test).
+- `make test-relevant` — same runner, but only tests that depend on files changed vs
+  `BASE` (default `origin/main`). PR CI uses this; pushes to `main` still run `make test`.
 
 ### Non-obvious notes
 - System dependencies are provided by the base image/snapshot, **not** by the update script:

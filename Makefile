@@ -14,6 +14,7 @@ help:
 	@echo "	make clean		- to clean up the build process"
 	@echo "	make veryclean		- to clean up and remove kactl.pdf"
 	@echo "	make test		- to run all the stress tests in stress-tests/"
+	@echo "	make test-relevant	- to run stress tests affected by changes vs BASE (default origin/main)"
 	@echo "	make test-compiles	- to test compiling all headers"
 	@echo "	make test-preprocess	- to run preprocessor unit tests"
 	@echo "	make help		- to show this information"
@@ -56,13 +57,16 @@ clean:
 veryclean: clean
 	rm -f kactl.pdf test-session.pdf web/public/kactl.pdf web/public/snippets.json
 
-.PHONY: help fast kactl web-pdf preprocess clean veryclean test test-compiles test-preprocess showexcluded
+.PHONY: help fast kactl web-pdf preprocess clean veryclean test test-relevant test-compiles test-preprocess showexcluded
 
 build:
 	mkdir -p build/
 
 test:
 	./doc/scripts/run-all.sh .
+
+test-relevant:
+	./doc/scripts/run-relevant.sh .
 
 test-compiles:
 	./doc/scripts/compile-all.sh .
