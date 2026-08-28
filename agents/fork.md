@@ -45,7 +45,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 
 | File | What |
 |---|---|
-| `content/contest/Random.h` | RNG + how to draw random ints / odd hash bases |
+| `content/contest/Random.h` | RNG + random ints / shuffle / odd hash bases |
 | `content/contest/Output.h` | `std::format` binary printing + fixed precision |
 | `content/data-structures/BinaryTrie.h` | insert/erase, XOR-min/max, count, lazy XOR, mex, set-union merge / `merge<1>` |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
