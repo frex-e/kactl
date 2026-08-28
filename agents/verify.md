@@ -11,7 +11,7 @@ All commands below run from the **repo root**. `make help` lists targets.
 | `make fast` | Preprocess plus a single LaTeX pass (quicker, worse refs/TOC). Same install step. |
 | `make web-pdf` | Preprocess plus two-pass PDF **without** `test-session.pdf`. This is what GitHub Pages uses. |
 | `make showexcluded` | Headers/sources in `content/` with no `\kactlimport`. |
-| `make test-preprocess` | Unit tests for snippet stripping, chapter parsing, and print-header. |
+| `make test-preprocess` | Unit tests for snippet stripping, chapter parsing, print-header, and stress-test selection. |
 
 `pdflatex` is invoked with **`-shell-escape`** (required: page headers shell out to `python3 -m tools.kactl print-header`). Make copies `build/header.tmp.seed` to `build/header.tmp` before each pass; print-header is the only remaining `write18`. Snippet listings are generated *before* LaTeX, not per `\kactlimport`.
 
@@ -39,6 +39,8 @@ Compiler: [doc/scripts/cxx.sh](../doc/scripts/cxx.sh). Prefers `g++-15`, then `g
 - Raises the stack limit (`ulimit -s 524288`) for the 2-SAT test.
 - Needs `bc` for timing.
 
+`make test-relevant` → `doc/scripts/run-relevant.sh` → `python3 -m tools.stress_select`, then the same runner on a subset. A test is selected if the changed file is the test itself, is quoted-included (transitively) from the test, or matches `content/<chapter>/<stem>.*` → `stress-tests/<chapter>/<stem>.cpp` (case-insensitive stem; covers tests that paste the algorithm). Changes to the runner/selector/`Makefile`/C++ workflow run the full suite. Doc/web/TeX-only diffs skip stress tests. Override the git base with `BASE=...` (CI sets it to the PR base SHA). Force an explicit file list with `STRESS_CHANGED="content/graph/2sat.h"`. If git cannot resolve a base, it falls back to all tests.
+
 A typical test includes `../utilities/template.h` (**not** the contest template — no `pb`/`fr`/`sc`) and the header under test, then prints `Tests passed!` on success. Mirror the chapter path, e.g. `content/data-structures/LiChao.h` → `stress-tests/data-structures/LiChao.cpp`. If two snippets both define `Node` (or another common name), wrap each `#include` in a namespace, as in `PersistentSegmentTree.cpp` and `SegmentTree.cpp`.
 
 Helpers live in `stress-tests/utilities/` (`template.h`, graph generators, etc.).
@@ -47,7 +49,7 @@ Helpers live in `stress-tests/utilities/` (`template.h`, graph generators, etc.)
 
 ## CI
 
-- [`.github/workflows/ccpp.yml`](../.github/workflows/ccpp.yml) — on push/PR to `main`: `make kactl`, `make test-preprocess`, `make test-compiles`, `make test`.
+- [`.github/workflows/ccpp.yml`](../.github/workflows/ccpp.yml) — on push/PR to `main`: `make kactl`, `make test-preprocess`, `make test-compiles`, then stress tests (`make test-relevant` on PRs vs the base SHA, `make test` on `main`). Concurrent runs on the same ref cancel in progress.
 - [`.github/workflows/pages.yml`](../.github/workflows/pages.yml) — on push to `main` (paths: `web/**`, `content/**`, `tools/**`, `Makefile`, the workflow itself): `make web-pdf`, then `npm ci && npm run build` in `web/`, deploy `web/dist`.
 
 When changing snippets, the usual bar is: header still compiles, a stress test exists and passes if the algorithm is new/non-trivial, and the PDF still builds if `chapter.tex` or headers changed. Full `make test` takes a couple of minutes.

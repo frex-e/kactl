@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 DIR=${1:-.}
+shift || true
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 # shellcheck source=cxx.sh
 . "$SCRIPT_DIR/cxx.sh"
@@ -20,15 +21,21 @@ now() {
 	fi
 }
 
-tests="$(find $DIR/stress-tests -name '*.cpp')"
+if [ $# -gt 0 ]; then
+	tests=("$@")
+	echo "Running ${#tests[@]} selected stress test(s)"
+else
+	mapfile -t tests < <(find "$DIR/stress-tests" -name '*.cpp' | sort)
+fi
+
 declare -i pass=0
 declare -i fail=0
 failTests=""
 ulimit -s 524288 # For 2-sat test
-for test in $tests; do
-    echo "$(basename $test): "
+for test in "${tests[@]}"; do
+    echo "$(basename "$test"): "
     start=$(now)
-    $CXX -Wall -Wfatal-errors -Wconversion -std=c++20 -O2 $test && ./a.out
+    $CXX -Wall -Wfatal-errors -Wconversion -std=c++20 -O2 "$test" && ./a.out
     retCode=$?
     if (($retCode != 0)); then
         echo "Failed with $retCode"
