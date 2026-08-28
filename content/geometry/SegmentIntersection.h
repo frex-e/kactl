@@ -3,12 +3,17 @@
  * Date: 2019-04-27
  * License: CC0
  * Source: https://vlecomte.github.io/cp-geo.pdf
- * Description:
-\kactlfigdesc{If a unique intersection point between the line segments going from \texttt{s1} to \texttt{e1} and from \texttt{s2} to \texttt{e2} exists then it is returned.
+ * Description:\\
+\begin{minipage}{\dimexpr\linewidth-15mm\relax}
+If a unique intersection point between the line segments going from \texttt{s1} to \texttt{e1} and from \texttt{s2} to \texttt{e2} exists then it is returned.
 If no intersection point exists an empty vector is returned.
 If infinitely many exist a vector with 2 elements is returned, containing the endpoints of the common line segment.
 The wrong position will be returned if \texttt{P} is \texttt{Point<ll>} and the intersection point does not have integer coordinates.
-Products of three coordinates are used in intermediate steps so watch out for overflow if using \texttt{int} or \texttt{long long}.}{content/geometry/SegmentIntersection}
+Products of three coordinates are used in intermediate steps so watch out for overflow if using \texttt{int} or \texttt{long long}.
+\end{minipage}%
+\begin{minipage}{15mm}
+\includegraphics[width=\textwidth]{content/geometry/SegmentIntersection}
+\end{minipage}
  * Usage:
  * vector<P> inter = segInter(s1,e1,s2,e2);
  * if (sz(inter)==1)

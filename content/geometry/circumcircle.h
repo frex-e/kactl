@@ -3,8 +3,14 @@
  * Date: 2009-04-11
  * License: CC0
  * Source: http://en.wikipedia.org/wiki/Circumcircle
- * Description:
-\kactlfigdesc{The circumcirle of a triangle is the circle intersecting all three vertices. \texttt{ccRadius} returns the radius of the circle going through points A, B and C and \texttt{ccCenter} returns the center of the same circle.}{content/geometry/circumcircle}
+ * Description:\\
+\begin{minipage}{\dimexpr\linewidth-15mm\relax}
+The circumcirle of a triangle is the circle intersecting all three vertices. \texttt{ccRadius} returns the radius of the circle going through points A, B and C and \texttt{ccCenter} returns the center of the same circle.
+\end{minipage}%
+\begin{minipage}{15mm}
+\vspace{-2mm}
+\includegraphics[width=\textwidth]{content/geometry/circumcircle}
+\end{minipage}
  * Status: tested
  */
 #pragma once

@@ -28,7 +28,7 @@ C++/Java/Python snippets start with a `/** ... */` (or `'''` / `"""`) metadata c
 
 Unknown keys are a PDF build error (`\kactlerror`). Description/Usage/Time appear above the listing; `#include`s become the left caption; a 6-char hash and line count become the right caption.
 
-Geometry snippets with a 15mm figure use `\kactlfigdesc{text}{content/geometry/File}` in the Description (defined in `kactlpkg.sty`) so the diagram stays in the column. Do not go back to 75mm+15mm minipages with negative `\vspace`.
+Geometry snippets with a figure use the same glued minipages as upstream KACTL: text in `\begin{minipage}{\dimexpr\linewidth-15mm\relax}` (upstream hard-codes `75mm`) next to a 15mm figure, plus the per-figure `\vspace{-Nmm}` on short descriptions. Do not wrap that in an `\hfill` hbox — the extra gap is what made the diagrams look sparse.
 
 Prefer `Status: stress-tested` when there is a matching file under `stress-tests/`.
 
