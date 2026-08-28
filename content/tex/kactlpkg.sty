@@ -46,7 +46,9 @@
 
 \newcommand{\enablecolors}{
 	\lstset{basicstyle=\footnotesize\ttfamily\color{mygreen}}
-	\lstset{commentstyle=\color{darkgray}\normalfont\itshape}
+	% Keep Inconsolata; only gray it. Roman italic next to mono looked wrong,
+	% and l/1 in comments no longer matched the code.
+	\lstset{commentstyle=\color{darkgray}}
 	\lstset{keywordstyle=\color{myblue}}
 	\lstset{identifierstyle=\color{black}}
 }
@@ -193,7 +195,7 @@
 \lstset{showstringspaces=false}
 \lstset{breaklines=true}
 \lstset{basicstyle=\footnotesize\ttfamily}
-\lstset{commentstyle=\normalfont\itshape}
+\lstset{commentstyle=\ttfamily}
 \lstset{literate={^}{\caret}{1} {~}{\tilde}{1} {\{}{\nicelbrace}{1} {\}}{\nicerbrace}{1}}
 \lstset{emptylines=*1}
 \lstset{inputencoding=utf8}
