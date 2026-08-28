@@ -8,7 +8,7 @@
  *  count $x\oplus y<k$ (\texttt{count<0>}) or $>k$
  *  (\texttt{count<1>}), lazy XOR-all, mex (set).
  *  XOR queries take $xr$ (default 0). \texttt{cnt} is the
- *  size. \texttt{each}($f$) calls $f(x, cnt)$. \texttt{merge}
+ *  size. \texttt{each}($f$) calls $f(x,\texttt{cnt})$. \texttt{merge}
  *  is set-union (destroys $o$; safe to delete);
  *  \texttt{merge<1>} adds counts. mex needs unique values.
  * Time: $O(B)$ per op
@@ -86,7 +86,7 @@ struct BinaryTrie {
 		push(i);
 		if (!i) f(x, cnt);
 		else rep(b,0,2) if (c[b])
-			c[b]->each(f, i - 1, x | b << i - 1);
+			c[b]->each(f, i - 1, x | (b << (i - 1)));
 	}
 	template<int ms = 0>
 	void merge(T& o, int i = B) { // o safe to delete
