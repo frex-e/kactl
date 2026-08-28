@@ -11,7 +11,7 @@ KACTL’s iterative `SegmentTree.h` is unchanged (simple point-update ops). Geom
 - University: Monash / Monash University / `monash`
 - Team: **A Succulent Chinese Algorithm** — Indra Kusumah-Kasim, Alex Yu, and Parsa Pordastan
 
-Code listings use **Inconsolata** (`varl` + `varqu`, vendored under [`texmf/`](../texmf/README.md)) instead of Courier, so `1` / `l` / `I` and `0` / `O` stay distinct in the printed notebook.
+Code listings use **Inconsolata** (`varl` + `varqu` + `mono`, vendored under [`texmf/`](../texmf/README.md)) instead of Courier, so `1` / `l` / `I` and `0` / `O` stay distinct in the printed notebook. listings `basewidth` is `0.5em` to match the glyph width (Courier’s `0.6em` default wrapped ~54-character lines).
 
 The snippets site is this fork’s addition (not upstream). See [web.md](web.md).
 

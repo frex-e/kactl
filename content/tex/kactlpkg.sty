@@ -14,8 +14,10 @@
 \usepackage{ifthen}                     % To enable some conditional programming in LaTeX
 % Inconsolata (vendored in texmf/): varl = tailed l, slashed 0 by default,
 % varqu = upright quotes. Distinguishes 1/l/I and 0/O at listing size.
+% mono keeps word spacing at 0.5em (the glyph width) so listings and
+% \texttt captions do not stretch leftover space to the end of the line.
 % Stay on OT1 so body text keeps Type1 Computer Modern (T1 would need cm-super).
-\usepackage[varl,varqu]{inconsolata}
+\usepackage[varl,varqu,mono]{inconsolata}
 \pdfmapfile{+zi4.map}
 \usepackage{graphicx}                   % To rotate page numbers
 \usepackage{fix-cm}                     % Large font sizes
@@ -194,6 +196,10 @@
 \lstset{tabsize=2}
 \lstset{showstringspaces=false}
 \lstset{breaklines=true}
+% Inconsolata glyphs are 0.5em. listings defaults to columns=fixed with
+% basewidth=0.6em (Courier). That made ~54-character lines wrap, leaving a
+% short leftover line -- wasted vertical space at the end of snippets.
+\lstset{columns=fixed,basewidth=0.5em,keepspaces=true}
 \lstset{basicstyle=\footnotesize\ttfamily}
 \lstset{commentstyle=\ttfamily}
 \lstset{literate={^}{\caret}{1} {~}{\tilde}{1} {\{}{\nicelbrace}{1} {\}}{\nicerbrace}{1}}
