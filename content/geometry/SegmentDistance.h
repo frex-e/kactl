@@ -4,10 +4,10 @@
  * License: CC0
  * Source:
  * Description:\\
-\begin{minipage}{\dimexpr\linewidth-16mm\relax}
+\begin{minipage}[t]{\dimexpr\linewidth-16mm\relax}\vspace{0pt}
 Returns the shortest distance between point \texttt{p} and the line segment from point \texttt{s} to \texttt{e}.
 \end{minipage}%
-\begin{minipage}{15mm}
+\begin{minipage}[t]{15mm}\vspace{0pt}
 \includegraphics[width=\linewidth]{content/geometry/SegmentDistance}
 \end{minipage}
  * Usage: 
