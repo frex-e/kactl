@@ -45,8 +45,16 @@
 	Common moduli: $10^9+7$, $10^9+9$, and $998244353=119\cdot 2^{23}+1$ (NTT).
 	Switch if one may collide.
 
-	Primitive roots exist modulo any prime power $p^a$, except for $p = 2, a > 2$, and there are $\phi(\phi(p^a))$ many.
-	For $p = 2, a > 2$, the group $\mathbb Z_{2^a}^\times$ is instead isomorphic to $\mathbb Z_2 \times \mathbb Z_{2^{a-2}}$.
+	\subsection{Order and primitive roots}
+	The order of $a$ modulo $p$ ($p\nmid a$) is the smallest $k>0$ with $a^k\equiv 1\pmod p$; it divides $p-1$. Compute it by factoring $p-1$, starting from $k=p-1$, and replacing $k\leftarrow k/q$ while $q\mid k$ and $a^{k/q}\equiv 1$. $g$ is a primitive root iff $\mathrm{ord}_p(g)=p-1$ iff $g^{(p-1)/q}\not\equiv 1\pmod p$ for all primes $q\mid p-1$. There are $\phi(p-1)$ of them. If calling many times for the same $p$, precompute \texttt{pfactors($p-1$)}.
+
+	Primitive roots exist modulo $n$ iff $n=2,4,p^k$ or $2p^k$ for odd prime $p$, and there are $\phi(\phi(n))$ of them.
+	For $p=2$, $a>2$, $\mathbb Z_{2^a}^\times\cong\mathbb Z_2\times\mathbb Z_{2^{a-2}}$.
+	If $g$ is a primitive root mod odd prime $p$, then $g$ is one mod all $p^k$ iff $g^{p-1}\not\equiv 1\pmod{p^2}$; otherwise $g+p$ works.
+	If $g$ is a primitive root mod $p^k$, the odd one of $g$ and $g+p^k$ is a primitive root mod $2p^k$.
+	For general $n$ with $\gcd(a,n)=1$, replace $p-1$ by $\phi(n)$.
+
+	\kactlimport{PrimitiveRoot.h}
 
 \section{Estimates}
 	$\sum_{d|n} d = O(n \log \log n)$.

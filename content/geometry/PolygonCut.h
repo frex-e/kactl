@@ -3,13 +3,8 @@
  * Date: 2009-03-21
  * License: CC0
  * Source:
- * Description:\\
-\begin{minipage}[t]{\dimexpr\linewidth-16mm\relax}\vspace{0pt}
- Returns a vector with the vertices of a polygon with everything to the left of the line going from \texttt{s} to \texttt{e} cut away.
-\end{minipage}%
-\begin{minipage}[t]{15mm}\vspace{0pt}
-\includegraphics[width=\linewidth]{content/geometry/PolygonCut}
-\end{minipage}
+ * Description:
+\kactlfigdesc{Returns a vector with the vertices of a polygon with everything to the left of the line going from \texttt{s} to \texttt{e} cut away.}{content/geometry/PolygonCut}
  * Usage:
  * 	vector<P> p = ...;
  * 	p = polygonCut(p, P(0,0), P(1,0));

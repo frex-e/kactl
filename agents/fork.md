@@ -45,7 +45,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 
 | File | What |
 |---|---|
-| `content/contest/Random.h` | RNG + how to draw random ints / odd hash bases |
+| `content/contest/Random.h` | RNG + random ints / shuffle / odd hash bases |
 | `content/contest/Output.h` | `std::format` binary printing + fixed precision |
 | `content/data-structures/BinaryTrie.h` | insert/erase, XOR-min/max, count, lazy XOR, mex, set-union merge / `merge<1>` |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
@@ -69,6 +69,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/graph/DominatorTree.h` | Lengauer--Tarjan dominator tree (from cactl / Benq); runtime $n$, ctor takes adj+root |
 | `content/graph/SteinerTree.h` | Dreyfus--Wagner Steiner tree; Library Checker `correct.cpp` rewrite; cost + edge indices |
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
+| `content/number-theory/PrimitiveRoot.h` | order of $a$ mod prime $p$, plus smallest primitive root |
 
 Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, flow demands / lower bounds.
 
@@ -92,16 +93,17 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/various/KnuthDP.h` | quadrangle notes (verified patterns) + `knuthDP` implementation |
 | `content/various/DivideAndConquerDP.h` | layered recurrence + usage of `lo`/`hi`/`f`/`store` |
 | `content/graph/chapter.tex` | Johnson’s notes; Dinic; centroid; demands / lower bounds; blossom; dominator tree; Steiner tree |
-| `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks |
+| `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks; order / primitive roots |
 | `content/contest/chapter.tex` | Random + Output.h |
 | `content/various/chapter.tex` | builtins, pragmas, memory |
 | `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ / beats / monotonic map |
 | `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, min-plus convolution; Fourier → Convolutions |
-| `content/geometry/chapter.tex` | half-plane intersection; figure minipages sized to `\linewidth` so they fit the 1.0cm-margin columns |
+| `content/geometry/chapter.tex` | half-plane intersection |
+| geometry figure captions | `\kactlfigdesc` so 15mm diagrams fit the printable-margin columns |
 
 ## Tests
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
-- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree
+- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`

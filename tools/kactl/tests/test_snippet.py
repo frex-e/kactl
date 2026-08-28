@@ -9,7 +9,7 @@ from io import StringIO
 from pathlib import Path
 
 from tools.kactl import CONTENT
-from tools.kactl.chapter import chapter_order, parse_chapter_imports
+from tools.kactl.chapter import chapter_order, parse_chapter_imports, strip_figures
 from tools.kactl.emit_tex import print_header
 from tools.kactl.snippet import process_path, resolve_language
 
@@ -87,34 +87,29 @@ class TestChapterParse(unittest.TestCase):
         self.assertFalse(imports["UnionFind.h"].included_in_pdf)
         self.assertTrue(imports["LazySegmentTree.h"].included_in_pdf)
 
-    def test_geometry_included_in_pdf(self):
-        imports = parse_chapter_imports("geometry")
-        self.assertTrue(imports)
-        self.assertTrue(imports["Point.h"].included_in_pdf)
-        self.assertTrue(imports["lineDistance.h"].included_in_pdf)
-        self.assertFalse(imports["LineProjectionReflection.h"].included_in_pdf)
-        self.assertIn("geometry", chapter_order())
-
-    def test_geometry_figure_minipages_fit_column(self):
-        from tools.kactl.chapter import strip_figures
-        from tools.kactl.snippet import process_path
-
-        path = CONTENT / "geometry" / "lineDistance.h"
-        processed = process_path(path)
-        desc = processed.commands["Description"]
-        self.assertIn(r"\begin{minipage}[t]{\dimexpr\linewidth-16mm\relax}", desc)
-        self.assertIn(r"\end{minipage}%", desc)
-        self.assertNotIn("{75mm}", desc)
+    def test_kactlfigdesc_unwrapped_for_site(self):
+        desc = process_path(CONTENT / "geometry" / "lineDistance.h").commands["Description"]
         stripped = strip_figures(desc)
         self.assertIn("signed distance", stripped)
+        self.assertNotIn("kactlfigdesc", stripped)
         self.assertNotIn("includegraphics", stripped)
-        self.assertNotIn("minipage", stripped)
-        self.assertFalse(stripped.endswith("%"))
+        self.assertNotIn("content/geometry/lineDistance", stripped)
+        self.assertFalse(stripped.rstrip().endswith("%"))
+
+    def test_geometry_included_in_pdf(self):
+        imports = parse_chapter_imports("geometry")
+        self.assertTrue(imports["Point.h"].included_in_pdf)
+        self.assertTrue(imports["lineDistance.h"].included_in_pdf)
+        self.assertTrue(imports["ConvexHull.h"].included_in_pdf)
+        self.assertTrue(imports["HalfplaneIntersection.h"].included_in_pdf)
+        self.assertFalse(imports["LineProjectionReflection.h"].included_in_pdf)
+        self.assertFalse(imports["CircleLine.h"].included_in_pdf)
+        self.assertFalse(imports["PolygonUnion.h"].included_in_pdf)
+        self.assertFalse(imports["ManhattanMST.h"].included_in_pdf)
+        self.assertFalse(imports["DelaunayTriangulation.h"].included_in_pdf)
+        self.assertIn("geometry", chapter_order())
 
     def test_geometry_site_descriptions_drop_figures(self):
-        from tools.kactl.chapter import strip_figures
-        from tools.kactl.snippet import process_path
-
         names = [
             "lineDistance.h",
             "SegmentDistance.h",
@@ -130,6 +125,7 @@ class TestChapterParse(unittest.TestCase):
                 desc = process_path(CONTENT / "geometry" / name).commands["Description"]
                 stripped = strip_figures(desc)
                 self.assertTrue(stripped)
+                self.assertNotIn("kactlfigdesc", stripped)
                 self.assertNotIn("includegraphics", stripped)
                 self.assertNotIn("minipage", stripped)
                 self.assertNotIn("vspace", stripped)

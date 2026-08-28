@@ -3,14 +3,9 @@
  * Date: 2019-05-05
  * License: Unlicense
  * Source: https://github.com/stjepang/snippets/blob/master/convex_hull.cpp
- * Description:\\
-\begin{minipage}[t]{\dimexpr\linewidth-16mm\relax}\vspace{0pt}
-Returns a vector of the points of the convex hull in counter-clockwise order.
-Points on the edge of the hull between two other points are not considered part of the hull.
-\end{minipage}%
-\begin{minipage}[t]{15mm}\vspace{0pt}
-\includegraphics[width=\linewidth]{content/geometry/ConvexHull}
-\end{minipage}
+ * Description:
+\kactlfigdesc{Returns a vector of the points of the convex hull in counter-clockwise order.
+Points on the edge of the hull between two other points are not considered part of the hull.}{content/geometry/ConvexHull}
  * Time: O(n \log n)
  * Status: stress-tested, tested with kattis:convexhull
 */

@@ -3,13 +3,8 @@
  * Date: 2009-04-09
  * License: CC0
  * Source:
- * Description:\\
-\begin{minipage}[t]{\dimexpr\linewidth-16mm\relax}\vspace{0pt}
- Apply the linear transformation (translation, rotation and scaling) which takes line \texttt{p0}-\texttt{p1} to line \texttt{q0}-\texttt{q1} to point \texttt{r}.
-\end{minipage}%
-\begin{minipage}[t]{15mm}\vspace{0pt}
-\includegraphics[width=\linewidth]{content/geometry/linearTransformation}
-\end{minipage}
+ * Description:
+\kactlfigdesc{Apply the linear transformation (translation, rotation and scaling) which takes line \texttt{p0}-\texttt{p1} to line \texttt{q0}-\texttt{q1} to point \texttt{r}.}{content/geometry/linearTransformation}
  * Status: not tested
  */
 #pragma once
