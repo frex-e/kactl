@@ -94,10 +94,12 @@ class TestChapterParse(unittest.TestCase):
         self.assertNotIn("kactlfigdesc", stripped)
         self.assertNotIn("includegraphics", stripped)
         self.assertNotIn("content/geometry/lineDistance", stripped)
+        self.assertFalse(stripped.rstrip().endswith("%"))
 
     def test_geometry_included_in_pdf(self):
         imports = parse_chapter_imports("geometry")
         self.assertTrue(imports["Point.h"].included_in_pdf)
+        self.assertTrue(imports["lineDistance.h"].included_in_pdf)
         self.assertTrue(imports["ConvexHull.h"].included_in_pdf)
         self.assertTrue(imports["HalfplaneIntersection.h"].included_in_pdf)
         self.assertFalse(imports["LineProjectionReflection.h"].included_in_pdf)
@@ -106,6 +108,28 @@ class TestChapterParse(unittest.TestCase):
         self.assertFalse(imports["ManhattanMST.h"].included_in_pdf)
         self.assertFalse(imports["DelaunayTriangulation.h"].included_in_pdf)
         self.assertIn("geometry", chapter_order())
+
+    def test_geometry_site_descriptions_drop_figures(self):
+        names = [
+            "lineDistance.h",
+            "SegmentDistance.h",
+            "SegmentIntersection.h",
+            "lineIntersection.h",
+            "linearTransformation.h",
+            "circumcircle.h",
+            "PolygonCut.h",
+            "ConvexHull.h",
+        ]
+        for name in names:
+            with self.subTest(name=name):
+                desc = process_path(CONTENT / "geometry" / name).commands["Description"]
+                stripped = strip_figures(desc)
+                self.assertTrue(stripped)
+                self.assertNotIn("kactlfigdesc", stripped)
+                self.assertNotIn("includegraphics", stripped)
+                self.assertNotIn("minipage", stripped)
+                self.assertNotIn("vspace", stripped)
+                self.assertFalse(stripped.rstrip().endswith("%"), stripped)
 
     def test_raw_template_keeps_include(self):
         path = CONTENT / "contest" / "template.cpp"
