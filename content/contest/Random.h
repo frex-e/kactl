@@ -5,7 +5,6 @@
  * Source: me
  * Description: Seeded RNG and drawing random integers.
  *  For string hashing, take a random odd 61-bit base.
- * Usage: shuffle(all(v), rng);
  * Status: untested
  */
 #pragma once
