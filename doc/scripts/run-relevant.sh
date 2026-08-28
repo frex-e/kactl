@@ -11,6 +11,14 @@ args=()
 if [ -n "${BASE:-}" ]; then
 	args+=(--base "$BASE")
 fi
+if [ -n "${STRESS_CHANGED+x}" ]; then
+	args+=(--changed)
+	if [ -n "${STRESS_CHANGED}" ]; then
+		# shellcheck disable=SC2206
+		changed_files=($STRESS_CHANGED)
+		args+=("${changed_files[@]}")
+	fi
+fi
 
 output=$(python3 -m tools.stress_select --repo "$REPO" --mode-line "${args[@]}")
 mapfile -t lines <<< "$output"

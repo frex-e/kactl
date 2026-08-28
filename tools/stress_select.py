@@ -141,6 +141,7 @@ def is_infra(rel_path: str) -> bool:
 def normalize_changed(repo: Path, files: list[str]) -> list[str]:
     out: list[str] = []
     seen: set[str] = set()
+    repo = repo.resolve()
     for raw in files:
         raw = raw.strip().replace("\\", "/")
         if not raw:
@@ -151,7 +152,9 @@ def normalize_changed(repo: Path, files: list[str]) -> list[str]:
             if rel is None:
                 continue
         else:
-            rel = Path(raw).as_posix().lstrip("./")
+            rel = path.as_posix()
+            while rel.startswith("./"):
+                rel = rel[2:]
         if rel not in seen:
             seen.add(rel)
             out.append(rel)

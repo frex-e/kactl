@@ -70,6 +70,12 @@ class TestSelectHelpers(unittest.TestCase):
         self.assertEqual(sel.mode, "all")
         self.assertEqual(sel.tests, list_tests(REPO_ROOT))
 
+    def test_workflow_dotfile_is_infra(self):
+        # lstrip("./") would turn this into github/workflows/... and skip tests.
+        sel = select(REPO_ROOT, [".github/workflows/ccpp.yml"])
+        self.assertEqual(sel.mode, "all")
+        self.assertIn(".github/workflows/ccpp.yml", sel.reason)
+
     def test_test_file_itself(self):
         sel = select(REPO_ROOT, ["stress-tests/graph/2sat.cpp"])
         self.assertEqual(sel.mode, "subset")
