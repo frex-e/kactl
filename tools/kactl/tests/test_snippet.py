@@ -87,6 +87,12 @@ class TestChapterParse(unittest.TestCase):
         self.assertFalse(imports["UnionFind.h"].included_in_pdf)
         self.assertTrue(imports["LazySegmentTree.h"].included_in_pdf)
 
+    def test_simd_excluded_from_pdf(self):
+        imports = parse_chapter_imports("various")
+        self.assertIn("SIMD.h", imports)
+        self.assertFalse(imports["SIMD.h"].included_in_pdf)
+        self.assertTrue(imports["Pragmas.h"].included_in_pdf)
+
     def test_kactlfigdesc_unwrapped_for_site(self):
         desc = process_path(CONTENT / "geometry" / "lineDistance.h").commands["Description"]
         stripped = strip_figures(desc)
