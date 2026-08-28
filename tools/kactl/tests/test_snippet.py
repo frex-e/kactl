@@ -87,10 +87,16 @@ class TestChapterParse(unittest.TestCase):
         self.assertFalse(imports["UnionFind.h"].included_in_pdf)
         self.assertTrue(imports["LazySegmentTree.h"].included_in_pdf)
 
-    def test_geometry_excluded_from_pdf(self):
+    def test_geometry_included_in_pdf(self):
         imports = parse_chapter_imports("geometry")
-        self.assertTrue(imports)
-        self.assertTrue(all(not spec.included_in_pdf for spec in imports.values()))
+        self.assertTrue(imports["Point.h"].included_in_pdf)
+        self.assertTrue(imports["ConvexHull.h"].included_in_pdf)
+        self.assertTrue(imports["HalfplaneIntersection.h"].included_in_pdf)
+        self.assertFalse(imports["LineProjectionReflection.h"].included_in_pdf)
+        self.assertFalse(imports["CircleLine.h"].included_in_pdf)
+        self.assertFalse(imports["PolygonUnion.h"].included_in_pdf)
+        self.assertFalse(imports["ManhattanMST.h"].included_in_pdf)
+        self.assertFalse(imports["DelaunayTriangulation.h"].included_in_pdf)
         self.assertIn("geometry", chapter_order())
 
     def test_raw_template_keeps_include(self):
