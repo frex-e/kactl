@@ -71,7 +71,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
 | `content/number-theory/PrimitiveRoot.h` | order of $a$ mod prime $p$, plus smallest primitive root |
 
-Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, flow demands / lower bounds.
+Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, flow demands / lower bounds, 12-fold way.
 
 ## Replaced
 
@@ -93,6 +93,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/various/KnuthDP.h` | quadrangle notes (verified patterns) + `knuthDP` implementation |
 | `content/various/DivideAndConquerDP.h` | layered recurrence + usage of `lo`/`hi`/`f`/`store` |
 | `content/graph/chapter.tex` | Johnson’s notes; Dinic; centroid; demands / lower bounds; blossom; dominator tree; Steiner tree |
+| `content/combinatorial/chapter.tex` | 12-fold way table (balls/bins / functions $[n]\to[k]$) |
 | `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks; order / primitive roots |
 | `content/contest/chapter.tex` | Random + Output.h |
 | `content/various/chapter.tex` | builtins, pragmas, memory |

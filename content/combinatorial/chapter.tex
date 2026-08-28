@@ -78,9 +78,27 @@
 		$$S(n,k) = \frac{1}{k!}\sum_{j=0}^k (-1)^{k-j}\binom{k}{j}j^n$$
 
 	\subsection{Bell numbers}
-		Total number of partitions of $n$ distinct elements. $B(n) =$
+		Total number of partitions of $n$ distinct elements. $B(n) = \sum_k S(n,k) =$
 		$1, 1, 2, 5, 15, 52, 203, 877, 4140, 21147, \dots$. For $p$ prime,
 		\[ B(p^m+n)\equiv mB(n)+B(n+1) \pmod{p} \]
+
+	\subsection{12-fold way}
+		$n$ balls into $k$ bins (functions $[n]\to[k]$).
+		D/I = distinguishable/indistinguishable.
+		Columns: unrestricted, injective ($\le 1$/bin), surjective ($\ge 1$/bin).
+		\begin{center}
+		\begin{tabular}{@{}c@{\,}c|ccc@{}}
+			$n$ & $k$ & any & $\le 1$ & $\ge 1$ \\ \hline
+			D & D & $k^n$ & $k^{\underline n}$ & $k!\,S(n,k)$ \\
+			D & I & $B(n,k)$ & $[n\le k]$ & $S(n,k)$ \\
+			I & D & $\binom{n+k-1}{n}$ & $\binom{k}{n}$ & $\binom{n-1}{k-1}$ \\
+			I & I & $p_k(n+k)$ & $[n\le k]$ & $p_k(n)$ \\
+		\end{tabular}
+		\end{center}
+		$k^{\underline n}=k(k-1)\cdots(k-n+1)$.
+		$B(n,k)=\sum_{i=0}^k S(n,i)$.
+		$p_k(n)$: partitions of $n$ into exactly $k$ parts
+		($p_k(n+k)$: at most $k$ parts).
 
 	\subsection{Labeled unrooted trees}
 		\# on $n$ vertices: $n^{n-2}$ \\
