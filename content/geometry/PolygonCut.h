@@ -4,13 +4,11 @@
  * License: CC0
  * Source:
  * Description:\\
-\begin{minipage}{75mm}
+\begin{minipage}{\dimexpr\linewidth-16mm\relax}
  Returns a vector with the vertices of a polygon with everything to the left of the line going from \texttt{s} to \texttt{e} cut away.
-\end{minipage}
+\end{minipage}%
 \begin{minipage}{15mm}
-\vspace{-6mm}
-\includegraphics[width=\textwidth]{content/geometry/PolygonCut}
-\vspace{-6mm}
+\includegraphics[width=\linewidth]{content/geometry/PolygonCut}
 \end{minipage}
  * Usage:
  * 	vector<P> p = ...;

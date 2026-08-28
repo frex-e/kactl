@@ -4,12 +4,11 @@
  * License: CC0
  * Source: http://en.wikipedia.org/wiki/Circumcircle
  * Description:\\
-\begin{minipage}{75mm}
+\begin{minipage}{\dimexpr\linewidth-16mm\relax}
 The circumcirle of a triangle is the circle intersecting all three vertices. \texttt{ccRadius} returns the radius of the circle going through points A, B and C and \texttt{ccCenter} returns the center of the same circle.
-\end{minipage}
+\end{minipage}%
 \begin{minipage}{15mm}
-\vspace{-2mm}
-\includegraphics[width=\textwidth]{content/geometry/circumcircle}
+\includegraphics[width=\linewidth]{content/geometry/circumcircle}
 \end{minipage}
  * Status: tested
  */

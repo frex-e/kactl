@@ -4,13 +4,11 @@
  * License: CC0
  * Source:
  * Description:\\
-\begin{minipage}{75mm}
+\begin{minipage}{\dimexpr\linewidth-16mm\relax}
  Apply the linear transformation (translation, rotation and scaling) which takes line \texttt{p0}-\texttt{p1} to line \texttt{q0}-\texttt{q1} to point \texttt{r}.
-\end{minipage}
+\end{minipage}%
 \begin{minipage}{15mm}
-\vspace{-8mm}
-\includegraphics[width=\textwidth]{content/geometry/linearTransformation}
-\vspace{-2mm}
+\includegraphics[width=\linewidth]{content/geometry/linearTransformation}
 \end{minipage}
  * Status: not tested
  */

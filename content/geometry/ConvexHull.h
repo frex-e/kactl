@@ -3,15 +3,13 @@
  * Date: 2019-05-05
  * License: Unlicense
  * Source: https://github.com/stjepang/snippets/blob/master/convex_hull.cpp
- * Description:
-\\\begin{minipage}{75mm}
+ * Description:\\
+\begin{minipage}{\dimexpr\linewidth-16mm\relax}
 Returns a vector of the points of the convex hull in counter-clockwise order.
 Points on the edge of the hull between two other points are not considered part of the hull.
-\end{minipage}
+\end{minipage}%
 \begin{minipage}{15mm}
-\vspace{-6mm}
-\includegraphics[width=\textwidth]{content/geometry/ConvexHull}
-\vspace{-6mm}
+\includegraphics[width=\linewidth]{content/geometry/ConvexHull}
 \end{minipage}
  * Time: O(n \log n)
  * Status: stress-tested, tested with kattis:convexhull
