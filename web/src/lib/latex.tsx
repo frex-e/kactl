@@ -1,6 +1,7 @@
 import katex from 'katex'
 import { memo, type ReactNode } from 'react'
 
+/** Maps a TeX `\<char>` text-mode escape to the character it prints. */
 const TEXT_ESCAPES: Record<string, string> = {
   _: '_',
   '#': '#',
@@ -9,7 +10,7 @@ const TEXT_ESCAPES: Record<string, string> = {
   '{': '{',
   '}': '}',
   $: '$',
-  '~': '\u00a0',
+  '~': '~',
   ' ': ' ',
 }
 
@@ -319,7 +320,8 @@ function skipIncludeGraphics(src: string, afterCmd: number): number {
   return p
 }
 
-function latexToHtml(src: string): string {
+/** Convert a TeX fragment to HTML (KaTeX for math, light text-mode markup). */
+export function latexToHtml(src: string): string {
   let out = ''
   let i = 0
   while (i < src.length) {
@@ -458,9 +460,32 @@ function latexToHtml(src: string): string {
         continue
       }
     }
+    // TeX text-mode: `~` is nbsp; `{...}` is grouping (KACTL uses `-{}-` to
+    // stop `--` becoming an en-dash inside `\texttt`).
+    if (src[i] === '~') {
+      out += '&nbsp;'
+      i++
+      continue
+    }
+    if (src[i] === '{') {
+      const group = readBraceGroup(src, i)
+      if (group) {
+        out += latexToHtml(group[0])
+        i = group[1]
+        continue
+      }
+      out += '{'
+      i++
+      continue
+    }
+    if (src[i] === '}') {
+      i++
+      continue
+    }
     let j = i + 1
     while (j < src.length) {
       if (src[j] === '$' || src[j] === '\\' || src[j] === '\n') break
+      if (src[j] === '{' || src[j] === '}' || src[j] === '~') break
       if (src.startsWith('\\[', j)) break
       j++
     }
@@ -497,9 +522,13 @@ export function descriptionPreview(desc: string, max = 120): string {
   s = s.replace(/\$([^$]+)\$/g, '$1')
   s = s.replace(/\\begin\{[^}]+\}(?:\[[^\]]*\])?(?:\{[^}]*\})?/g, ' ')
   s = s.replace(/\\end\{[^}]+\}/g, ' ')
+  // Empty groups break ligatures in TeX (`-{}-` → `--`); strip before
+  // unwrapping `\texttt{...}` so nested `}` does not truncate the argument.
+  s = s.replace(/\{\}/g, '')
   s = s.replace(/\\[a-zA-Z]+\*?\{([^}]*)\}/g, '$1')
   s = s.replace(/\\[a-zA-Z]+\*?/g, '')
   s = unescapeLatexText(s)
+  s = s.replace(/~/g, ' ')
   s = s.replace(/\s+/g, ' ').trim()
   if (s.length <= max) return s
   return s.slice(0, max - 1) + '…'
