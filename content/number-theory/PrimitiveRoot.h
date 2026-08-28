@@ -9,7 +9,9 @@
  * (HAC 4.79: smallest $k>0$ with $a^k\equiv 1\pmod p$).
  * Assumes $p\nmid a$. \texttt{primitiveRoot(p)} is the
  * smallest generator of $\mathbb Z_p^\times$ (ACL).
- * Time: factoring $p-1$, then $O(\log^2 p)$ per candidate
+ * If calling \texttt{ord} many times for the same $p$,
+ * precompute \texttt{pfactors(p-1)} and pass it in.
+ * Time: factoring $p-1$ once, then $O(\log^2 p)$ per call
  * Status: stress-tested
  */
 #pragma once
@@ -22,14 +24,15 @@ vector<ull> pfactors(ull n) {
 	f.erase(unique(all(f)), f.end());
 	return f;
 }
-ull ord(ull a, ull p) {
+ull ord(ull a, ull p, const vector<ull>& pf) {
 	a %= p;
 	ull t = p - 1;
-	for (ull q : pfactors(t))
+	for (ull q : pf)
 		while (t % q == 0 && modpow(a, t / q, p) == 1)
 			t /= q;
 	return t;
 }
+ull ord(ull a, ull p) { return ord(a, p, pfactors(p - 1)); }
 ull primitiveRoot(ull p) {
 	if (p == 2) return 1;
 	auto divs = pfactors(p - 1);
