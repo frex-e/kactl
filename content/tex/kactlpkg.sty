@@ -184,6 +184,18 @@
   \endgroup
 }
 
+% Digit 1 with a heavier base so it is not mistaken for l (or I) at footnotesize.
+% Courier already has a small flag/foot; those serifs vanish in 3-column print.
+% Only 1 is replaced: literate-replacing l would split keywords (long, class, ...)
+% and recolor identifier letters. Color is inherited (green literals).
+\newcommand*{\niceone}{%
+  \leavevmode
+  \ooalign{%
+    1\cr
+    \hfil\vrule height 0.14ex depth 0.06ex width 0.58em\hfil\cr
+  }%
+}
+
 \definecolor{mygreen}{HTML}{007000}
 \definecolor{myblue}{HTML}{0000dd}
 
@@ -197,7 +209,7 @@
 \lstset{breaklines=true}
 \lstset{basicstyle=\footnotesize\ttfamily}
 \lstset{commentstyle=\normalfont\itshape}
-\lstset{literate={^}{\caret}{1} {~}{\tilde}{1} {\{}{\nicelbrace}{1} {\}}{\nicerbrace}{1}}
+\lstset{literate={^}{\caret}{1} {~}{\tilde}{1} {\{}{\nicelbrace}{1} {\}}{\nicerbrace}{1} {1}{\niceone}{1}}
 \lstset{emptylines=*1}
 \lstset{inputencoding=utf8}
 \lstset{aboveskip=3pt}
