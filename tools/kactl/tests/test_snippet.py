@@ -93,6 +93,16 @@ class TestChapterParse(unittest.TestCase):
         self.assertFalse(imports["SIMD.h"].included_in_pdf)
         self.assertTrue(imports["Pragmas.h"].included_in_pdf)
 
+    def test_trivial_graph_and_nt_excluded_from_pdf(self):
+        graph = parse_chapter_imports("graph")
+        self.assertFalse(graph["BellmanFord.h"].included_in_pdf)
+        self.assertFalse(graph["FloydWarshall.h"].included_in_pdf)
+        self.assertTrue(graph["TopoSort.h"].included_in_pdf)
+        nt = parse_chapter_imports("number-theory")
+        self.assertFalse(nt["FloorBlocks.h"].included_in_pdf)
+        self.assertFalse(nt["Mobius.h"].included_in_pdf)
+        self.assertTrue(nt["LinearSieve.h"].included_in_pdf)
+
     def test_kactlfigdesc_unwrapped_for_site(self):
         desc = process_path(CONTENT / "geometry" / "lineDistance.h").commands["Description"]
         stripped = strip_figures(desc)
