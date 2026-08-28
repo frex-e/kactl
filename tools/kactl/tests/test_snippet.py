@@ -109,6 +109,31 @@ class TestChapterParse(unittest.TestCase):
         self.assertIn("signed distance", stripped)
         self.assertNotIn("includegraphics", stripped)
         self.assertNotIn("minipage", stripped)
+        self.assertFalse(stripped.endswith("%"))
+
+    def test_geometry_site_descriptions_drop_figures(self):
+        from tools.kactl.chapter import strip_figures
+        from tools.kactl.snippet import process_path
+
+        names = [
+            "lineDistance.h",
+            "SegmentDistance.h",
+            "SegmentIntersection.h",
+            "lineIntersection.h",
+            "linearTransformation.h",
+            "circumcircle.h",
+            "PolygonCut.h",
+            "ConvexHull.h",
+        ]
+        for name in names:
+            with self.subTest(name=name):
+                desc = process_path(CONTENT / "geometry" / name).commands["Description"]
+                stripped = strip_figures(desc)
+                self.assertTrue(stripped)
+                self.assertNotIn("includegraphics", stripped)
+                self.assertNotIn("minipage", stripped)
+                self.assertNotIn("vspace", stripped)
+                self.assertFalse(stripped.rstrip().endswith("%"), stripped)
 
     def test_raw_template_keeps_include(self):
         path = CONTENT / "contest" / "template.cpp"

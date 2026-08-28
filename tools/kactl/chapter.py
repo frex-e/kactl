@@ -166,12 +166,15 @@ def strip_figures(text: str) -> str:
     """Drop includegraphics and unwrap minipage wrappers in snippet headers."""
     text = INCLUDEGRAPHICS_RE.sub("", text)
     text = BEGIN_MINIPAGE_RE.sub("\n", text)
-    text = text.replace(r"\end{minipage}", "\n")
+    # `%` after \end{minipage} is the usual "eat the following newline" comment.
+    text = re.sub(r"\\end\{minipage\}%?", "\n", text)
     text = re.sub(r"\\vspace(?:\*)?(?:\[[^\]]*\])?\{[^}]*\}", "", text)
     text = re.sub(r"\\hspace(?:\*)?(?:\[[^\]]*\])?\{[^}]*\}", "", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     text = text.strip()
     text = re.sub(r"^(?:\\\\|\s)+", "", text)
+    # A glued minipage pair can leave a leftover `%` at the end of the prose.
+    text = re.sub(r"(?:\n\s*)+%+\s*$", "", text)
     return text.strip()
 
 
