@@ -99,6 +99,7 @@ class TestChapterParse(unittest.TestCase):
         self.assertIn("signed distance", stripped)
         self.assertNotIn("kactlfigdesc", stripped)
         self.assertNotIn("includegraphics", stripped)
+        self.assertNotIn("minipage", stripped)
         self.assertNotIn("content/geometry/lineDistance", stripped)
         self.assertFalse(stripped.rstrip().endswith("%"))
 

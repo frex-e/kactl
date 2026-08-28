@@ -3,8 +3,14 @@
  * Date: 2009-03-21
  * License: CC0
  * Source:
- * Description:
-\kactlfigdesc{Returns the shortest distance between point \texttt{p} and the line segment from point \texttt{s} to \texttt{e}.}{content/geometry/SegmentDistance}
+ * Description:\\
+\begin{minipage}{\dimexpr\linewidth-15mm\relax}
+Returns the shortest distance between point \texttt{p} and the line segment from point \texttt{s} to \texttt{e}.
+\end{minipage}%
+\begin{minipage}{15mm}
+\vspace{-10mm}
+\includegraphics[width=\textwidth]{content/geometry/SegmentDistance}
+\end{minipage}
  * Usage: 
  * 	Point<double> a, b(2,2), p(1,1);
  * 	bool onSegment = segDist(a,b,p) < 1e-10;
