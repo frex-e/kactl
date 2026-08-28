@@ -69,6 +69,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/graph/DominatorTree.h` | Lengauer--Tarjan dominator tree (from cactl / Benq); runtime $n$, ctor takes adj+root |
 | `content/graph/SteinerTree.h` | Dreyfus--Wagner Steiner tree; Library Checker `correct.cpp` rewrite; cost + edge indices |
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
+| `content/strings/Duval.h` | Duval Lyndon factorization (from cp-algorithms) |
 
 Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, flow demands / lower bounds.
 
@@ -104,5 +105,5 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
-- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree
+- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, Duval
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`
