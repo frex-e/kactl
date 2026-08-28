@@ -7,6 +7,7 @@
  *  than every nonempty proper suffix. Returns $0=a_0<\dots<a_k=n$
  *  so $s[a_i,a_{i+1})$ is the unique non-increasing Lyndon
  *  factorization of $s$.
+ * Usage: vi f = duval(s); // factor i is s[f[i], f[i+1])
  * Time: $O(N)$
  * Status: stress-tested
  */
