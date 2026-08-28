@@ -97,7 +97,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/various/chapter.tex` | builtins, pragmas, memory |
 | `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ / beats / monotonic map |
 | `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, min-plus convolution; Fourier → Convolutions |
-| `content/geometry/chapter.tex` | half-plane intersection; whole chapter omitted from the printed PDF |
+| `content/geometry/chapter.tex` | half-plane intersection; figure minipages sized to `\linewidth` so they fit the 1.0cm-margin columns |
 
 ## Tests
 

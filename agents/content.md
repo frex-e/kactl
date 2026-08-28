@@ -6,7 +6,7 @@ Source of truth for the printed notebook and the snippets site is `content/`. On
 
 Chapters live in `content/<chapter>/` with a `chapter.tex` that pulls in snippets and prose. PDF chapter order is the `\kactlchapter{...}` list in [content/kactl.tex](../content/kactl.tex) (the preprocessor reads that list; do not duplicate it elsewhere):
 
-contest, math, data-structures, numerical, number-theory, combinatorial, graph, strings, various, then appendix (on a new `multicols*` block). Geometry is commented out of the PDF (`% \kactlchapter{geometry}` and commented `\kactlimport`s) so it stays on the snippets site only.
+contest, math, data-structures, numerical, number-theory, combinatorial, graph, geometry, strings, various, then appendix (on a new `multicols*` block). Comment a `\kactlimport` (or a whole `\kactlchapter`) to drop it from the PDF; preprocess still lists it, with `includedInPdf: false`. The site hides those by default and has a toggle to show them.
 
 Team name, members, university, and contest line are also in `content/kactl.tex`. Do not put those in the README or web HTML as a second source of truth.
 
@@ -27,6 +27,8 @@ C++/Java/Python snippets start with a `/** ... */` (or `'''` / `"""`) metadata c
 `Author`, `Date`, `Description`, `Source`, `Time`, `Memory`, `License`, `Status`, `Usage`, `Details`
 
 Unknown keys are a PDF build error (`\kactlerror`). Description/Usage/Time appear above the listing; `#include`s become the left caption; a 6-char hash and line count become the right caption.
+
+Geometry snippets that ship a figure use two minipages: prose at `\dimexpr\linewidth-16mm\relax` and a 15mm image, with `%` between them so they stay on one line. Do not restore the old `{75mm}`+`{15mm}` pair — that is wider than a column after the 1.0cm side margins.
 
 Prefer `Status: stress-tested` when there is a matching file under `stress-tests/`.
 
