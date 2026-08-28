@@ -32,9 +32,7 @@ int main() {
 		if (!isPrime(p)) continue;
 		ull g = primitiveRoot(p);
 		assert(g >= 1 && g < (ull)p);
-		auto pf = pfactors(p - 1);
 		assert(ord(g, p) == (ull)p - 1);
-		assert(ord(g, p, pf) == (ull)p - 1);
 		set<ull> seen;
 		ull x = 1;
 		rep(i,0,p-1) {
@@ -43,7 +41,7 @@ int main() {
 		}
 		assert(sz(seen) == p - 1);
 		rep(a,1,p) {
-			ull o = ord(a, p, pf);
+			ull o = ord(a, p);
 			assert(o == bruteOrd(a, p));
 			assert(((ull)p - 1) % o == 0);
 			assert(modpow(a, o, p) == 1);
@@ -60,10 +58,10 @@ int main() {
 		assert(modpow(g, p - 1, p) == 1);
 		for (ull q : pf)
 			assert(modpow(g, (p - 1) / q, p) != 1);
-		assert(ord(g, p, pf) == p - 1);
+		assert(ord(g, p) == p - 1);
 		rep(i,0,4) {
 			ull a = rng() % (p - 1) + 1;
-			ull o = ord(a, p, pf);
+			ull o = ord(a, p);
 			assert(o >= 1 && o <= p - 1);
 			assert((p - 1) % o == 0);
 			assert(modpow(a, o, p) == 1);
