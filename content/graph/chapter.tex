@@ -51,6 +51,30 @@
 	\kactlimport{HopcroftKarp.h}
 	\kactlimport{DFSMatching.h}
 	\kactlimport{MinimumVertexCover.h}
+	\subsection{Kőnig, path cover, Dilworth}
+		In a bipartite graph, max matching = min vertex cover
+		(Kőnig). The complement of a min vertex cover is a max
+		independent set. Hall: a matching saturates $L$ iff
+		$|N(S)|\ge|S|$ for every $S\subseteq L$.
+		The construction is \texttt{cover} above: from unmatched
+		left vertices follow unmatched $L\to R$ and matched
+		$R\to L$; the cover is unvisited left plus visited right.
+		NP-hard on general graphs.
+
+		Min vertex-disjoint path cover of a DAG: split each $v$
+		into $v_L$ (left) and $v_R$ (right); each edge $u\to v$
+		becomes $u_L\to v_R$. Size $= n$ minus max matching.
+		A match $u\mapsto v$ means $u$ is followed by $v$ on a
+		path. NP-hard on general digraphs.
+
+		Dilworth: in a partially ordered set, min chain cover
+		= max antichain.
+		Build the comparability DAG ($u\to v$ iff $u<v$) and take
+		a min path cover. Max antichain = $\{x:$ neither copy of
+		$x$ is in the Kőnig cover$\}$.
+		Mirsky (dual): min antichain cover = max chain; partition
+		by longest-path height.
+		On a sequence, min decreasing-subsequence cover = LIS.
 	\kactlimport{WeightedMatching.h}
 	\kactlimport{Blossom.h}
 

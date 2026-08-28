@@ -3,7 +3,7 @@
  * Date: 2026-07-09
  * License: CC0
  * Source: https://github.com/scipy/scipy/blob/main/scipy/optimize/rectangular_lsap/rectangular_lsap.cpp
- * Description: Given a weighted bipartite graph, matches every node on
+ * Description: Assignment (min-cost bipartite matching). Matches every node on
  * the left with a node on the right such that no
  * nodes are in two matchings and the sum of the edge weights is minimal. Takes
  * \texttt{cost[N][M]}, where \texttt{cost[i][j]} = cost for \texttt{L[i]} to be matched with \texttt{R[j]}, and
