@@ -4,8 +4,9 @@
  * License: CC0
  * Source: https://github.com/ei1333/library GabowEdmonds
  *  (Library Checker general\_matching; qiita.com/Kutimoti\_T)
- * Description: Maximum matching in general graphs
- *  (Gabow--Edmonds).
+ * Description: Maximum cardinality matching in general graphs
+ *  (Gabow--Edmonds). Bipartite: Hopcroft--Karp /
+ *  \texttt{weightedMatching} instead.
  *  0-indexed. \texttt{ae} adds an undirected edge.
  *  After \texttt{solve()}, \texttt{mate[u]} is the partner
  *  of $u$, or $-1$ if unmatched. Returns matching size.

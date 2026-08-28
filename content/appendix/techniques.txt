@@ -32,6 +32,7 @@ Graph theory
 	* Edmonds-Karp
 	Bipartite matching
 	Min. path cover
+	Dilworth's theorem / chain covering
 	Topological sorting
 	Strongly connected components
 	2-SAT
