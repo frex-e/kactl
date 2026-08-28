@@ -71,7 +71,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
 | `content/number-theory/PrimitiveRoot.h` | order of $a$ mod prime $p$, plus smallest primitive root |
 
-Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, flow demands / lower bounds, 12-fold way, matching (Kőnig, path cover, Dilworth, assignment vs blossom).
+Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, flow demands / lower bounds, 12-fold way, matching (Kőnig, path cover, Dilworth).
 
 ## Replaced
 
@@ -92,7 +92,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/graph/HLD.h` | uses `LazyUpdateTree`; converts half-open HLD ranges to inclusive `[l, r-1]` |
 | `content/various/KnuthDP.h` | quadrangle notes (verified patterns) + `knuthDP` implementation |
 | `content/various/DivideAndConquerDP.h` | layered recurrence + usage of `lo`/`hi`/`f`/`store` |
-| `content/graph/chapter.tex` | Johnson’s notes; Dinic; centroid; demands / lower bounds; blossom; dominator tree; Steiner tree; Kőnig / path cover / Dilworth / assignment vs blossom |
+| `content/graph/chapter.tex` | Johnson’s notes; Dinic; centroid; demands / lower bounds; blossom; dominator tree; Steiner tree; Kőnig / path cover / Dilworth |
 | `content/combinatorial/chapter.tex` | 12-fold way table (balls/bins / functions $[n]\to[k]$) |
 | `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks; order / primitive roots |
 | `content/contest/chapter.tex` | Random + Output.h |

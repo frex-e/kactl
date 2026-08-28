@@ -77,16 +77,6 @@
 		On a sequence, min decreasing-subsequence cover = LIS.
 	\kactlimport{WeightedMatching.h}
 	\kactlimport{Blossom.h}
-	\subsection{Assignment vs blossom}
-		Assignment is min-cost matching in a \emph{bipartite}
-		graph. Dense: \texttt{weightedMatching} ($N\le M$, every
-		left vertex is matched; negate costs for max; missing
-		edges $\to$ a large cost). Sparse or extra capacities:
-		MCMF.
-		\texttt{Blossom} is max-cardinality matching in a
-		\emph{general} graph (unweighted). Bipartite unweighted:
-		Hopcroft--Karp / DFS matching, not blossom.
-		Weighted general matching is not included.
 
 \section{DFS algorithms}
 	\kactlimport{SCC.h}
