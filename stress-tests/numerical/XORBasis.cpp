@@ -64,21 +64,21 @@ void testXorBasis() {
 	rep(it,0,500) {
 		XorBasis xb;
 		BitBasis32 ref;
-		vi inserted;
+		vector<unsigned> inserted;
 		int n = rand() % 40;
 		rep(i,0,n) {
-			int x = (int)(randU() & 0x7fffffff);
+			unsigned x = randU();
 			xb.add(x);
-			ref.add((unsigned)x);
+			ref.add(x);
 			inserted.push_back(x);
 			assert(sz(xb.basis) == ref.size());
 		}
 		assert(xb.inSpan(0));
 		rep(q,0,80) {
-			int x = (int)(randU() & 0x7fffffff);
-			assert(xb.inSpan(x) == ref.inSpan((unsigned)x));
+			unsigned x = randU();
+			assert(xb.inSpan(x) == ref.inSpan(x));
 		}
-		for (int x : inserted) assert(xb.inSpan(x));
+		for (unsigned x : inserted) assert(xb.inSpan(x));
 	}
 }
 
@@ -123,6 +123,11 @@ int main() {
 	XorBasis empty;
 	assert(empty.inSpan(0));
 	assert(!empty.inSpan(1));
+	XorBasis hi;
+	hi.add(1u << 31);
+	hi.add((1u << 31) | 4);
+	assert(hi.inSpan(1u << 31));
+	assert(hi.inSpan(4));
 	testXorBasis();
 	testBigBasis();
 	cout << "Tests passed!" << endl;

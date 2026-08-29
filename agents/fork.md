@@ -53,7 +53,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/number-theory/LinearSieve.h` | linear sieve + least prime factor (kept alongside Eratosthenes) |
 | `content/number-theory/Mobius.h` | Möbius sieve (formulas stay in `chapter.tex`) |
 | `content/numerical/RREF.h` | rectangular reduced row echelon form |
-| `content/numerical/XORBasis.h` | incremental XOR basis (kept alongside `SolveLinearBinary.h`) |
+| `content/numerical/XORBasis.h` | incremental unsigned XOR basis (kept alongside `SolveLinearBinary.h`) |
 | `content/numerical/QuadRoots.h` | stable real quadratic roots (from cactl / cp-geo) |
 | `content/numerical/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested) |
 | `content/various/MemoryUsage.h` | `getrusage` peak RSS (lifetime, not current) |
