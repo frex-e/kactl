@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -47,13 +48,10 @@ def parse_lang_flag(optional: str | None) -> str | None:
     return m.group(1) if m else None
 
 
-def parse_chapter_imports(chapter_id: str) -> dict[str, KactlImport]:
+def parse_import_lines(lines: Iterable[str]) -> dict[str, KactlImport]:
     """Map filename -> import. First active wins; commented only if unseen."""
-    chapter_tex = CONTENT / chapter_id / "chapter.tex"
     result: dict[str, KactlImport] = {}
-    if not chapter_tex.exists():
-        return result
-    for line in chapter_tex.read_text(encoding="utf-8", errors="replace").splitlines():
+    for line in lines:
         m = IMPORT_RE.match(line)
         if not m:
             continue
@@ -66,6 +64,15 @@ def parse_chapter_imports(chapter_id: str) -> dict[str, KactlImport]:
                 lang_flag=parse_lang_flag(optional),
             )
     return result
+
+
+def parse_chapter_imports(chapter_id: str) -> dict[str, KactlImport]:
+    chapter_tex = CONTENT / chapter_id / "chapter.tex"
+    if not chapter_tex.exists():
+        return {}
+    return parse_import_lines(
+        chapter_tex.read_text(encoding="utf-8", errors="replace").splitlines()
+    )
 
 
 def strip_quotes(include: str) -> str:
