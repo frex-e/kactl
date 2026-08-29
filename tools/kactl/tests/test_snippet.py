@@ -99,7 +99,7 @@ class TestChapterParse(unittest.TestCase):
         self.assertFalse(graph["FloydWarshall.h"].included_in_pdf)
         self.assertTrue(graph["TopoSort.h"].included_in_pdf)
         nt = parse_chapter_imports("number-theory")
-        self.assertFalse(nt["FloorBlocks.h"].included_in_pdf)
+        self.assertTrue(nt["FloorBlocks.h"].included_in_pdf)
         self.assertFalse(nt["Mobius.h"].included_in_pdf)
         self.assertTrue(nt["LinearSieve.h"].included_in_pdf)
 
