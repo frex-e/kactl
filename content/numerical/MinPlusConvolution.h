@@ -10,7 +10,7 @@
  *  monotone means every submatrix's leftmost row-minimum
  *  indices are nondecreasing. Queried through f, not stored.
  * Time: $O(N+M)$ convex, $O(N\log M+M)$ concave
- * Status: untested (no local stress test)
+ * Status: tested on Library Checker (min\_plus\_convolution\_*)
  */
 #pragma once
 
