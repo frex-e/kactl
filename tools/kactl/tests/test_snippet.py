@@ -74,9 +74,9 @@ class TestChapterParse(unittest.TestCase):
                 "number-theory",
                 "combinatorial",
                 "graph",
-                "geometry",
                 "strings",
                 "various",
+                "geometry",
                 "appendix",
             ],
         )
@@ -119,12 +119,15 @@ class TestChapterParse(unittest.TestCase):
         self.assertTrue(imports["lineDistance.h"].included_in_pdf)
         self.assertTrue(imports["ConvexHull.h"].included_in_pdf)
         self.assertTrue(imports["HalfplaneIntersection.h"].included_in_pdf)
-        self.assertFalse(imports["LineProjectionReflection.h"].included_in_pdf)
-        self.assertFalse(imports["CircleLine.h"].included_in_pdf)
-        self.assertFalse(imports["PolygonUnion.h"].included_in_pdf)
-        self.assertFalse(imports["ManhattanMST.h"].included_in_pdf)
-        self.assertFalse(imports["DelaunayTriangulation.h"].included_in_pdf)
-        self.assertIn("geometry", chapter_order())
+        self.assertTrue(imports["LineProjectionReflection.h"].included_in_pdf)
+        self.assertTrue(imports["CircleLine.h"].included_in_pdf)
+        self.assertTrue(imports["PolygonUnion.h"].included_in_pdf)
+        self.assertTrue(imports["ManhattanMST.h"].included_in_pdf)
+        self.assertTrue(imports["DelaunayTriangulation.h"].included_in_pdf)
+        self.assertTrue(imports["FastDelaunay.h"].included_in_pdf)
+        order = chapter_order()
+        self.assertEqual(order[-2], "geometry")
+        self.assertEqual(order[-1], "appendix")
 
     def test_geometry_site_descriptions_drop_figures(self):
         names = [
