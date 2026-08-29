@@ -92,10 +92,8 @@ def poll(sid: int, timeout: float = 600) -> dict:
         d = http_json(f"{API}/submissions/{sid}")
         st = d.get("overview", {}).get("status", "")
         last = d
-        if st and st not in ("WJ", "WR", ""):
-            # still judging if some cases pending? overview status is final-ish
-            if st not in ("WJ", "Waiting Judge", "WR"):
-                return d
+        if st in {"AC", "WA", "TLE", "RE", "MLE", "QLE", "CE", "IE", "PE", "OLE"}:
+            return d
         time.sleep(2)
     return last or {}
 

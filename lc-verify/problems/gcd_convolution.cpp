@@ -10,10 +10,11 @@ int main() {
 	rep(i, 1, n + 1) cin >> B[i];
 	vi mu(n + 1);
 	calcMobius(mu);
-	for (int i = n; i >= 1; --i)
-		for (int j = 2 * i; j <= n; j += i) {
-			A[i] += A[j];
-			B[i] += B[j];
+	// multiples zeta; visit i ascending so A[i*j] is still original a[i*j]
+	for (int i = 1; i <= n; ++i)
+		for (int j = 2; j <= n / i; ++j) {
+			A[i] += A[i * j];
+			B[i] += B[i * j];
 		}
 	vector<ll> D(n + 1), c(n + 1);
 	rep(i, 1, n + 1) D[i] = (A[i] % MOD) * (B[i] % MOD) % MOD;
