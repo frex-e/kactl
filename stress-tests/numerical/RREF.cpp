@@ -105,7 +105,7 @@ int main() {
 		int rank = checkMod(a);
 		vvd ad(max(n, 1), vd(max(m, 1)));
 		if (n && m) {
-			rep(i,0,n) rep(j,0,m) ad[i][j] = a[i][j];
+			rep(i,0,n) rep(j,0,m) ad[i][j] = (double)a[i][j];
 			auto [rd, _] = rref(ad);
 			assert(rd == rank);
 		}

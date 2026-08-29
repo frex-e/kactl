@@ -59,7 +59,7 @@ struct DynCon {
 	void rec(int i, vector<ll>& res) {
 		int t0 = uf.time();
 		vector<pair<int, ll>> sav;
-		auto save = [&](int r) { sav.pb({r, sm[r]}); };
+		auto save = [&](int r) { sav.push_back({r, sm[r]}); };
 		for (auto [a, b, x] : st[i]) {
 			if (a >= 0) {
 				int ra = uf.find((int)a);
@@ -75,8 +75,8 @@ struct DynCon {
 			}
 		}
 		for (auto [a, b, x] : st[i]) if (a == -1) {
-			if (b < 0) res.pb(n - uf.time() / 2);
-			else res.pb(sm[uf.find((int)b)]);
+			if (b < 0) res.push_back(n - uf.time() / 2);
+			else res.push_back(sm[uf.find((int)b)]);
 		}
 		if (i < q) rec(2 * i, res), rec(2 * i + 1, res);
 		uf.rollback(t0);
