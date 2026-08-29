@@ -6,7 +6,7 @@ Source of truth for the printed notebook and the snippets site is `content/`. On
 
 Chapters live in `content/<chapter>/` with a `chapter.tex` that pulls in snippets and prose. PDF chapter order is the `\kactlchapter{...}` list in [content/kactl.tex](../content/kactl.tex) (the preprocessor reads that list; do not duplicate it elsewhere):
 
-contest, math, data-structures, numerical, number-theory, combinatorial, graph, geometry, strings, various, then appendix (on a new `multicols*` block).
+contest, math, data-structures, numerical, number-theory, combinatorial, graph, strings, various, geometry, then appendix (on a new `multicols*` block).
 
 Team name, members, university, and contest line are also in `content/kactl.tex`. Do not put those in the README or web HTML as a second source of truth.
 

@@ -74,9 +74,9 @@ class TestChapterParse(unittest.TestCase):
                 "number-theory",
                 "combinatorial",
                 "graph",
-                "geometry",
                 "strings",
                 "various",
+                "geometry",
                 "appendix",
             ],
         )
