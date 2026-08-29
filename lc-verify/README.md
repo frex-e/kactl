@@ -5,7 +5,7 @@ Solvers that wrap this fork's additions/API deltas vs
 submit them to [Library Checker](https://judge.yosupo.jp/).
 
 Submissions in this run used account [`inj`](https://judge.yosupo.jp/submissions?user=inj).
-**24/24 accepted** on the original mapping; four more problems need the small snippet hooks below (solvers added).
+**29/29 accepted.**
 
 ```
 python3 lc-verify/bundle.py lc-verify/problems/set_xor_min.cpp -o /tmp/a.cpp
@@ -43,20 +43,15 @@ change `V` / `U` / `binop` are pasted with those edits (same algorithm).
 | [vertex_add_path_sum](https://judge.yosupo.jp/problem/vertex_add_path_sum) | `HLD.h` + sum tree | [397534](https://judge.yosupo.jp/submission/397534) | AC |
 | [vertex_add_subtree_sum](https://judge.yosupo.jp/problem/vertex_add_subtree_sum) | `HLD.h` subtree | [397535](https://judge.yosupo.jp/submission/397535) | AC |
 | [bipartitematching](https://judge.yosupo.jp/problem/bipartitematching) | `HopcroftKarp.h` | [397512](https://judge.yosupo.jp/submission/397512) | AC |
+| [enumerate_primes](https://judge.yosupo.jp/problem/enumerate_primes) | `LinearSieve.h` (`n>` `SIEVE_N` skips `lp`) | [397539](https://judge.yosupo.jp/submission/397539) | AC |
+| [dynamic_graph_vertex_add_component_sum](https://judge.yosupo.jp/problem/dynamic_graph_vertex_add_component_sum) | `OfflineDynamicConnectivity.h` addVal/query(v) | [397540](https://judge.yosupo.jp/submission/397540) | AC |
+| [range_affine_range_sum](https://judge.yosupo.jp/problem/range_affine_range_sum) | `LazySegmentTree.h` affine + `seglen` | [397541](https://judge.yosupo.jp/submission/397541) | AC |
+| [range_affine_range_sum_large_array](https://judge.yosupo.jp/problem/range_affine_range_sum_large_array) | `SparseLazySegmentTree.h` + `seglen` | [397542](https://judge.yosupo.jp/submission/397542) | AC |
+| [matrix_rank](https://judge.yosupo.jp/problem/matrix_rank) | `RREF.h` `rref(A, mod)` | [397543](https://judge.yosupo.jp/submission/397543) | AC |
 
 `gcd_convolution` first submission ([397516](https://judge.yosupo.jp/submission/397516)) was WA from a wrong multiples-zeta *in the wrapper* (descending loop double-counted). `Mobius.h` itself matched the stress test; the resubmit is AC.
 
-## Snippet hooks for the remaining four
-
-| Problem | Snippet | Change |
-|---|---|---|
-| [enumerate_primes](https://judge.yosupo.jp/problem/enumerate_primes) | `LinearSieve.h` | `linearSieve(n)` with $n>$ `SIEVE_N` skips `lp` |
-| [dynamic_graph_vertex_add_component_sum](https://judge.yosupo.jp/problem/dynamic_graph_vertex_add_component_sum) | `OfflineDynamicConnectivity.h` | `addVal` / `query(v)` component sums |
-| [range_affine_range_sum](https://judge.yosupo.jp/problem/range_affine_range_sum) | `LazySegmentTree.h` | `seglen` during `applyUpdate` |
-| [range_affine_range_sum_large_array](https://judge.yosupo.jp/problem/range_affine_range_sum_large_array) | `SparseLazySegmentTree.h` | same `seglen` |
-| [matrix_rank](https://judge.yosupo.jp/problem/matrix_rank) | `RREF.h` | modular `rref(A, mod)` |
-
-`persistent_range_affine_range_sum` is not mapped (range-copy-from-another-version). Persistent tree has the same `seglen` hook.
+The last five rows used small snippet hooks (`seglen`, primes-only sieve, DynCon sums, modular RREF) so the rest of each algorithm could be judged as-is. `persistent_range_affine_range_sum` is still unmapped (range-copy-from-another-version); the persistent tree has the same `seglen` hook.
 
 ## Not submitted
 

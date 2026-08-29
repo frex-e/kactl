@@ -11,7 +11,8 @@
  *  is the node length during \texttt{applyUpdate}. Default is
  *  range add and range max. Used by HLD.
  * Time: $O(\log N)$
- * Status: stress-tested
+ * Status: stress-tested, Library Checker
+ *  range\_affine\_range\_sum
  */
 #pragma once
 

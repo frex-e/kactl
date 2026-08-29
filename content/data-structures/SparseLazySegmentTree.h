@@ -10,7 +10,8 @@
  *  \texttt{mergeUpdate}. \texttt{seglen} is the node length
  *  during \texttt{applyUpdate}. Default is range add / max.
  * Time: $O(\log R)$
- * Status: stress-tested
+ * Status: stress-tested, Library Checker
+ *  range\_affine\_range\_sum\_large\_array
  */
 #pragma once
 
