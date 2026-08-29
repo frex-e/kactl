@@ -55,7 +55,7 @@ def main() -> None:
             except SystemExit:
                 continue
             st = info.get("overview", {}).get("status", "")
-            if st and st not in ("WJ", "WR"):
+            if st and not S.in_progress(st):
                 done[name] = info
                 pending.pop(name)
                 ov = info["overview"]

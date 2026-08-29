@@ -1,0 +1,91 @@
+// LazyUpdateTree from LazySegmentTree.h, affine range update / range sum.
+const int MOD = 998244353;
+struct LazyUpdateTree {
+	using V = ll;
+	using U = pii; // (b, c): x -> b x + c
+	static constexpr V id = 0;
+	static constexpr V def = 0;
+	static constexpr U idU = {1, 0};
+	V binop(V a, V b) { return a + b >= MOD ? a + b - MOD : a + b; }
+	V applyUpdate(U u, V v) {
+		return (u.first * v + (ll)u.second * seglen) % MOD;
+	}
+	U mergeUpdate(U o, U nw) {
+		return {int((ll)nw.first * o.first % MOD),
+			int(((ll)nw.first * o.second + nw.second) % MOD)};
+	}
+	vector<V> arr;
+	vector<U> lazy;
+	int size, seglen = 1;
+	LazyUpdateTree(int n) :
+		arr(4 * n + 2, def), lazy(4 * n + 2, idU), size(n) {}
+	void updateNode(int cur, int l, int r, U u) {
+		seglen = r - l + 1;
+		lazy[cur] = mergeUpdate(lazy[cur], u);
+		arr[cur] = applyUpdate(u, arr[cur]);
+	}
+	void push(int cur, int l, int r) {
+		int mid = l + (r - l) / 2;
+		updateNode(2 * cur, l, mid, lazy[cur]);
+		updateNode(2 * cur + 1, mid + 1, r, lazy[cur]);
+		lazy[cur] = idU;
+	}
+	void update(int cur, int l, int r, int ql, int qr, U u) {
+		if (qr < l || r < ql) return;
+		if (ql <= l && r <= qr) {
+			updateNode(cur, l, r, u); return;
+		}
+		push(cur, l, r);
+		int mid = l + (r - l) / 2;
+		update(2 * cur, l, mid, ql, qr, u);
+		update(2 * cur + 1, mid + 1, r, ql, qr, u);
+		arr[cur] = binop(arr[2 * cur], arr[2 * cur + 1]);
+	}
+	void update(int ql, int qr, U u) {
+		update(1, 0, size - 1, ql, qr, u);
+	}
+	void set(int cur, int l, int r, int i, V v) {
+		if (i < l || r < i) return;
+		if (l == r) { arr[cur] = v; lazy[cur] = idU; return; }
+		push(cur, l, r);
+		int mid = l + (r - l) / 2;
+		if (i <= mid) set(2 * cur, l, mid, i, v);
+		else set(2 * cur + 1, mid + 1, r, i, v);
+		arr[cur] = binop(arr[2 * cur], arr[2 * cur + 1]);
+	}
+	void set(int i, V v) { set(1, 0, size - 1, i, v); }
+	V query(int cur, int l, int r, int ql, int qr) {
+		if (qr < l || r < ql) return id;
+		if (ql <= l && r <= qr) return arr[cur];
+		push(cur, l, r);
+		int mid = l + (r - l) / 2;
+		return binop(query(2 * cur, l, mid, ql, qr),
+			query(2 * cur + 1, mid + 1, r, ql, qr));
+	}
+	V query(int ql, int qr) {
+		return query(1, 0, size - 1, ql, qr);
+	}
+};
+
+int main() {
+	cin.tie(0)->sync_with_stdio(0);
+	int n, q;
+	cin >> n >> q;
+	LazyUpdateTree st(n);
+	rep(i, 0, n) {
+		ll x;
+		cin >> x;
+		st.set(i, x);
+	}
+	rep(i, 0, q) {
+		int ty, l, r;
+		cin >> ty >> l >> r;
+		if (ty == 0) {
+			int b, c;
+			cin >> b >> c;
+			st.update(l, r - 1, {b, c});
+		} else {
+			cout << st.query(l, r - 1) << '\n';
+		}
+	}
+}

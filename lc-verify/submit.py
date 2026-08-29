@@ -85,6 +85,17 @@ def submit(token: str, problem: str, source: str, lang: str = "cpp") -> int:
     return int(d["id"])
 
 
+FINAL = {"AC", "WA", "TLE", "RE", "MLE", "QLE", "CE", "IE", "PE", "OLE"}
+
+
+def in_progress(st: str) -> bool:
+    if not st or st in {"WJ", "WR", "-"}:
+        return True
+    if "/" in st:
+        return True
+    return st not in FINAL
+
+
 def poll(sid: int, timeout: float = 600) -> dict:
     t0 = time.time()
     last = None
@@ -92,7 +103,7 @@ def poll(sid: int, timeout: float = 600) -> dict:
         d = http_json(f"{API}/submissions/{sid}")
         st = d.get("overview", {}).get("status", "")
         last = d
-        if st in {"AC", "WA", "TLE", "RE", "MLE", "QLE", "CE", "IE", "PE", "OLE"}:
+        if not in_progress(st):
             return d
         time.sleep(2)
     return last or {}
