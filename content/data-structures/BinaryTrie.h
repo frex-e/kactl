@@ -72,7 +72,7 @@ struct BinaryTrie {
 		return ((k >> i & 1) ^ sgn ? cc(!b) : 0) +
 			(c[b] ? c[b]->count<sgn>(xr, k, i) : 0);
 	}
-	int mex(int xr = 0, int i = B) {
+	int mex(int xr = 0, int i = B) { // unique values
 		if (!i) return 0;
 		push(i);
 		int b = xr >> --i & 1;
