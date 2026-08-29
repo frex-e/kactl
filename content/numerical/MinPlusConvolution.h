@@ -9,6 +9,7 @@
  *  minimizing column for each row of the matrix f. Totally
  *  monotone means every submatrix's leftmost row-minimum
  *  indices are nondecreasing. Queried through f, not stored.
+ *  Both \texttt{a} and \texttt{b} must be non-empty.
  * Time: $O(N+M)$ convex, $O(N\log M+M)$ concave
  * Status: untested (no local stress test)
  */
@@ -55,7 +56,7 @@ template<class V>
 vector<V> min_plus_smawk(const vector<V>& a,
 		const vector<V>& b) {
 	int n = sz(a), m = sz(b);
-	if (!n || !m) return n ? a : b;
+	assert(n && m);
 	auto f = [&](int r, int c) -> tuple<int,V,int> {
 		if (r < c) return {1, V{}, c};
 		if (r-c >= m) return {1, V{}, -c};
@@ -72,7 +73,7 @@ template<class V>
 vector<V> min_plus_concave_one(const vector<V>& a,
 		const vector<V>& b) {
 	int n = sz(a), m = sz(b), z = n+m-1;
-	if (!n || !m) return n ? a : b;
+	assert(n && m);
 	vector<V> c(z, numeric_limits<V>::max());
 	auto solve = [&](int l, int r, bool rev) {
 		auto val = [&](int j, int k) {

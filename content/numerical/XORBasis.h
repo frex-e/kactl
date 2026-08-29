@@ -6,7 +6,7 @@
  * Description: Incremental XOR basis (span of vectors over
  *  $\mathbb F_2$). Insert online; \texttt{x} is in the span iff it
  *  reduces to 0. Span size is $2^{|\texttt{basis}|}$.
- *  \texttt{XorBasis} is for ints; \texttt{BigBasis} for
+ *  \texttt{XorBasis} is for unsigned; \texttt{BigBasis} for
  *  bitblocks. For solving $Ax=b$, see SolveLinearBinary.
  * Time: $O(B\cdot |basis|)$ per insert
  * Status: stress-tested
@@ -14,12 +14,12 @@
 #pragma once
 
 struct XorBasis {
-	vi basis;
-	void add(int x) {
+	vector<unsigned> basis;
+	void add(unsigned x) {
 		rep(i,0,sz(basis)) x = min(x, x ^ basis[i]);
 		if (x) basis.push_back(x);
 	}
-	bool inSpan(int x) {
+	bool inSpan(unsigned x) {
 		rep(i,0,sz(basis)) x = min(x, x ^ basis[i]);
 		return x == 0;
 	}
