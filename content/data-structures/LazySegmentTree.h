@@ -7,7 +7,8 @@
  *  point set, and range queries. Bounds inclusive on both
  *  sides. Change \texttt{V}, \texttt{U}, \texttt{id},
  *  \texttt{def}, \texttt{idU}, \texttt{binop},
- *  \texttt{applyUpdate}, \texttt{mergeUpdate}. Default is
+ *  \texttt{applyUpdate}, \texttt{mergeUpdate}. \texttt{seglen}
+ *  is the node length during \texttt{applyUpdate}. Default is
  *  range add and range max. Used by HLD.
  * Time: $O(\log N)$
  * Status: stress-tested
@@ -25,10 +26,11 @@ struct LazyUpdateTree {
 	U mergeUpdate(U oldU, U nw) { return oldU + nw; }
 	vector<V> arr;
 	vector<U> lazy;
-	int size;
+	int size, seglen = 1;
 	LazyUpdateTree(int n) :
 		arr(4 * n + 2, def), lazy(4 * n + 2, idU), size(n) {}
-	void updateNode(int cur, int, int, U u) {
+	void updateNode(int cur, int l, int r, U u) {
+		seglen = r - l + 1;
 		lazy[cur] = mergeUpdate(lazy[cur], u);
 		arr[cur] = applyUpdate(u, arr[cur]);
 	}

@@ -5,20 +5,23 @@
  * Source: me
  * Description: Partial-pivot reduced row echelon form of a
  *  (possibly rectangular) matrix. Returns \texttt{(rank, det)}.
- *  \texttt{det} is meaningful for square matrices. Use this when you
- *  need the RREF itself (rank, nullspace, row space).
+ *  Over $\mathbb{R}$, or modulo a prime (pass \texttt{mod}).
+ *  \texttt{det} is meaningful for square matrices. Use this when
+ *  you need the RREF itself (rank, nullspace, row space).
  *  For $Ax=b$ or inversion, see SolveLinear / MatrixInverse.
  * Time: $O(n^2 m)$
- * Status: stress-tested
+ * Status: stress-tested, Library Checker matrix\_rank
  */
 #pragma once
+
+#include "../number-theory/euclid.h"
 
 typedef vector<double> vd;
 typedef vector<vd> vvd;
 const double RREF_EPS = 1e-10;
 
 pair<int, double> rref(vvd& a) {
-	int n = sz(a), m = sz(a[0]), r = 0;
+	int n = sz(a), m = n ? sz(a[0]) : 0, r = 0;
 	double det = 1;
 	for (int c = 0; c < m && r < n; c++) {
 		int j = r;
@@ -37,5 +40,32 @@ pair<int, double> rref(vvd& a) {
 		r++;
 	}
 	if (n == m && r < n) det = 0;
+	return {r, det};
+}
+
+pair<int, ll> rref(vector<vector<ll>>& A, ll mod) {
+	int n = sz(A), m = n ? sz(A[0]) : 0, r = 0;
+	ll det = 1;
+	rep(c,0,m) {
+		if (r == n) break;
+		int p = r;
+		while (p < n && !A[p][c]) ++p;
+		if (p == n) continue;
+		if (p != r) {
+			swap(A[p], A[r]);
+			det = (mod - det) % mod;
+		}
+		det = det * A[r][c] % mod;
+		ll x, y; euclid(A[r][c], mod, x, y);
+		ll iv = (x % mod + mod) % mod;
+		rep(j,0,m) A[r][j] = A[r][j] * iv % mod;
+		rep(i,0,n) if (i != r && A[i][c]) {
+			ll f = A[i][c];
+			rep(j,0,m) A[i][j] =
+				(A[i][j] - f * A[r][j] % mod + mod) % mod;
+		}
+		++r;
+	}
+	if (n != m || r < n) det = 0;
 	return {r, det};
 }

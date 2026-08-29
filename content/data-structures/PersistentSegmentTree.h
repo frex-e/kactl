@@ -8,7 +8,8 @@
  *  root; old roots stay valid. No destructor (nodes are
  *  shared). Bounds inclusive. Change \texttt{V}, \texttt{U},
  *  \texttt{id}, \texttt{def}, \texttt{idU}, \texttt{binop},
- *  \texttt{applyUpdate}, \texttt{mergeUpdate}. Default is
+ *  \texttt{applyUpdate}, \texttt{mergeUpdate}. \texttt{seglen}
+ *  is the node length during \texttt{applyUpdate}. Default is
  *  range add / range max.
  * Time: $O(\log R)$
  * Status: stress-tested
@@ -28,7 +29,9 @@ struct Node {
 	T *lt = 0, *rt = 0;
 	V val = def;
 	U lazy = idU;
-	void updateNode(int, int, U u) {
+	int seglen = 1;
+	void updateNode(int l, int r, U u) {
+		seglen = r - l + 1;
 		lazy = mergeUpdate(lazy, u);
 		val = applyUpdate(u, val);
 	}

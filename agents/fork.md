@@ -27,13 +27,13 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 ## Snippet API that diverges
 
-**Lazy segment tree.** [content/data-structures/LazySegmentTree.h](../content/data-structures/LazySegmentTree.h) is `LazyUpdateTree`, not upstream’s pointer `Node` with range `set`/`add`. Bounds are **inclusive on both sides**. Range `update`, point `set`, range `query`. Default op is range add + range max; customize `V`/`U`/`binop`/`applyUpdate`/`mergeUpdate`.
+**Lazy segment tree.** [content/data-structures/LazySegmentTree.h](../content/data-structures/LazySegmentTree.h) is `LazyUpdateTree`, not upstream’s pointer `Node` with range `set`/`add`. Bounds are **inclusive on both sides**. Range `update`, point `set`, range `query`. Default op is range add + range max; customize `V`/`U`/`binop`/`applyUpdate`/`mergeUpdate`. `seglen` is the current node length during `applyUpdate` (needed for range affine / range sum). The sparse and persistent trees have the same hook.
 
 **HLD.** [content/graph/HLD.h](../content/graph/HLD.h) uses `LazyUpdateTree`. Internal `process` still talks in half-open `[l, r)` then converts with `r - 1` for `tree.update` / `tree.query`. Do not “simplify” those calls back to half-open, and do not call a removed `tree->set` API. Subtree query is already inclusive: `pos[v] + VALS_EDGES` .. `pos[v] + siz[v] - 1`.
 
 **Suffix array.** Same SA/LCP as upstream, plus rank, RMQ, `getLCP`, `cmpSubstr`. Stress test covers the extras.
 
-**Offline dynamic connectivity.** [content/data-structures/OfflineDynamicConnectivity.h](../content/data-structures/OfflineDynamicConnectivity.h) is sequential: `toggle(u, v)` adds or deletes an undirected edge, `query()` records a component-count snapshot, `ans()` returns answers. $q$ is an upper bound on the number of `toggle`/`query` calls.
+**Offline dynamic connectivity.** [content/data-structures/OfflineDynamicConnectivity.h](../content/data-structures/OfflineDynamicConnectivity.h) is sequential: `toggle(u, v)` adds or deletes an undirected edge, `addVal(v, x)` adds $x$ to vertex $v$, `query()` records a component-count snapshot, `query(v)` records that vertex's component sum, `ans()` returns `vector<ll>`. $q$ is an upper bound on the number of ops. Optional ctor arg is the initial vertex values.
 
 **Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset `insert<1>`, XOR-min/max, XOR-count, lazy XOR-all, mex, `each`, and merge. XOR queries (`minxor`/`maxxor`/`count`/`mex`) take `xr` (default 0). `each(f)` calls `f(x, cnt)` for each stored value. `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s) and destroys the other trie (safe to delete); `merge<1>` adds multiplicities from `insert<1>`. Values are in $[0,2^{30})$.
 
@@ -50,9 +50,9 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/data-structures/BinaryTrie.h` | insert/`insert<1>`/erase, XOR-min/max, count, lazy XOR, mex, each, set-union merge / `merge<1>` |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
 | `content/data-structures/LiChao.h` | min Li Chao (kept alongside `LineContainer.h`) |
-| `content/number-theory/LinearSieve.h` | linear sieve + least prime factor (kept alongside Eratosthenes) |
+| `content/number-theory/LinearSieve.h` | linear sieve + least prime factor (kept alongside Eratosthenes); $n>$ `SIEVE_N` skips `lp` |
 | `content/number-theory/Mobius.h` | Möbius sieve (formulas stay in `chapter.tex`) |
-| `content/numerical/RREF.h` | rectangular reduced row echelon form |
+| `content/numerical/RREF.h` | rectangular RREF over $\mathbb{R}$ or modulo a prime |
 | `content/numerical/XORBasis.h` | incremental XOR basis (kept alongside `SolveLinearBinary.h`) |
 | `content/numerical/QuadRoots.h` | stable real quadratic roots (from cactl / cp-geo) |
 | `content/numerical/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; Library Checker) |
@@ -61,7 +61,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
 | `content/graph/Centroid.h` | centroid decomposition |
 | `content/data-structures/PersistentSegmentTree.h` | persistent implicit lazy tree with point set |
-| `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/query/ans) |
+| `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/addVal/query/ans) |
 | `content/data-structures/StaticRangeQuery.h` | disjoint sparse table, any associative op |
 | `content/data-structures/SegmentTreeBeats.h` | range chmin/chmax/add + sum/min/max (USACO Guide) |
 | `content/data-structures/MonotonicMap.h` | prefix/suffix min/max with insertions (monotonic map) |
@@ -107,5 +107,5 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
-- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
+- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF (real + modular), QuadRoots, LinearSieve (incl. primes-only path), Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity (count + component sum), StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`

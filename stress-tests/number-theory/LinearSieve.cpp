@@ -25,5 +25,11 @@ int main() {
 		}
 	}
 	assert(lp[2] == 2 && lp[4] == 2 && lp[9] == 3 && lp[1] == 0);
+
+	vi prSmall = pr;
+	linearSieve(SIEVE_N + 20000);
+	assert(lp.empty());
+	assert(sz(pr) > sz(prSmall));
+	assert(vi(pr.begin(), pr.begin() + sz(prSmall)) == prSmall);
 	cout << "Tests passed!" << endl;
 }
