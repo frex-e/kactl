@@ -9,7 +9,7 @@ from io import StringIO
 from pathlib import Path
 
 from tools.kactl import CONTENT
-from tools.kactl.chapter import chapter_order, parse_chapter_imports, strip_figures
+from tools.kactl.chapter import chapter_order, parse_import_lines, strip_figures
 from tools.kactl.emit_tex import print_header
 from tools.kactl.snippet import process_path, resolve_language
 
@@ -81,27 +81,38 @@ class TestChapterParse(unittest.TestCase):
             ],
         )
 
-    def test_commented_import_excluded_from_pdf(self):
-        imports = parse_chapter_imports("data-structures")
-        self.assertIn("UnionFind.h", imports)
-        self.assertFalse(imports["UnionFind.h"].included_in_pdf)
-        self.assertTrue(imports["LazySegmentTree.h"].included_in_pdf)
-
-    def test_simd_excluded_from_pdf(self):
-        imports = parse_chapter_imports("various")
-        self.assertIn("SIMD.h", imports)
-        self.assertFalse(imports["SIMD.h"].included_in_pdf)
-        self.assertTrue(imports["Pragmas.h"].included_in_pdf)
-
-    def test_trivial_graph_and_nt_excluded_from_pdf(self):
-        graph = parse_chapter_imports("graph")
-        self.assertFalse(graph["BellmanFord.h"].included_in_pdf)
-        self.assertFalse(graph["FloydWarshall.h"].included_in_pdf)
-        self.assertTrue(graph["TopoSort.h"].included_in_pdf)
-        nt = parse_chapter_imports("number-theory")
-        self.assertFalse(nt["FloorBlocks.h"].included_in_pdf)
-        self.assertFalse(nt["Mobius.h"].included_in_pdf)
-        self.assertTrue(nt["LinearSieve.h"].included_in_pdf)
+    def test_commented_kactlimport_sets_included_in_pdf(self):
+        imports = parse_import_lines(
+            [
+                r"\kactlimport{Active.h}",
+                r"% \kactlimport{Commented.h}",
+                r"  %\kactlimport{IndentedComment.h}",
+                r"\kactlimport[-l raw]{Raw.txt}",
+                r"% \kactlimport{LaterActive.h}",
+                r"\kactlimport{LaterActive.h}",
+                r"\kactlimport{StayActive.h}",
+                r"% \kactlimport{StayActive.h}",
+                r"\section{Not an import}",
+            ]
+        )
+        self.assertTrue(imports["Active.h"].included_in_pdf)
+        self.assertFalse(imports["Commented.h"].included_in_pdf)
+        self.assertFalse(imports["IndentedComment.h"].included_in_pdf)
+        self.assertTrue(imports["Raw.txt"].included_in_pdf)
+        self.assertEqual(imports["Raw.txt"].lang_flag, "raw")
+        self.assertTrue(imports["LaterActive.h"].included_in_pdf)
+        self.assertTrue(imports["StayActive.h"].included_in_pdf)
+        self.assertEqual(
+            list(imports),
+            [
+                "Active.h",
+                "Commented.h",
+                "IndentedComment.h",
+                "Raw.txt",
+                "LaterActive.h",
+                "StayActive.h",
+            ],
+        )
 
     def test_kactlfigdesc_unwrapped_for_site(self):
         desc = process_path(CONTENT / "geometry" / "lineDistance.h").commands["Description"]
@@ -112,19 +123,6 @@ class TestChapterParse(unittest.TestCase):
         self.assertNotIn("minipage", stripped)
         self.assertNotIn("content/geometry/lineDistance", stripped)
         self.assertFalse(stripped.rstrip().endswith("%"))
-
-    def test_geometry_included_in_pdf(self):
-        imports = parse_chapter_imports("geometry")
-        self.assertTrue(imports["Point.h"].included_in_pdf)
-        self.assertTrue(imports["lineDistance.h"].included_in_pdf)
-        self.assertTrue(imports["ConvexHull.h"].included_in_pdf)
-        self.assertTrue(imports["HalfplaneIntersection.h"].included_in_pdf)
-        self.assertFalse(imports["LineProjectionReflection.h"].included_in_pdf)
-        self.assertFalse(imports["CircleLine.h"].included_in_pdf)
-        self.assertFalse(imports["PolygonUnion.h"].included_in_pdf)
-        self.assertFalse(imports["ManhattanMST.h"].included_in_pdf)
-        self.assertFalse(imports["DelaunayTriangulation.h"].included_in_pdf)
-        self.assertIn("geometry", chapter_order())
 
     def test_geometry_site_descriptions_drop_figures(self):
         names = [
