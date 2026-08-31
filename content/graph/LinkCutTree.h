@@ -2,11 +2,13 @@
  * Author: Simon Lindholm
  * Date: 2016-07-25
  * Source: https://github.com/ngthanhtrung23/ACM_Notebook_new/blob/master/DataStructure/LinkCutTree.h
- * Description: Represents a forest of unrooted trees. You can add and remove
- * edges (as long as the result is still a forest), and check whether
- * two nodes are in the same tree.
- * Time: All operations take amortized O(\log N).
- * Status: Stress-tested a bit for N <= 20
+ * Description: Forest of trees with a distinguished root per component.
+ * Add and remove edges (the result must stay a forest), query whether two
+ * nodes are in the same tree, and query a node's component root.
+ * \texttt{link(u, v)} keeps the root of $v$'s tree; \texttt{link(v, u)}
+ * keeps $u$'s.
+ * Time: All operations take amortized $O(\log N)$.
+ * Status: stress-tested
  */
 #pragma once
 
@@ -59,7 +61,10 @@ struct LinkCut {
 	vector<Node> node;
 	LinkCut(int N) : node(N) {}
 
-	void link(int u, int v) { // add an edge (u, v)
+	int root(int u) { // root of u's component
+		return int(access(&node[u])->first() - &node[0]);
+	}
+	void link(int u, int v) { // add edge; keep v's root
 		assert(!connected(u, v));
 		makeRoot(&node[u]);
 		node[u].pp = &node[v];
@@ -74,10 +79,7 @@ struct LinkCut {
 			x->fix();
 		}
 	}
-	bool connected(int u, int v) { // are u, v in the same tree?
-		Node* nu = access(&node[u])->first();
-		return nu == access(&node[v])->first();
-	}
+	bool connected(int u, int v) { return root(u) == root(v); }
 	void makeRoot(Node* u) { /// Move u to root of represented tree.
 		access(u);
 		u->splay();
