@@ -33,7 +33,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 **Suffix array.** Same SA/LCP as upstream, plus rank, RMQ, `getLCP`, `cmpSubstr`. Stress test covers the extras.
 
-**Offline dynamic connectivity.** [content/data-structures/OfflineDynamicConnectivity.h](../content/data-structures/OfflineDynamicConnectivity.h) is sequential: `toggle(u, v)` adds or deletes an undirected edge, `query()` records a component-count snapshot, `ans()` returns answers. $q$ is an upper bound on the number of `toggle`/`query` calls.
+**Offline dynamic connectivity.** [content/data-structures/OfflineDynamicConnectivity.h](../content/data-structures/OfflineDynamicConnectivity.h) is sequential: `toggle(u, v)` adds or deletes an undirected edge, `query()` records a component-count snapshot, `ans()` returns answers. Time is query-indexed: `toggle` does not consume a slot. $q$ is an upper bound on the number of `query` calls.
 
 **Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset `insert<1>`, XOR-min/max, XOR-count, lazy XOR-all, mex, `each`, and merge. XOR queries (`minxor`/`maxxor`/`count`/`mex`) take `xr` (default 0). `each(f)` calls `f(x, cnt)` for each stored value. `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s) and destroys the other trie (safe to delete); `merge<1>` adds multiplicities from `insert<1>`. Values are in $[0,2^{30})$.
 
