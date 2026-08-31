@@ -90,6 +90,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 |---|---|
 | `content/data-structures/Treap.h` | subtree sum, lazy range add |
 | `content/graph/HLD.h` | uses `LazyUpdateTree`; converts half-open HLD ranges to inclusive `[l, r-1]` |
+| `content/graph/LinkCutTree.h` | `root(u)` query; `link(u, v)` keeps the root of $v$'s tree |
 | `content/various/KnuthDP.h` | quadrangle notes (verified patterns) + `knuthDP` implementation |
 | `content/various/DivideAndConquerDP.h` | layered recurrence + usage of `lo`/`hi`/`f`/`store` |
 | `content/graph/chapter.tex` | Johnson’s notes; Dinic; centroid; demands / lower bounds; blossom; dominator tree; Steiner tree; Kőnig / path cover / Dilworth |
@@ -107,5 +108,6 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
+- `stress-tests/graph/LinkCutTree.cpp` checks `root()` and that `link(u, v)` keeps $v$'s root
 - New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`
