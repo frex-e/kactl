@@ -9,7 +9,12 @@ from io import StringIO
 from pathlib import Path
 
 from tools.kactl import CONTENT
-from tools.kactl.chapter import chapter_order, parse_import_lines, strip_figures
+from tools.kactl.chapter import (
+    chapter_order,
+    parse_chapter_document,
+    parse_import_lines,
+    strip_figures,
+)
 from tools.kactl.emit_tex import print_header
 from tools.kactl.snippet import process_path, resolve_language
 
@@ -103,6 +108,8 @@ class TestChapterParse(unittest.TestCase):
         self.assertEqual(imports["Raw.txt"].lang_flag, "raw")
         self.assertTrue(imports["LaterActive.h"].included_in_pdf)
         self.assertTrue(imports["StayActive.h"].included_in_pdf)
+        self.assertEqual(imports["LaterActive.h"].source_index, 5)
+        self.assertEqual(imports["StayActive.h"].source_index, 6)
         self.assertEqual(
             list(imports),
             [
@@ -114,6 +121,29 @@ class TestChapterParse(unittest.TestCase):
                 "StayActive.h",
             ],
         )
+
+    def test_document_uses_same_canonical_import_as_pipeline(self):
+        lines = [
+            r"\chapter{Synthetic}",
+            r"% \kactlimport{Duplicate.h}",
+            r"\section{Before active import}",
+            r"\kactlimport{Duplicate.h}",
+        ]
+        imports = parse_import_lines(lines)
+        blocks = parse_chapter_document("synthetic", lines, imports)
+        snippet_blocks = [block for block in blocks if block["type"] == "snippet"]
+        self.assertEqual(
+            snippet_blocks,
+            [
+                {
+                    "type": "snippet",
+                    "id": "synthetic/Duplicate.h",
+                    "chapter": "synthetic",
+                    "includedInPdf": True,
+                }
+            ],
+        )
+        self.assertEqual(blocks[-1], snippet_blocks[0])
 
     def test_kactlfigdesc_unwrapped_for_site(self):
         desc = process_path(CONTENT / "geometry" / "lineDistance.h").commands["Description"]

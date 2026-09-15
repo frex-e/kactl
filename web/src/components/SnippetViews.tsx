@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import hljs from 'highlight.js/lib/core'
 import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
@@ -14,14 +14,6 @@ hljs.registerLanguage('java', java)
 hljs.registerLanguage('bash', bash)
 hljs.registerLanguage('python', python)
 hljs.registerLanguage('plaintext', plaintext)
-
-function langFor(name: string): string {
-  if (/\.(h|hpp|cpp|cc|c)$/i.test(name)) return 'cpp'
-  if (/\.java$/i.test(name)) return 'java'
-  if (/\.py$/i.test(name)) return 'python'
-  if (/\.sh$/i.test(name) || name === '.bashrc') return 'bash'
-  return 'plaintext'
-}
 
 function highlightCode(code: string, language: string): string {
   try {
@@ -95,8 +87,6 @@ export const SnippetDetail = memo(function SnippetDetail({
   scrollRoot?: Element | null
 }) {
   const [copied, setCopied] = useState<'code' | 'deps' | 'fail' | null>(null)
-
-  const language = useMemo(() => langFor(snippet.name), [snippet.name])
 
   async function doCopy(mode: 'code' | 'deps') {
     setCopied(mode)
@@ -202,7 +192,7 @@ export const SnippetDetail = memo(function SnippetDetail({
         <h3>Code</h3>
         <LazyCode
           code={snippet.code}
-          language={language}
+          language={snippet.language}
           eager={active}
           root={scrollRoot}
         />

@@ -10,7 +10,7 @@ from .chapter import (
     resolve_include,
     strip_figures,
 )
-from .snippet import ProcessedSnippet
+from .model import Document, Snippet
 
 
 def wrap_ordo(text: str) -> str:
@@ -52,22 +52,21 @@ def wrap_time(t: str) -> str:
 
 
 def snippet_json(
-    sid: str,
-    chapter_id: str,
-    snippet: ProcessedSnippet,
-    included: bool,
+    snippet: Snippet,
     id_set: set[str],
 ) -> dict:
+    processed = snippet.processed
     deps: list[str] = []
-    for raw in snippet.includes:
-        resolved = resolve_include(sid, raw, id_set)
+    for raw in processed.includes:
+        resolved = resolve_include(snippet.id, raw, id_set)
         if resolved and resolved not in deps:
             deps.append(resolved)
-    commands = snippet.commands
+    commands = processed.commands
     return {
-        "id": sid,
-        "name": snippet.path.name,
-        "chapter": chapter_id,
+        "id": snippet.id,
+        "name": processed.path.name,
+        "chapter": snippet.chapter,
+        "language": processed.syntax_lang,
         "description": strip_figures(commands.get("Description", "")),
         "usage": commands.get("Usage", ""),
         "time": wrap_time(commands.get("Time", "")),
@@ -76,8 +75,33 @@ def snippet_json(
         "author": commands.get("Author", ""),
         "source": commands.get("Source", ""),
         "dependencies": deps,
-        "includedInPdf": included,
-        "code": snippet.code,
+        "includedInPdf": snippet.included_in_pdf,
+        "code": processed.code,
+    }
+
+
+def document_payload(document: Document) -> dict:
+    """Format the shared document model as the web snippet index."""
+    id_set = {snippet.id for snippet in document.snippets}
+    snippets = [
+        snippet_json(snippet, id_set) for snippet in document.snippets
+    ]
+    chapter_rank = {
+        chapter.id: rank for rank, chapter in enumerate(document.chapters)
+    }
+    snippets.sort(
+        key=lambda snippet: (
+            chapter_rank.get(snippet["chapter"], len(chapter_rank)),
+            snippet["name"].lower(),
+        )
+    )
+    return {
+        "chapters": [
+            {"id": chapter.id, "title": chapter.title}
+            for chapter in document.chapters
+        ],
+        "snippets": snippets,
+        "document": document.blocks,
     }
 
 

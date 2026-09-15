@@ -7,6 +7,7 @@ export type Snippet = {
   id: string
   name: string
   chapter: string
+  language: 'cpp' | 'java' | 'python' | 'bash' | 'plaintext'
   description: string
   usage: string
   time: string

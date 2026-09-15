@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import REPO_ROOT
-from .texesc import codeescape, escape, ordoescape, pathescape
 
 KNOWN_COMMANDS = [
     "Author",
@@ -68,6 +67,14 @@ CLI_LANG: dict[str, tuple[str, str]] = {
     "rawpy": ("raw", "Python"),
 }
 
+SYNTAX_LANG: dict[str, str] = {
+    "C++": "cpp",
+    "Java": "java",
+    "Python": "python",
+    "bash": "bash",
+    "raw": "plaintext",
+}
+
 
 @dataclass
 class ProcessedSnippet:
@@ -75,6 +82,7 @@ class ProcessedSnippet:
     caption: str
     mode: str
     listings_lang: str
+    syntax_lang: str
     commands: dict[str, str] = field(default_factory=dict)
     includes: list[str] = field(default_factory=list)
     code: str = ""
@@ -120,6 +128,11 @@ def resolve_language(filename: str, lang_flag: str | None = None) -> tuple[str, 
     if ext in CLI_LANG:
         return CLI_LANG[ext]
     raise ValueError("Unknown language: " + str(ext or filename))
+
+
+def syntax_language(listings_lang: str) -> str:
+    """Return the normalized language id shared with the web highlighter."""
+    return SYNTAX_LANG.get(listings_lang, "plaintext")
 
 
 def hash_source(code: str) -> str:
@@ -217,6 +230,7 @@ def process_with_comments(path: Path, caption: str, listings_lang: str, text: st
         caption=caption,
         mode="comments",
         listings_lang=listings_lang,
+        syntax_lang=syntax_language(listings_lang),
         commands=commands,
         includes=includelist,
         code=nsource,
@@ -233,6 +247,7 @@ def process_raw(path: Path, caption: str, listings_lang: str, text: str) -> Proc
         caption=caption,
         mode="raw",
         listings_lang=listings_lang,
+        syntax_lang=syntax_language(listings_lang),
         code=code,
         line_count=len(code.split("\n")) if code else 0,
     )
@@ -248,6 +263,7 @@ def process_path(path: Path, lang_flag: str | None = None) -> ProcessedSnippet:
             caption=caption,
             mode="raw",
             listings_lang="raw",
+            syntax_lang="plaintext",
             error=str(err),
         )
     try:
@@ -258,52 +274,9 @@ def process_path(path: Path, lang_flag: str | None = None) -> ProcessedSnippet:
             caption=caption,
             mode=mode,
             listings_lang=listings_lang,
+            syntax_lang=syntax_language(listings_lang),
             error="Could not read source.",
         )
     if mode == "raw":
         return process_raw(path, caption, listings_lang, text)
     return process_with_comments(path, caption, listings_lang, text)
-
-
-def listing_tex(snippet: ProcessedSnippet) -> str:
-    """Emit the lstlisting TeX payload for a processed snippet."""
-    caption = snippet.caption
-    if snippet.error:
-        return r"\kactlerror{%s: %s}" % (caption, snippet.error) + "\n"
-
-    out: list[str] = []
-    out.append(r"\kactlref{%s}" % pathescape(caption).strip())
-    if snippet.mode == "raw":
-        out.append(r"\rightcaption{%d lines}" % snippet.line_count)
-        out.append(
-            r"\begin{lstlisting}[language=%s,caption={%s}]"
-            % (snippet.listings_lang, pathescape(caption))
-        )
-        out.append(snippet.code)
-        out.append(r"\end{lstlisting}")
-        return "\n".join(out) + "\n"
-
-    commands = snippet.commands
-    if commands.get("Description"):
-        out.append(r"\defdescription{%s}" % escape(commands["Description"]))
-    if commands.get("Usage"):
-        out.append(r"\defusage{%s}" % codeescape(commands["Usage"]))
-    if commands.get("Time"):
-        out.append(r"\deftime{%s}" % ordoescape(commands["Time"]))
-    if commands.get("Memory"):
-        out.append(r"\defmemory{%s}" % ordoescape(commands["Memory"]))
-    if snippet.includes:
-        out.append(r"\leftcaption{%s}" % pathescape(", ".join(snippet.includes)))
-    if snippet.code:
-        out.append(
-            r"\rightcaption{%s%d lines}" % (snippet.hash_prefix, snippet.line_count)
-        )
-    langstr = ", language=" + snippet.listings_lang
-    out.append(r"\begin{lstlisting}[caption={%s}%s]" % (pathescape(caption), langstr))
-    out.append(snippet.code)
-    out.append(r"\end{lstlisting}")
-    return "\n".join(out) + "\n"
-
-
-def header_caption(snippet: ProcessedSnippet) -> str:
-    return pathescape(snippet.caption).strip()

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from . import CONTENT
+from .model import DocumentBlock
 
 CODE_SUFFIXES = {".h", ".hpp", ".cpp", ".cc", ".c", ".java", ".py", ".sh", ".txt"}
 
@@ -34,6 +35,15 @@ class KactlImport:
     name: str
     included_in_pdf: bool
     lang_flag: str | None = None
+    source_index: int = -1
+
+
+@dataclass
+class ParsedChapter:
+    id: str
+    title: str
+    imports: dict[str, KactlImport]
+    blocks: list[DocumentBlock]
 
 
 def chapter_order(kactl_tex: Path | None = None) -> list[str]:
@@ -51,17 +61,19 @@ def parse_lang_flag(optional: str | None) -> str | None:
 def parse_import_lines(lines: Iterable[str]) -> dict[str, KactlImport]:
     """Map filename -> import. First active wins; commented only if unseen."""
     result: dict[str, KactlImport] = {}
-    for line in lines:
+    for source_index, line in enumerate(lines):
         m = IMPORT_RE.match(line)
         if not m:
             continue
         optional, name = m.group(2), m.group(3)
         commented = line.lstrip().startswith("%")
-        if name not in result or not commented:
+        existing = result.get(name)
+        if existing is None or (not commented and not existing.included_in_pdf):
             result[name] = KactlImport(
                 name=name,
                 included_in_pdf=not commented,
                 lang_flag=parse_lang_flag(optional),
+                source_index=source_index,
             )
     return result
 
@@ -279,7 +291,12 @@ def chapter_title(chapter_id: str) -> str:
     chapter_tex = CONTENT / chapter_id / "chapter.tex"
     if not chapter_tex.is_file():
         return chapter_id
-    for line in chapter_tex.read_text(encoding="utf-8", errors="replace").splitlines():
+    lines = chapter_tex.read_text(encoding="utf-8", errors="replace").splitlines()
+    return chapter_title_from_lines(chapter_id, lines)
+
+
+def chapter_title_from_lines(chapter_id: str, lines: Iterable[str]) -> str:
+    for line in lines:
         stripped = strip_tex_comment(line).strip()
         m = HEADING_CMD_RE.match(stripped)
         if not m or m.group(1) != "chapter":
@@ -292,15 +309,27 @@ def chapter_title(chapter_id: str) -> str:
     return chapter_id
 
 
-def parse_chapter_document(chapter_id: str) -> list[dict]:
+def parse_chapter_document(
+    chapter_id: str,
+    lines: Iterable[str] | None = None,
+    imports: dict[str, KactlImport] | None = None,
+) -> list[DocumentBlock]:
     """Walk chapter.tex into heading / prose / snippet blocks (PDF order)."""
     chapter_dir = CONTENT / chapter_id
     chapter_tex = chapter_dir / "chapter.tex"
-    if not chapter_tex.is_file():
+    if lines is None and not chapter_tex.is_file():
         return []
+    source_lines = (
+        list(lines)
+        if lines is not None
+        else chapter_tex.read_text(encoding="utf-8", errors="replace").splitlines()
+    )
+    chapter_imports = (
+        imports if imports is not None else parse_import_lines(source_lines)
+    )
 
     used_ids: set[str] = set()
-    blocks: list[dict] = []
+    blocks: list[DocumentBlock] = []
     prose_buf: list[str] = []
     prose_n = 0
 
@@ -334,13 +363,15 @@ def parse_chapter_document(chapter_id: str) -> list[dict]:
         cleaned = [strip_tex_comment(line) for line in text.splitlines()]
         prose_buf.append("\n".join(cleaned))
 
-    for line in chapter_tex.read_text(encoding="utf-8", errors="replace").splitlines():
+    for source_index, line in enumerate(source_lines):
         raw_line = line
         import_m = IMPORT_RE.match(raw_line)
         if import_m:
-            flush_prose()
             name = import_m.group(3)
-            commented = raw_line.lstrip().startswith("%")
+            spec = chapter_imports.get(name)
+            if spec is None or spec.source_index != source_index:
+                continue
+            flush_prose()
             sid = f"{chapter_id}/{name}"
             used_ids.add(sid)
             blocks.append(
@@ -348,7 +379,7 @@ def parse_chapter_document(chapter_id: str) -> list[dict]:
                     "type": "snippet",
                     "id": sid,
                     "chapter": chapter_id,
-                    "includedInPdf": not commented,
+                    "includedInPdf": spec.included_in_pdf,
                 }
             )
             continue
@@ -395,3 +426,18 @@ def parse_chapter_document(chapter_id: str) -> list[dict]:
 
     flush_prose()
     return blocks
+
+
+def parse_chapter(chapter_id: str) -> ParsedChapter:
+    """Parse title, imports, and document blocks from one chapter read."""
+    chapter_tex = CONTENT / chapter_id / "chapter.tex"
+    if not chapter_tex.is_file():
+        return ParsedChapter(chapter_id, chapter_id, {}, [])
+    lines = chapter_tex.read_text(encoding="utf-8", errors="replace").splitlines()
+    imports = parse_import_lines(lines)
+    return ParsedChapter(
+        id=chapter_id,
+        title=chapter_title_from_lines(chapter_id, lines),
+        imports=imports,
+        blocks=parse_chapter_document(chapter_id, lines, imports),
+    )
