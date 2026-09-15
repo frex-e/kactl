@@ -34,6 +34,9 @@ assert.match(html, /<code class="ltx-tt">mat\[b\]\[b\]\+\+<\/code>/)
 assert.match(html, /katex/)
 
 assert.equal(latexToHtml('\\texttt{\\{u,v,w\\}}'), '<code class="ltx-tt">{u,v,w}</code>')
+assert.match(latexToHtml('Max $s$--$t$ flow'), /Max .*&ndash;.* flow|Max .*\u2013.* flow/)
+assert.doesNotMatch(latexToHtml('Max $s$--$t$ flow'), /s--t/)
+assert.match(latexToHtml('\\texttt{mat[a][b]-{}-}'), /mat\[a\]\[b\]--/)
 assert.equal(
   latexToHtml('\\kactlfigdesc{signed distance \\texttt{p}}{content/geometry/lineDistance}'),
   'signed distance <code class="ltx-tt">p</code>',

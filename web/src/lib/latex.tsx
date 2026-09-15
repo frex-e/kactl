@@ -501,7 +501,11 @@ export function latexToHtml(src: string): string {
       if (src.startsWith('\\[', j)) break
       j++
     }
+    // TeX text-mode ligatures: `--` en-dash, `---` em-dash.
+    // `-{}-` stays two hyphens because `{}` splits the run (same as LaTeX).
     out += escapeHtml(src.slice(i, j))
+      .replace(/---/g, '&mdash;')
+      .replace(/--/g, '&ndash;')
     i = j
   }
   return out
