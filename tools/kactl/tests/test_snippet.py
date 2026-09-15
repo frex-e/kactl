@@ -77,6 +77,7 @@ class TestChapterParse(unittest.TestCase):
                 "strings",
                 "various",
                 "geometry",
+                "extras",
                 "appendix",
             ],
         )
