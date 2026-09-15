@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import REPO_ROOT
-from .texesc import codeescape, escape, ordoescape, pathescape
 
 KNOWN_COMMANDS = [
     "Author",
@@ -68,6 +67,43 @@ CLI_LANG: dict[str, tuple[str, str]] = {
     "rawpy": ("raw", "Python"),
 }
 
+SYNTAX_BY_NAME: dict[str, str] = {
+    "template.cpp": "cpp",
+    ".bashrc": "bash",
+    ".vimrc": "plaintext",
+    "hash.sh": "bash",
+    "troubleshoot.txt": "plaintext",
+    "techniques.txt": "plaintext",
+}
+
+SYNTAX_BY_EXT: dict[str, str] = {
+    "cpp": "cpp",
+    "cc": "cpp",
+    "c": "cpp",
+    "h": "cpp",
+    "hpp": "cpp",
+    "java": "java",
+    "kt": "java",
+    "py": "python",
+    "sh": "bash",
+}
+
+SYNTAX_BY_FLAG: dict[str, str] = {
+    "cpp": "cpp",
+    "cc": "cpp",
+    "c": "cpp",
+    "h": "cpp",
+    "hpp": "cpp",
+    "java": "java",
+    "kt": "java",
+    "py": "python",
+    "sh": "bash",
+    "rawcpp": "cpp",
+    "rawpy": "python",
+    "ps": "plaintext",
+    "raw": "plaintext",
+}
+
 
 @dataclass
 class ProcessedSnippet:
@@ -75,6 +111,7 @@ class ProcessedSnippet:
     caption: str
     mode: str
     listings_lang: str
+    syntax_lang: str
     commands: dict[str, str] = field(default_factory=dict)
     includes: list[str] = field(default_factory=list)
     code: str = ""
@@ -122,6 +159,15 @@ def resolve_language(filename: str, lang_flag: str | None = None) -> tuple[str, 
     raise ValueError("Unknown language: " + str(ext or filename))
 
 
+def resolve_syntax_language(filename: str, lang_flag: str | None = None) -> str:
+    """Return a target-neutral syntax id without inferring it in the web app."""
+    if lang_flag:
+        return SYNTAX_BY_FLAG.get(lang_flag.lower(), "plaintext")
+    if filename in SYNTAX_BY_NAME:
+        return SYNTAX_BY_NAME[filename]
+    return SYNTAX_BY_EXT.get(ext_of(filename).lower(), "plaintext")
+
+
 def hash_source(code: str) -> str:
     script = REPO_ROOT / "content" / "contest" / "hash.sh"
     p = subprocess.Popen(
@@ -135,7 +181,13 @@ def hash_source(code: str) -> str:
     return hsh.split(None, 1)[0]
 
 
-def process_with_comments(path: Path, caption: str, listings_lang: str, text: str) -> ProcessedSnippet:
+def process_with_comments(
+    path: Path,
+    caption: str,
+    listings_lang: str,
+    syntax_lang: str,
+    text: str,
+) -> ProcessedSnippet:
     error = ""
     includelist: list[str] = []
     nlines: list[str] = []
@@ -217,6 +269,7 @@ def process_with_comments(path: Path, caption: str, listings_lang: str, text: st
         caption=caption,
         mode="comments",
         listings_lang=listings_lang,
+        syntax_lang=syntax_lang,
         commands=commands,
         includes=includelist,
         code=nsource,
@@ -226,13 +279,20 @@ def process_with_comments(path: Path, caption: str, listings_lang: str, text: st
     )
 
 
-def process_raw(path: Path, caption: str, listings_lang: str, text: str) -> ProcessedSnippet:
+def process_raw(
+    path: Path,
+    caption: str,
+    listings_lang: str,
+    syntax_lang: str,
+    text: str,
+) -> ProcessedSnippet:
     code = text.strip()
     return ProcessedSnippet(
         path=path,
         caption=caption,
         mode="raw",
         listings_lang=listings_lang,
+        syntax_lang=syntax_lang,
         code=code,
         line_count=len(code.split("\n")) if code else 0,
     )
@@ -248,8 +308,10 @@ def process_path(path: Path, lang_flag: str | None = None) -> ProcessedSnippet:
             caption=caption,
             mode="raw",
             listings_lang="raw",
+            syntax_lang="plaintext",
             error=str(err),
         )
+    syntax_lang = resolve_syntax_language(path.name, lang_flag)
     try:
         text = path.read_text(encoding="utf-8")
     except OSError:
@@ -258,52 +320,9 @@ def process_path(path: Path, lang_flag: str | None = None) -> ProcessedSnippet:
             caption=caption,
             mode=mode,
             listings_lang=listings_lang,
+            syntax_lang=syntax_lang,
             error="Could not read source.",
         )
     if mode == "raw":
-        return process_raw(path, caption, listings_lang, text)
-    return process_with_comments(path, caption, listings_lang, text)
-
-
-def listing_tex(snippet: ProcessedSnippet) -> str:
-    """Emit the lstlisting TeX payload for a processed snippet."""
-    caption = snippet.caption
-    if snippet.error:
-        return r"\kactlerror{%s: %s}" % (caption, snippet.error) + "\n"
-
-    out: list[str] = []
-    out.append(r"\kactlref{%s}" % pathescape(caption).strip())
-    if snippet.mode == "raw":
-        out.append(r"\rightcaption{%d lines}" % snippet.line_count)
-        out.append(
-            r"\begin{lstlisting}[language=%s,caption={%s}]"
-            % (snippet.listings_lang, pathescape(caption))
-        )
-        out.append(snippet.code)
-        out.append(r"\end{lstlisting}")
-        return "\n".join(out) + "\n"
-
-    commands = snippet.commands
-    if commands.get("Description"):
-        out.append(r"\defdescription{%s}" % escape(commands["Description"]))
-    if commands.get("Usage"):
-        out.append(r"\defusage{%s}" % codeescape(commands["Usage"]))
-    if commands.get("Time"):
-        out.append(r"\deftime{%s}" % ordoescape(commands["Time"]))
-    if commands.get("Memory"):
-        out.append(r"\defmemory{%s}" % ordoescape(commands["Memory"]))
-    if snippet.includes:
-        out.append(r"\leftcaption{%s}" % pathescape(", ".join(snippet.includes)))
-    if snippet.code:
-        out.append(
-            r"\rightcaption{%s%d lines}" % (snippet.hash_prefix, snippet.line_count)
-        )
-    langstr = ", language=" + snippet.listings_lang
-    out.append(r"\begin{lstlisting}[caption={%s}%s]" % (pathescape(caption), langstr))
-    out.append(snippet.code)
-    out.append(r"\end{lstlisting}")
-    return "\n".join(out) + "\n"
-
-
-def header_caption(snippet: ProcessedSnippet) -> str:
-    return pathescape(snippet.caption).strip()
+        return process_raw(path, caption, listings_lang, syntax_lang, text)
+    return process_with_comments(path, caption, listings_lang, syntax_lang, text)

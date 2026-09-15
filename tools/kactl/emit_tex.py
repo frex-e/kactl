@@ -6,7 +6,54 @@ from pathlib import Path
 from typing import TextIO
 
 from . import BUILD
-from .snippet import ProcessedSnippet, header_caption, listing_tex
+from .model import Document
+from .snippet import ProcessedSnippet
+from .texesc import codeescape, escape, ordoescape, pathescape
+
+
+def listing_tex(snippet: ProcessedSnippet) -> str:
+    """Format one processed snippet for the PDF listings adapter."""
+    caption = snippet.caption
+    if snippet.error:
+        return r"\kactlerror{%s: %s}" % (caption, snippet.error) + "\n"
+
+    out: list[str] = [r"\kactlref{%s}" % pathescape(caption).strip()]
+    if snippet.mode == "raw":
+        out.append(r"\rightcaption{%d lines}" % snippet.line_count)
+        out.append(
+            r"\begin{lstlisting}[language=%s,caption={%s}]"
+            % (snippet.listings_lang, pathescape(caption))
+        )
+        out.append(snippet.code)
+        out.append(r"\end{lstlisting}")
+        return "\n".join(out) + "\n"
+
+    commands = snippet.commands
+    if commands.get("Description"):
+        out.append(r"\defdescription{%s}" % escape(commands["Description"]))
+    if commands.get("Usage"):
+        out.append(r"\defusage{%s}" % codeescape(commands["Usage"]))
+    if commands.get("Time"):
+        out.append(r"\deftime{%s}" % ordoescape(commands["Time"]))
+    if commands.get("Memory"):
+        out.append(r"\defmemory{%s}" % ordoescape(commands["Memory"]))
+    if snippet.includes:
+        out.append(r"\leftcaption{%s}" % pathescape(", ".join(snippet.includes)))
+    if snippet.code:
+        out.append(
+            r"\rightcaption{%s%d lines}" % (snippet.hash_prefix, snippet.line_count)
+        )
+    out.append(
+        r"\begin{lstlisting}[caption={%s}, language=%s]"
+        % (pathescape(caption), snippet.listings_lang)
+    )
+    out.append(snippet.code)
+    out.append(r"\end{lstlisting}")
+    return "\n".join(out) + "\n"
+
+
+def header_caption(snippet: ProcessedSnippet) -> str:
+    return pathescape(snippet.caption).strip()
 
 
 def listing_path(chapter_id: str, filename: str) -> Path:
@@ -27,6 +74,19 @@ def write_header_seed(snippets: list[ProcessedSnippet]) -> Path:
     lines = [header_caption(s) for s in snippets if not s.error]
     path.write_text("".join(line + "\n" for line in lines), encoding="utf-8")
     return path
+
+
+def write_pdf_artifacts(document: Document) -> tuple[Path, Path]:
+    """Write all artifacts consumed by pdflatex from the shared document."""
+    for snippet in document.snippets:
+        if snippet.included_in_pdf:
+            write_listing(snippet.chapter, snippet.processed)
+    included = [
+        snippet.processed
+        for snippet in document.snippets
+        if snippet.included_in_pdf and not snippet.processed.error
+    ]
+    return BUILD / "listings", write_header_seed(included)
 
 
 def print_header(data: str, outstream: TextIO, header_tmp: Path | None = None) -> None:
