@@ -126,15 +126,23 @@ class TestChapterParse(unittest.TestCase):
         lines = [
             r"\chapter{Synthetic}",
             r"% \kactlimport{Duplicate.h}",
+            r"\kactlimport{Between.h}",
             r"\section{Before active import}",
             r"\kactlimport{Duplicate.h}",
         ]
         imports = parse_import_lines(lines)
+        self.assertEqual(list(imports), ["Between.h", "Duplicate.h"])
         blocks = parse_chapter_document("synthetic", lines, imports)
         snippet_blocks = [block for block in blocks if block["type"] == "snippet"]
         self.assertEqual(
             snippet_blocks,
             [
+                {
+                    "type": "snippet",
+                    "id": "synthetic/Between.h",
+                    "chapter": "synthetic",
+                    "includedInPdf": True,
+                },
                 {
                     "type": "snippet",
                     "id": "synthetic/Duplicate.h",
@@ -143,7 +151,16 @@ class TestChapterParse(unittest.TestCase):
                 }
             ],
         )
-        self.assertEqual(blocks[-1], snippet_blocks[0])
+        self.assertEqual(blocks[-1], snippet_blocks[-1])
+
+    def test_duplicate_active_import_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "Duplicate active"):
+            parse_import_lines(
+                [
+                    r"\kactlimport{Duplicate.h}",
+                    r"\kactlimport{Duplicate.h}",
+                ]
+            )
 
     def test_kactlfigdesc_unwrapped_for_site(self):
         desc = process_path(CONTENT / "geometry" / "lineDistance.h").commands["Description"]

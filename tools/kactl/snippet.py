@@ -67,11 +67,40 @@ CLI_LANG: dict[str, tuple[str, str]] = {
     "rawpy": ("raw", "Python"),
 }
 
-SYNTAX_LANG: dict[str, str] = {
-    "C++": "cpp",
-    "Java": "java",
-    "Python": "python",
-    "bash": "bash",
+SYNTAX_BY_NAME: dict[str, str] = {
+    "template.cpp": "cpp",
+    ".bashrc": "bash",
+    ".vimrc": "plaintext",
+    "hash.sh": "bash",
+    "troubleshoot.txt": "plaintext",
+    "techniques.txt": "plaintext",
+}
+
+SYNTAX_BY_EXT: dict[str, str] = {
+    "cpp": "cpp",
+    "cc": "cpp",
+    "c": "cpp",
+    "h": "cpp",
+    "hpp": "cpp",
+    "java": "java",
+    "kt": "java",
+    "py": "python",
+    "sh": "bash",
+}
+
+SYNTAX_BY_FLAG: dict[str, str] = {
+    "cpp": "cpp",
+    "cc": "cpp",
+    "c": "cpp",
+    "h": "cpp",
+    "hpp": "cpp",
+    "java": "java",
+    "kt": "java",
+    "py": "python",
+    "sh": "bash",
+    "rawcpp": "cpp",
+    "rawpy": "python",
+    "ps": "plaintext",
     "raw": "plaintext",
 }
 
@@ -130,9 +159,13 @@ def resolve_language(filename: str, lang_flag: str | None = None) -> tuple[str, 
     raise ValueError("Unknown language: " + str(ext or filename))
 
 
-def syntax_language(listings_lang: str) -> str:
-    """Return the normalized language id shared with the web highlighter."""
-    return SYNTAX_LANG.get(listings_lang, "plaintext")
+def resolve_syntax_language(filename: str, lang_flag: str | None = None) -> str:
+    """Return a target-neutral syntax id without inferring it in the web app."""
+    if lang_flag:
+        return SYNTAX_BY_FLAG.get(lang_flag.lower(), "plaintext")
+    if filename in SYNTAX_BY_NAME:
+        return SYNTAX_BY_NAME[filename]
+    return SYNTAX_BY_EXT.get(ext_of(filename).lower(), "plaintext")
 
 
 def hash_source(code: str) -> str:
@@ -148,7 +181,13 @@ def hash_source(code: str) -> str:
     return hsh.split(None, 1)[0]
 
 
-def process_with_comments(path: Path, caption: str, listings_lang: str, text: str) -> ProcessedSnippet:
+def process_with_comments(
+    path: Path,
+    caption: str,
+    listings_lang: str,
+    syntax_lang: str,
+    text: str,
+) -> ProcessedSnippet:
     error = ""
     includelist: list[str] = []
     nlines: list[str] = []
@@ -230,7 +269,7 @@ def process_with_comments(path: Path, caption: str, listings_lang: str, text: st
         caption=caption,
         mode="comments",
         listings_lang=listings_lang,
-        syntax_lang=syntax_language(listings_lang),
+        syntax_lang=syntax_lang,
         commands=commands,
         includes=includelist,
         code=nsource,
@@ -240,14 +279,20 @@ def process_with_comments(path: Path, caption: str, listings_lang: str, text: st
     )
 
 
-def process_raw(path: Path, caption: str, listings_lang: str, text: str) -> ProcessedSnippet:
+def process_raw(
+    path: Path,
+    caption: str,
+    listings_lang: str,
+    syntax_lang: str,
+    text: str,
+) -> ProcessedSnippet:
     code = text.strip()
     return ProcessedSnippet(
         path=path,
         caption=caption,
         mode="raw",
         listings_lang=listings_lang,
-        syntax_lang=syntax_language(listings_lang),
+        syntax_lang=syntax_lang,
         code=code,
         line_count=len(code.split("\n")) if code else 0,
     )
@@ -266,6 +311,7 @@ def process_path(path: Path, lang_flag: str | None = None) -> ProcessedSnippet:
             syntax_lang="plaintext",
             error=str(err),
         )
+    syntax_lang = resolve_syntax_language(path.name, lang_flag)
     try:
         text = path.read_text(encoding="utf-8")
     except OSError:
@@ -274,9 +320,9 @@ def process_path(path: Path, lang_flag: str | None = None) -> ProcessedSnippet:
             caption=caption,
             mode=mode,
             listings_lang=listings_lang,
-            syntax_lang=syntax_language(listings_lang),
+            syntax_lang=syntax_lang,
             error="Could not read source.",
         )
     if mode == "raw":
-        return process_raw(path, caption, listings_lang, text)
-    return process_with_comments(path, caption, listings_lang, text)
+        return process_raw(path, caption, listings_lang, syntax_lang, text)
+    return process_with_comments(path, caption, listings_lang, syntax_lang, text)

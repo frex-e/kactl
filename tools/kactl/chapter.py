@@ -68,14 +68,21 @@ def parse_import_lines(lines: Iterable[str]) -> dict[str, KactlImport]:
         optional, name = m.group(2), m.group(3)
         commented = line.lstrip().startswith("%")
         existing = result.get(name)
-        if existing is None or (not commented and not existing.included_in_pdf):
+        if existing is not None and not commented and existing.included_in_pdf:
+            raise ValueError(
+                f"Duplicate active \\kactlimport{{{name}}} "
+                f"on lines {existing.source_index + 1} and {source_index + 1}"
+            )
+        if existing is None or not commented:
             result[name] = KactlImport(
                 name=name,
                 included_in_pdf=not commented,
                 lang_flag=parse_lang_flag(optional),
                 source_index=source_index,
             )
-    return result
+    return dict(
+        sorted(result.items(), key=lambda item: item[1].source_index)
+    )
 
 
 def parse_chapter_imports(chapter_id: str) -> dict[str, KactlImport]:

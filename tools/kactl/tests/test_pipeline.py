@@ -42,6 +42,7 @@ class TestSharedDocument(unittest.TestCase):
         self.assertEqual(web_snippets["contest/template.cpp"]["language"], "cpp")
         self.assertEqual(web_snippets["contest/.bashrc"]["language"], "bash")
         self.assertEqual(web_snippets["contest/.vimrc"]["language"], "plaintext")
+        self.assertEqual(web_snippets["contest/hash.sh"]["language"], "bash")
 
     def test_pdf_adapter_uses_same_processed_snippet(self):
         record = next(
