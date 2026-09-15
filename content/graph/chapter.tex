@@ -20,7 +20,7 @@
 	\kactlimport{GlobalMinCut.h}
 	\kactlimport{GomoryHu.h}
 	\subsection{Demands and lower bounds}
-		\noindent\textbf{Lower bounds.}\\
+		\noindent\textbf{Lower bounds.}
 		Edge $u\to v$ with capacity in $[L,R]$: force $L$
 		units via \texttt{demand[v]+=L}, \texttt{demand[u]-=L},
 		then replace the edge by capacity $R-L$.
@@ -28,28 +28,28 @@
 		Original flow is $L$ plus flow on the rewritten
 		cap-$(R-L)$ edge.
 
-		\noindent\textbf{Circulation.}\\
+		\noindent\textbf{Circulation.}
 		$d(v)$ is the forced net inflow (positive = excess).
 		Residual flow must send net outflow $d(v)$ from each
 		excess vertex. Add super-source $S$ and super-sink $T$:
-		$S\to v$ cap $d(v)$ if $d(v)>0$, $v\to T$ cap $-d(v)$
-		if $d(v)<0$. Feasible iff $\sum d=0$ and max flow
-		$S\to T$ equals $\sum_{d>0} d(v)$. A circulation is
-		this check after the lower-bound rewrite.
+		$S\to v$ of cap $d(v)$ if $d(v)>0$, $v\to T$ of cap
+		$-d(v)$ if $d(v)<0$. Feasible iff $\sum d=0$ and max
+		flow $S\to T$ equals $\sum_{d>0} d(v)$. A circulation
+		is this check after the lower-bound rewrite.
 
-		\noindent\textbf{Max $s$--$t$ flow.}\\
+		\noindent\textbf{Max $s$--$t$ flow.}
 		Add $t\to s$ cap $\infty$, find a feasible
 		circulation. Let $F$ be the flow on $t\to s$;
 		delete $S$, $T$, and $t\to s$, then max-augment
 		$s\to t$. Value $= F$ plus the extra max flow.
 
-		\noindent\textbf{Min $s$--$t$ flow.}\\
+		\noindent\textbf{Min $s$--$t$ flow.}
 		Binary search the capacity $C$ of $t\to s$; a
 		feasible circulation exists iff a flow of value
 		$\le C$ exists. Minimize $C$; the $s$--$t$ value
 		is $C$ (flow on $t\to s$).
 	\subsection{Kőnig, path cover, Dilworth}
-		\noindent\textbf{Kőnig.}\\
+		\noindent\textbf{Kőnig.}
 		A vertex cover meets every edge. On a bipartite
 		graph, max matching = min vertex cover; the
 		complement of a min cover is a max independent
@@ -60,7 +60,7 @@
 		$R\to L$; the cover is unvisited left plus
 		visited right. NP-hard on general graphs.
 
-		\noindent\textbf{Path cover.}\\
+		\noindent\textbf{Path cover.}
 		Min vertex-disjoint path cover of a DAG: split
 		each $v$ into $v_L$ (left) and $v_R$ (right);
 		each edge $u\to v$ becomes $u_L\to v_R$. Size
@@ -68,7 +68,7 @@
 		means $u$ is followed by $v$ on a path.
 		NP-hard on general digraphs.
 
-		\noindent\textbf{Dilworth.}\\
+		\noindent\textbf{Dilworth.}
 		In a poset, min chain cover = max antichain.
 		Build the comparability DAG ($u\to v$ iff $u<v$)
 		and take a min path cover. Max antichain =
