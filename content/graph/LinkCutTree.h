@@ -4,18 +4,10 @@
  * License: CC0
  * Source: folklore
  * Description: Unrooted link-cut tree. Path sum and lazy
- *  path add on nodes. Keep it unrooted: \texttt{makeRoot}
- *  reroots by reversing a path, which is what you want
- *  for arbitrary $u$--$v$ paths. After
- *  \texttt{makeRoot(u); access(v);} the splay at $v$ is
- *  the $u$--$v$ path (read \texttt{t[v].sum} or
- *  \texttt{apply}). Change \texttt{pull}/\texttt{apply}
- *  for min/max. Point set: \texttt{access} then
- *  \texttt{val}. $p$ is the splay parent, or the path
- *  parent if \texttt{!nroot}. Subtree queries need
- *  virtual-child data (not included). Static tree: HLD.
- *  Offline connectivity: DynCon. Edge weights: extra
- *  nodes. Rooted LCA: \texttt{lca(r,u,v)}.
+ *  path add on nodes. After \texttt{makeRoot(u); access(v);}
+ *  the splay at $v$ is the $u$--$v$ path. Change
+ *  \texttt{pull}/\texttt{apply} for min/max. $p$ is the
+ *  splay parent, or the path parent if \texttt{!nroot}.
  * Time: amortized $O(\log N)$
  * Status: stress-tested
  * Usage:
