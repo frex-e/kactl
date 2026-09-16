@@ -1,102 +1,144 @@
 /**
- * Author: Simon Lindholm
- * Date: 2016-07-25
- * Source: https://github.com/ngthanhtrung23/ACM_Notebook_new/blob/master/DataStructure/LinkCutTree.h
- * Description: Represents a forest of unrooted trees. You can add and remove
- * edges (as long as the result is still a forest), and check whether
- * two nodes are in the same tree.
- * Time: All operations take amortized O(\log N).
- * Status: Stress-tested a bit for N <= 20
+ * Author: folklore
+ * Date: 2026-09-16
+ * License: CC0
+ * Source: folklore
+ * Description: Unrooted link-cut tree. Path sum and lazy
+ *  path add on nodes. Keep it unrooted: \texttt{makeRoot}
+ *  reroots by reversing a path, which is what you want
+ *  for arbitrary $u$--$v$ paths. After
+ *  \texttt{makeRoot(u); access(v);} the splay at $v$ is
+ *  the $u$--$v$ path (read \texttt{t[v].sum} or
+ *  \texttt{apply}). Change \texttt{pull}/\texttt{apply}
+ *  for min/max. Point set: \texttt{access} then
+ *  \texttt{val}. $p$ is the splay parent, or the path
+ *  parent if \texttt{!nroot}. Subtree queries need
+ *  virtual-child data (not included). Static tree: HLD.
+ *  Offline connectivity: DynCon. Edge weights: extra
+ *  nodes. Rooted LCA: \texttt{lca(r,u,v)}.
+ * Time: amortized $O(\log N)$
+ * Status: stress-tested
+ * Usage:
+ *  LinkCut lc(n);
+ *  lc.link(u, v); lc.cut(u, v);
+ *  lc.connected(u, v); lc.query(u, v);
+ *  lc.update(u, v, x); lc.set(u, x);
  */
 #pragma once
 
-struct Node { // Splay tree. Root's pp contains tree's parent.
-	Node *p = 0, *pp = 0, *c[2];
-	bool flip = 0;
-	Node() { c[0] = c[1] = 0; fix(); }
-	void fix() {
-		if (c[0]) c[0]->p = this;
-		if (c[1]) c[1]->p = this;
-		// (+ update sum of subtree elements etc. if wanted)
-	}
-	void pushFlip() {
-		if (!flip) return;
-		flip = 0; swap(c[0], c[1]);
-		if (c[0]) c[0]->flip ^= 1;
-		if (c[1]) c[1]->flip ^= 1;
-	}
-	int up() { return p ? p->c[1] == this : -1; }
-	void rot(int i, int b) {
-		int h = i ^ b;
-		Node *x = c[i], *y = b == 2 ? x : x->c[h], *z = b ? y : x;
-		if ((y->p = p)) p->c[up()] = y;
-		c[i] = z->c[i ^ 1];
-		if (b < 2) {
-			x->c[h] = y->c[h ^ 1];
-			y->c[h ^ 1] = x;
-		}
-		z->c[i ^ 1] = this;
-		fix(); x->fix(); y->fix();
-		if (p) p->fix();
-		swap(pp, y->pp);
-	}
-	void splay() { /// Splay this up to the root. Always finishes without flip set.
-		for (pushFlip(); p; ) {
-			if (p->p) p->p->pushFlip();
-			p->pushFlip(); pushFlip();
-			int c1 = up(), c2 = p->up();
-			if (c2 == -1) p->rot(c1, 2);
-			else p->p->rot(c2, c1 != c2);
-		}
-	}
-	Node* first() { /// Return the min element of the subtree rooted at this, splayed to the top.
-		pushFlip();
-		return c[0] ? c[0]->first() : (splay(), this);
-	}
-};
-
 struct LinkCut {
-	vector<Node> node;
-	LinkCut(int N) : node(N) {}
-
-	void link(int u, int v) { // add an edge (u, v)
+	struct N {
+		int c[2] = {-1, -1}, p = -1, sz = 1;
+		int flip = 0;
+		ll val = 0, sum = 0, add = 0;
+	};
+	vector<N> t;
+	LinkCut(int n) : t(n) {}
+	bool nroot(int x) {
+		int p = t[x].p;
+		return p != -1 &&
+			(t[p].c[0] == x || t[p].c[1] == x);
+	}
+	void pull(int x) { // path aggregate
+		int a = t[x].c[0], b = t[x].c[1];
+		t[x].sz = 1 + (a<0?0:t[a].sz) + (b<0?0:t[b].sz);
+		t[x].sum = t[x].val + (a<0?0:t[a].sum) +
+			(b<0?0:t[b].sum);
+	}
+	void apply(int x, ll v) { // path add
+		t[x].val += v; t[x].sum += v * t[x].sz;
+		t[x].add += v;
+	}
+	void push(int x) {
+		int a = t[x].c[0], b = t[x].c[1];
+		if (t[x].flip) {
+			swap(t[x].c[0], t[x].c[1]);
+			if (a>=0) t[a].flip ^= 1;
+			if (b>=0) t[b].flip ^= 1;
+			t[x].flip = 0;
+		}
+		if (t[x].add) {
+			if (a>=0) apply(a, t[x].add);
+			if (b>=0) apply(b, t[x].add);
+			t[x].add = 0;
+		}
+	}
+	void rot(int x) {
+		int y = t[x].p, z = t[y].p;
+		int k = t[y].c[1] == x;
+		if (nroot(y)) t[z].c[t[z].c[1]==y] = x;
+		int w = t[x].c[k^1];
+		t[y].c[k] = w;
+		if (w>=0) t[w].p = y;
+		t[x].c[k^1] = y;
+		t[y].p = x; t[x].p = z;
+		pull(y);
+	}
+	void splay(int x) {
+		vi stk = {x};
+		for (int y = x; nroot(y); )
+			stk.push_back(y = t[y].p);
+		while (!stk.empty())
+			push(stk.back()), stk.pop_back();
+		while (nroot(x)) {
+			int y = t[x].p, z = t[y].p;
+			if (nroot(y))
+				rot((t[y].c[0]==x)==(t[z].c[0]==y)?y:x);
+			rot(x);
+		}
+		pull(x);
+	}
+	void access(int x) {
+		int last = -1;
+		for (int y = x; y>=0; y = t[y].p) {
+			splay(y); t[y].c[1] = last;
+			pull(y); last = y;
+		}
+		splay(x);
+	}
+	void makeRoot(int x) {
+		access(x); t[x].flip ^= 1;
+	}
+	int findRoot(int x) {
+		access(x);
+		for (;;) {
+			push(x);
+			if (t[x].c[0]<0) break;
+			x = t[x].c[0];
+		}
+		splay(x);
+		return x;
+	}
+	void link(int u, int v) { // add edge (u, v)
 		assert(!connected(u, v));
-		makeRoot(&node[u]);
-		node[u].pp = &node[v];
+		makeRoot(u); t[u].p = v;
 	}
-	void cut(int u, int v) { // remove an edge (u, v)
-		Node *x = &node[u], *top = &node[v];
-		makeRoot(top); x->splay();
-		assert(top == (x->pp ?: x->c[0]));
-		if (x->pp) x->pp = 0;
-		else {
-			x->c[0] = top->p = 0;
-			x->fix();
-		}
+	void cut(int u, int v) { // remove edge (u, v)
+		makeRoot(u); access(v);
+		assert(t[v].c[0]==u && t[u].c[0]<0 &&
+			t[u].c[1]<0);
+		t[v].c[0] = t[u].p = -1;
+		pull(v);
 	}
-	bool connected(int u, int v) { // are u, v in the same tree?
-		Node* nu = access(&node[u])->first();
-		return nu == access(&node[v])->first();
+	bool connected(int u, int v) {
+		return findRoot(u) == findRoot(v);
 	}
-	void makeRoot(Node* u) { /// Move u to root of represented tree.
-		access(u);
-		u->splay();
-		if(u->c[0]) {
-			u->c[0]->p = 0;
-			u->c[0]->flip ^= 1;
-			u->c[0]->pp = u;
-			u->c[0] = 0;
-			u->fix();
-		}
+	ll query(int u, int v) { // path sum
+		makeRoot(u); access(v);
+		return t[v].sum;
 	}
-	Node* access(Node* u) { /// Move u to root aux tree. Return the root of the root aux tree.
-		u->splay();
-		while (Node* pp = u->pp) {
-			pp->splay(); u->pp = 0;
-			if (pp->c[1]) {
-				pp->c[1]->p = 0; pp->c[1]->pp = pp; }
-			pp->c[1] = u; pp->fix(); u = pp;
-		}
-		return u;
+	void update(int u, int v, ll x) { // path add
+		makeRoot(u); access(v); apply(v, x);
+	}
+	void set(int u, ll x) {
+		access(u); t[u].val = x; pull(u);
+	}
+	ll get(int u) {
+		access(u); return t[u].val;
+	}
+	int lca(int r, int u, int v) { // wrt root r
+		makeRoot(r); access(u); access(v);
+		splay(u);
+		return t[u].p<0 ? u : t[u].p;
 	}
 };

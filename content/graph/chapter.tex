@@ -107,6 +107,17 @@
 	\kactlimport{VirtualTree.h}
 	\kactlimport{Centroid.h}
 	\kactlimport{HLD.h}
+	\subsection{Using link-cut trees}
+		Keep the forest unrooted. \texttt{makeRoot} reverses
+		a path so any node can be the root; a rooted LCT
+		only links a component root as a child and still
+		needs reverse for $u$--$v$ paths.
+		Path query/update: \texttt{makeRoot(u);}
+		\texttt{access(v);} then $v$'s splay is the path.
+		$k$-th on a path: walk that splay by size.
+		Edge weights: one extra node per edge.
+		Subtree queries need virtual-child aggregates.
+		Static tree: HLD. Offline connectivity: DynCon.
 	\kactlimport{LinkCutTree.h}
 	\kactlimport{DirectedMST.h}
 	\kactlimport{SteinerTree.h}
