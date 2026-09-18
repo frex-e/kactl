@@ -156,6 +156,17 @@ int main() {
 	assert(one.query(0, 0) == 10);
 	assert(one.findRoot(0) == 0);
 	assert(one.lca(0, 0, 0) == 0);
+	{
+		LinkCut lc(3);
+		lc.set(0, 3); lc.set(1, 1); lc.set(2, 4);
+		lc.link(0, 1); lc.link(1, 2);
+		assert(lc.query(0, 2) ==
+			lc.binop(lc.binop(3, 1), 4));
+		assert(lc.query(2, 0) == lc.query(0, 2));
+		lc.update(0, 2, 2);
+		assert(lc.query(0, 2) ==
+			lc.applyUpdate(2, lc.binop(lc.binop(3, 1), 4), 3));
+	}
 
 	testDynamic(2000, 12, 200);
 	testStaticTree(2, 50);
