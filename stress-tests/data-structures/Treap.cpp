@@ -8,12 +8,12 @@ pair<Node*, Node*> split2(Node* n, int v) {
 	if (n->val >= v) {
 		auto pa = split2(n->l, v);
 		n->l = pa.second;
-		n->recalc();
+		n->pull();
 		return {pa.first, n};
 	} else {
 		auto pa = split2(n->r, v);
 		n->r = pa.first;
-		n->recalc();
+		n->pull();
 		return {n, pa.second};
 	}
 }
@@ -45,7 +45,7 @@ void testLazy(int n, int iters) {
 		Node *a, *b, *c;
 		tie(a, b) = split(t, l);
 		tie(b, c) = split(b, r - l);
-		if (b) b->applyAdd(x);
+		if (b) b->apply(x);
 		t = merge(merge(a, b), c);
 	};
 
@@ -53,7 +53,7 @@ void testLazy(int n, int iters) {
 		Node *a, *b, *c;
 		tie(a, b) = split(t, l);
 		tie(b, c) = split(b, r - l);
-		ll res = lsum(b);
+		ll res = query(b);
 		t = merge(merge(a, b), c);
 		return res;
 	};
