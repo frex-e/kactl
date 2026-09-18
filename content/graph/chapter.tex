@@ -108,18 +108,23 @@
 	\kactlimport{Centroid.h}
 	\kactlimport{HLD.h}
 	\subsection{Using link-cut trees}
-		Keep the forest unrooted. \texttt{makeRoot} reverses
-		a path so any node can be the root; a rooted LCT
-		only links a component root as a child and still
-		needs reverse for $u$--$v$ paths.
-		Path query/update: \texttt{makeRoot(u);}
-		\texttt{access(v);} then $v$'s splay is the path.
-		$k$-th on a path: walk that splay by size.
-		Edge weights: one extra node per edge.
-		Subtree queries need virtual-child aggregates.
-		Static tree: HLD. Offline connectivity: DynCon.
-		\texttt{findRoot} follows the current evert;
-		use \texttt{connected} for a stable test.
+		LCT is the right tree for \emph{online} link/cut
+		plus path aggregates, not for whole-component
+		update/set. After \texttt{makeRoot(u); access(v);}
+		$v$'s splay is the $u$--$v$ path. Change
+		\texttt{apply}/\texttt{pushLazy}/\texttt{pull} for
+		a different path lazy; \texttt{pushFlip} stays.
+		Keep it unrooted: \texttt{makeRoot} reverses a path.
+		\texttt{findRoot} follows the current evert; use
+		\texttt{connected}.
+		Static tree $\to$ HLD (path \emph{and} subtree;
+		edit \texttt{LazyUpdateTree}). Offline connectivity
+		$\to$ DynCon. Component or subtree update/set $\to$
+		Euler tour tree: a preferred-path splay is not the
+		component. Subtree \emph{query} on an LCT needs
+		virtual-child aggregates (not in the snippet).
+		Edge weights: extra nodes. $k$-th on a path: walk
+		the splay by size.
 	\kactlimport{LinkCutTree.h}
 	\kactlimport{DirectedMST.h}
 	\kactlimport{SteinerTree.h}

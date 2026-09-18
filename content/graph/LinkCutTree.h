@@ -3,11 +3,14 @@
  * Date: 2026-09-16
  * License: CC0
  * Source: folklore
- * Description: Unrooted link-cut tree. Path sum and lazy
- *  path add on nodes. After \texttt{makeRoot(u); access(v);}
- *  the splay at $v$ is the $u$--$v$ path. Change
- *  \texttt{pull}/\texttt{apply} for min/max. $p$ is the
- *  splay parent, or the path parent if \texttt{!nroot}.
+ * Description: Unrooted link-cut tree for online link/cut
+ *  and path aggregates. After
+ *  \texttt{makeRoot(u); access(v);} the splay at $v$ is
+ *  the $u$--$v$ path. Change \texttt{apply}/
+ *  \texttt{pushLazy}/\texttt{pull} for a different path
+ *  lazy; \texttt{pushFlip} stays. Not for component
+ *  update (use an Euler tour tree). $p$ is splay parent,
+ *  or path parent if \texttt{!nroot}.
  * Time: amortized $O(\log N)$
  * Status: stress-tested
  * Usage:
@@ -31,29 +34,34 @@ struct LinkCut {
 		return p != -1 &&
 			(t[p].c[0] == x || t[p].c[1] == x);
 	}
-	void pull(int x) { // path aggregate
+	void pull(int x) { // path aggregate (binop)
 		int a = t[x].c[0], b = t[x].c[1];
 		t[x].sz = 1 + (a<0?0:t[a].sz) + (b<0?0:t[b].sz);
 		t[x].sum = t[x].val + (a<0?0:t[a].sum) +
 			(b<0?0:t[b].sum);
 	}
-	void apply(int x, ll v) { // path add
+	void apply(int x, ll v) { // tag -> val, sum, add
 		t[x].val += v; t[x].sum += v * t[x].sz;
-		t[x].add += v;
+		t[x].add += v; // mergeUpdate
+	}
+	void pushFlip(int x) { // reverse; keep this
+		if (!t[x].flip) return;
+		swap(t[x].c[0], t[x].c[1]);
+		int a = t[x].c[0], b = t[x].c[1];
+		if (a>=0) t[a].flip ^= 1;
+		if (b>=0) t[b].flip ^= 1;
+		t[x].flip = 0;
+	}
+	void pushLazy(int x) { // send add to children
+		ll v = t[x].add; // idU is 0
+		if (!v) return;
+		int a = t[x].c[0], b = t[x].c[1];
+		if (a>=0) apply(a, v);
+		if (b>=0) apply(b, v);
+		t[x].add = 0;
 	}
 	void push(int x) {
-		int a = t[x].c[0], b = t[x].c[1];
-		if (t[x].flip) {
-			swap(t[x].c[0], t[x].c[1]);
-			if (a>=0) t[a].flip ^= 1;
-			if (b>=0) t[b].flip ^= 1;
-			t[x].flip = 0;
-		}
-		if (t[x].add) {
-			if (a>=0) apply(a, t[x].add);
-			if (b>=0) apply(b, t[x].add);
-			t[x].add = 0;
-		}
+		pushFlip(x); pushLazy(x);
 	}
 	void rot(int x) {
 		int y = t[x].p, z = t[y].p;
