@@ -4,10 +4,7 @@
  * License: CC0
  * Source: folklore
  * Description: Unrooted link-cut tree. Online link/cut.
- *  Default path add + path sum. Change \texttt{V},
- *  \texttt{U}, \texttt{id}, \texttt{def}, \texttt{idU},
- *  \texttt{binop}, \texttt{rev}, \texttt{applyUpdate},
- *  \texttt{mergeUpdate} like \texttt{LazyUpdateTree}.
+ *  Default path add + path sum.
  * Time: amortized $O(\log N)$
  * Status: stress-tested
  * Usage:
