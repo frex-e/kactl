@@ -62,6 +62,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
 | `content/graph/Centroid.h` | centroid decomposition |
+| `content/extras/EulerTourTree.h` | treap Euler tours: link/cut/connectivity, generic point set/get and lazy component update/query/size; recycled edge tokens |
 | `content/data-structures/PersistentSegmentTree.h` | persistent implicit lazy tree with point set |
 | `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/query/ans) |
 | `content/data-structures/StaticRangeQuery.h` | disjoint sparse table, any associative op |
@@ -110,6 +111,8 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | geometry figure captions | same glued 15mm minipages as upstream (with their `\vspace`); text width is `\linewidth-15mm` instead of `75mm` so they fit the printable-margin columns |
 
 ## Tests
+
+- `stress-tests/extras/EulerTourTree.cpp`: naive forest comparisons, treap/tour invariants, edge recycling, large paths and stars
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
