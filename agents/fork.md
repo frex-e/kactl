@@ -66,6 +66,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/query/ans) |
 | `content/data-structures/StaticRangeQuery.h` | disjoint sparse table, any associative op |
 | `content/extras/SegmentTreeBeats.h` | range chmin/chmax/add + sum/min/max (USACO Guide) |
+| `content/extras/LinkCutTree.h` | moved from graph; unrooted path lazy via `binop`/`rev`/`applyUpdate`/`mergeUpdate` (default add+sum) |
 | `content/data-structures/MonotonicMap.h` | prefix/suffix min/max with insertions (monotonic map) |
 | `content/graph/Blossom.h` | Gabow--Edmonds matching (ei1333 / LC), 0-indexed |
 | `content/graph/DominatorTree.h` | Lengauer--Tarjan dominator tree (from cactl / Benq); runtime $n$, ctor takes adj+root |
@@ -102,7 +103,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/various/chapter.tex` | builtins, pragmas, memory |
 | `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ / monotonic map |
 | `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, MatrixInverse-mod; Fourier → Convolutions |
-| `content/extras/chapter.tex` | segment tree beats; min-plus convolution |
+| `content/extras/chapter.tex` | segment tree beats; min-plus convolution; link-cut tree |
 | `content/strings/chapter.tex` | Hashing-codeforces in the PDF (alongside `Hashing.h`) |
 | `content/geometry/chapter.tex` | half-plane intersection; remaining upstream snippets in the PDF (`LineProjectionReflection`, `CircleLine`, `PolygonUnion`, `ManhattanMST`, `DelaunayTriangulation`); geometry is last before extras |
 | `content/geometry/*.h` (planar) | complex coordinates and free predicates; `arg` macro removed; hull helpers accept floating or integer points |
@@ -112,6 +113,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
+- `stress-tests/extras/LinkCutTree.cpp` covers link/cut connectivity plus path sum/add, point set, and rooted LCA
 - New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`
 
