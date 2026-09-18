@@ -3,14 +3,8 @@
  * Date: 2026-09-16
  * License: CC0
  * Source: folklore
- * Description: Unrooted link-cut tree for online link/cut
- *  and path aggregates. After
- *  \texttt{makeRoot(u); access(v);} the splay at $v$ is
- *  the $u$--$v$ path. Change \texttt{apply}/
- *  \texttt{pushLazy}/\texttt{pull} for a different path
- *  lazy; \texttt{pushFlip} stays. Not for component
- *  update (use an Euler tour tree). $p$ is splay parent,
- *  or path parent if \texttt{!nroot}.
+ * Description: Unrooted link-cut tree. Online link/cut,
+ *  path sum, lazy path add.
  * Time: amortized $O(\log N)$
  * Status: stress-tested
  * Usage:
@@ -22,29 +16,31 @@
 #pragma once
 
 struct LinkCut {
+	// Path LCT. Not component/subtree update (ETT),
+	// not a static tree (HLD). Subtree query needs vsub.
 	struct N {
 		int c[2] = {-1, -1}, p = -1, sz = 1;
-		int flip = 0;
-		ll val = 0, sum = 0, add = 0;
+		int flip = 0; // reverse; keep
+		ll val = 0, sum = 0, add = 0; // add = path tag
 	};
 	vector<N> t;
 	LinkCut(int n) : t(n) {}
-	bool nroot(int x) {
+	bool nroot(int x) { // else p is path-parent
 		int p = t[x].p;
 		return p != -1 &&
 			(t[p].c[0] == x || t[p].c[1] == x);
 	}
-	void pull(int x) { // path aggregate (binop)
+	void pull(int x) { // path aggregate; change w/ apply
 		int a = t[x].c[0], b = t[x].c[1];
 		t[x].sz = 1 + (a<0?0:t[a].sz) + (b<0?0:t[b].sz);
 		t[x].sum = t[x].val + (a<0?0:t[a].sum) +
 			(b<0?0:t[b].sum);
 	}
-	void apply(int x, ll v) { // tag -> val, sum, add
+	void apply(int x, ll v) { // path add
 		t[x].val += v; t[x].sum += v * t[x].sz;
-		t[x].add += v; // mergeUpdate
+		t[x].add += v; // compose
 	}
-	void pushFlip(int x) { // reverse; keep this
+	void pushFlip(int x) { // structural; not a value tag
 		if (!t[x].flip) return;
 		swap(t[x].c[0], t[x].c[1]);
 		int a = t[x].c[0], b = t[x].c[1];
@@ -52,8 +48,8 @@ struct LinkCut {
 		if (b>=0) t[b].flip ^= 1;
 		t[x].flip = 0;
 	}
-	void pushLazy(int x) { // send add to children
-		ll v = t[x].add; // idU is 0
+	void pushLazy(int x) { // idU is 0
+		ll v = t[x].add;
 		if (!v) return;
 		int a = t[x].c[0], b = t[x].c[1];
 		if (a>=0) apply(a, v);
@@ -88,7 +84,7 @@ struct LinkCut {
 		}
 		pull(x);
 	}
-	void access(int x) {
+	void access(int x) { // preferred path through x
 		int last = -1;
 		for (int y = x; y>=0; y = t[y].p) {
 			splay(y); t[y].c[1] = last;
@@ -96,10 +92,10 @@ struct LinkCut {
 		}
 		splay(x);
 	}
-	void makeRoot(int x) {
+	void makeRoot(int x) { // evert; why this is unrooted
 		access(x); t[x].flip ^= 1;
 	}
-	int findRoot(int x) {
+	int findRoot(int x) { // current evert; use connected
 		access(x);
 		for (;;) {
 			push(x);
@@ -123,6 +119,7 @@ struct LinkCut {
 	bool connected(int u, int v) {
 		return findRoot(u) == findRoot(v);
 	}
+	// makeRoot(u); access(v); => v's splay is path u-v
 	ll query(int u, int v) { // path sum
 		makeRoot(u); access(v);
 		return t[v].sum;
