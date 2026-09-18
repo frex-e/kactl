@@ -186,14 +186,14 @@ void testRandom(int n, int numPts = 10, int lim = 5, bool brute = false) {
 	for (auto i : polygons) {
 		vector<blackhorse::pt> t;
 		for (auto j : i)
-			t.push_back({j.x, j.y});
+			t.push_back({j.real(), j.imag()});
 		polygons2.push_back(t);
 	}
 	vector<vector<lovelive::cpoi>> polygons3;
 	for (auto i : polygons) {
 		vector<lovelive::cpoi> t;
 		for (auto j : i)
-			t.push_back({j.x, j.y});
+			t.push_back({j.real(), j.imag()});
 		polygons3.push_back(t);
 	}
 	auto val3 = blackhorse::polygon_union(polygons2.data(), sz(polygons2));

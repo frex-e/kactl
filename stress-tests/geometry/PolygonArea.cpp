@@ -6,7 +6,7 @@
 
 int main() {
 	srand(0);
-	typedef Point<double> P;
+	typedef complex<double> P;
 	vector<P> ps = {P{0,0}, P{6,4}, P{0,9}};
 	int count = 0;
 	P su{0,0};
@@ -19,10 +19,10 @@ int main() {
 		count++;
 		su = su + P{x,y};
 	}
-	su = su / count;
+	su = su / double(count);
 	double approxArea = (double)count / 100000 * 100;
 	assert(abs(polygonArea2(ps)/2.0 - approxArea) < 1);
 	auto p = polygonCenter(ps);
-	assert(abs(p.x - su.x) < 1e-1 && abs(p.y - su.y) < 1e-1);
+	assert(abs(p.real() - su.real()) < 1e-1 && abs(p.imag() - su.imag()) < 1e-1);
 	cout<<"Tests passed!"<<endl;
 }

@@ -17,15 +17,15 @@ int main() {
 		double rad = pa.second;
 		double maxDist = 0;
 		for(auto &p: ps) {
-			maxDist = max(maxDist, (p - mid).dist());
+			maxDist = max(maxDist, dist(p - mid));
 		}
 
 		assert(abs(maxDist - rad) < 1e-6);
 
 		rep(it2,0,50) {
-			P q2 = mid - P(0, 1e-6).rotate(it2);
+			P q2 = mid - (P(0, 1e-6)) * polar(1.0, (double)it2);
 			for(auto &p: ps) {
-				if((p - q2).dist() > rad - 1e-7) goto fail;
+				if(dist(p - q2) > rad - 1e-7) goto fail;
 			}
 			assert(0);
 fail:;

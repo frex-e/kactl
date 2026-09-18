@@ -3,13 +3,14 @@
 // #define TEST_PERF
 
 #include "../../content/geometry/ConvexHull.h"
+typedef complex<ll> P;
 #include "../../content/geometry/PolygonArea.h"
 
 #define P P2
 #include "../../content/geometry/circumcircle.h"
 #undef P
 
-P2 top(P x) { return P2((double)x.x, (double)x.y); }
+P2 top(P x) { return P2((double)x.real(), (double)x.imag()); }
 
 struct Bumpalloc {
 	char buf[450 << 20];
@@ -41,7 +42,7 @@ template<class A, class F>
 void dela(A& v, F f) {
 	auto ret = triangulate(v);
 	assert(sz(ret) % 3 == 0);
-	map<P, int> lut;
+	map<P, int, PointLess> lut;
 	rep(i,0,sz(v)) lut[v[i]] = i;
 	for (int a = 0; a < sz(ret); a += 3) {
 		f(lut[ret[a]], lut[ret[a+1]], lut[ret[a+2]]);
@@ -50,7 +51,9 @@ void dela(A& v, F f) {
 
 int main1() {
 	srand(2);
+	#ifdef __GLIBC__
 	feenableexcept(29);
+	#endif
 	rep(it,0,3000000) {{
 		bumpalloc.reset();
 		// if (it % 200 == 0) cerr << endl;
@@ -63,12 +66,12 @@ int main1() {
 		}
 
 		auto coc = [&](int i, int j, int k, int l) {
-			double a = (ps[i] - ps[j]).dist();
-			double b = (ps[j] - ps[k]).dist();
-			double c = (ps[k] - ps[l]).dist();
-			double d = (ps[l] - ps[i]).dist();
-			double e = (ps[i] - ps[k]).dist();
-			double f = (ps[j] - ps[l]).dist();
+			double a = dist(ps[i] - ps[j]);
+			double b = dist(ps[j] - ps[k]);
+			double c = dist(ps[k] - ps[l]);
+			double d = dist(ps[l] - ps[i]);
+			double e = dist(ps[i] - ps[k]);
+			double f = dist(ps[j] - ps[l]);
 			double q = a*c + b*d - e*f;
 			return abs(q) < 1e-4;
 		};
@@ -79,7 +82,7 @@ int main1() {
 		}
 		if (false) rep(i,0,N) rep(j,0,i) rep(k,0,j) {
 			// colinear
-			if (ps[i].cross(ps[j], ps[k]) == 0) {  goto fail; }
+			if (orient(ps[i], ps[j], ps[k]) == 0) {  goto fail; }
 		}
 		if (false) rep(i,0,N) rep(j,0,i) rep(k,0,j) rep(l,0,k) {
 			// concyclic
@@ -88,13 +91,13 @@ int main1() {
 
 		bool allColinear = true;
 		if (N >= 3) {
-			rep(i,2,N) if ((ps[i] - ps[0]).cross(ps[1] - ps[0])) allColinear = false;
+			rep(i,2,N) if (crossp(ps[i] - ps[0], ps[1] - ps[0])) allColinear = false;
 		}
 
 		auto fail = [&]() {
 			cout << "Points:" << endl;
 			for(auto &p: ps) {
-				cout << p.x << ' ' << p.y << endl;
+				cout << p.real() << ' ' << p.imag() << endl;
 			}
 
 			cout << "Triangles:" << endl;
@@ -111,13 +114,13 @@ int main1() {
 		dela(ps, [&](int i, int j, int k) {
 			any = true;
 			used[i] = used[j] = used[k] = 1;
-			ll ar = ps[i].cross(ps[j], ps[k]);
+			ll ar = orient(ps[i], ps[j], ps[k]);
 			if (ar <= 0) fail();
 			sumar += ar;
 			P2 c = ccCenter(top(ps[i]), top(ps[j]), top(ps[k]));
 			double ra = ccRadius(top(ps[i]), top(ps[j]), top(ps[k]));
 			rep(l,0,N) {
-				if ((top(ps[l]) - c).dist() < ra - 1e-5) fail();
+				if (dist(top(ps[l]) - c) < ra - 1e-5) fail();
 			}
 		});
 		if (!allColinear) {
@@ -146,7 +149,7 @@ int main2() {
 	rep(i,0,N) {
 		ps.emplace_back(rand() % (2*xrange) - xrange, rand() % (2*yrange) - yrange);
 	}
-	sort(all(ps));
+	sort(all(ps), PointLess{});
 	ps.erase(unique(all(ps)), ps.end());
 
 	cout << sz(ps) << endl;

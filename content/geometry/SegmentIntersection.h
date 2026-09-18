@@ -8,7 +8,7 @@
 If a unique intersection point between the line segments going from \texttt{s1} to \texttt{e1} and from \texttt{s2} to \texttt{e2} exists then it is returned.
 If no intersection point exists an empty vector is returned.
 If infinitely many exist a vector with 2 elements is returned, containing the endpoints of the common line segment.
-The wrong position will be returned if \texttt{P} is \texttt{Point<ll>} and the intersection point does not have integer coordinates.
+The wrong position will be returned if \texttt{P} is \texttt{complex<ll>} and the intersection point does not have integer coordinates.
 Products of three coordinates are used in intermediate steps so watch out for overflow if using \texttt{int} or \texttt{long long}.
 \end{minipage}%
 \begin{minipage}{15mm}
@@ -26,12 +26,12 @@ Products of three coordinates are used in intermediate steps so watch out for ov
 #include "OnSegment.h"
 
 template<class P> vector<P> segInter(P a, P b, P c, P d) {
-	auto oa = c.cross(d, a), ob = c.cross(d, b),
-	     oc = a.cross(b, c), od = a.cross(b, d);
+	auto oa = orient(c, d, a), ob = orient(c, d, b),
+	     oc = orient(a, b, c), od = orient(a, b, d);
 	// Checks if intersection is single non-endpoint point.
 	if (sgn(oa) * sgn(ob) < 0 && sgn(oc) * sgn(od) < 0)
 		return {(a * ob - b * oa) / (ob - oa)};
-	set<P> s;
+	set<P, PointLess> s;
 	if (onSegment(c, d, a)) s.insert(a);
 	if (onSegment(c, d, b)) s.insert(b);
 	if (onSegment(a, b, c)) s.insert(c);

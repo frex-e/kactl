@@ -6,7 +6,7 @@
 int main() {
 	rep(t,0,1000000) {
 		const int GRID=10;
-		Point<double>
+		complex<double>
 			a(rand()%GRID, rand()%GRID),
 			b(rand()%GRID, rand()%GRID),
 			c(rand()%GRID, rand()%GRID),

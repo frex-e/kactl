@@ -19,10 +19,10 @@ template<class P> pair<bool, vector<P>> conquer(vector<P> pts, int depth) {
 	int divideId = randRange(2, sz(pts));
 	P p1 = pts[divideId];
 	double divideK = randDouble(0.01, 0.99);
-	P p2(divideK*(pts[1].x-pts[0].x) + pts[0].x, divideK*(pts[1].y - pts[0].y) + pts[0].y);
-	vector<double> line = {p2.y - p1.y, p1.x - p2.x, -p1.x*p2.y + p1.y*p2.x};
-	int idx0 = ((line[0]*pts[0].x + line[1]*pts[0].y + line[2]) >=0);
-	int idx1 = ((line[0]*pts[1].x + line[1]*pts[1].y + line[2]) >=0);
+	P p2(divideK*(pts[1].real()-pts[0].real()) + pts[0].real(), divideK*(pts[1].imag() - pts[0].imag()) + pts[0].imag());
+	vector<double> line = {p2.imag() - p1.imag(), p1.real() - p2.real(), -p1.real()*p2.imag() + p1.imag()*p2.real()};
+	int idx0 = ((line[0]*pts[0].real() + line[1]*pts[0].imag() + line[2]) >=0);
+	int idx1 = ((line[0]*pts[1].real() + line[1]*pts[1].imag() + line[2]) >=0);
 	if (idx0==idx1)
 		return conquer(pts, depth+1);
 	array<vector<P>, 2> S;
@@ -32,7 +32,7 @@ template<class P> pair<bool, vector<P>> conquer(vector<P> pts, int depth) {
 	S[!idx0].push_back(pts[1]);
 	rep(i,2,sz(pts)) {
 		if (i == divideId) continue;
-		int idx = ((line[0]*pts[i].x + line[1]*pts[i].y + line[2]) >=0);
+		int idx = ((line[0]*pts[i].real() + line[1]*pts[i].imag() + line[2]) >=0);
 		S[idx].push_back(pts[i]);
 	}
 	auto pa = conquer(S[idx0], depth+1);
@@ -44,18 +44,18 @@ template<class P> pair<bool, vector<P>> conquer(vector<P> pts, int depth) {
 }
 template<class P> vector<P> genPolygon(vector<P> pts, int depth=0) {
 	if (depth>100) return {P(0,0), P(1,0), P(0,1)};
-	sort(all(pts));
+	sort(all(pts), PointLess{});
 	pts.resize(unique(all(pts)) - pts.begin());
 	shuffle_vec(pts);
 	if (sz(pts) <=3) return pts;
-	vector<double> line ={(double)(pts[1].y-pts[0].y), (double)(pts[0].x - pts[1].x), (double)(-pts[0].x*pts[1].y + pts[0].y*pts[1].x)};
+	vector<double> line ={(double)(pts[1].imag()-pts[0].imag()), (double)(pts[0].real() - pts[1].real()), (double)(-pts[0].real()*pts[1].imag() + pts[0].imag()*pts[1].real())};
 	array<vector<P>, 2> S;
 	S[0].push_back(pts[0]);
 	S[0].push_back(pts[1]);
 	S[1].push_back(pts[1]);
 	S[1].push_back(pts[0]);
 	rep(i,2,sz(pts)) {
-		int idx = (line[0]*pts[i].x + line[1]*pts[i].y + line[2]) >=0;
+		int idx = (line[0]*pts[i].real() + line[1]*pts[i].imag() + line[2]) >=0;
 		S[idx].push_back(pts[i]);
 	}
 	auto ta = conquer(S[0],0);

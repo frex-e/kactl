@@ -7,7 +7,7 @@
 \begin{minipage}{\dimexpr\linewidth-15mm\relax}
 If a unique intersection point of the lines going through \texttt{s1,e1} and \texttt{s2,e2} exists \texttt{\{1, point\}} is returned.
 If no intersection point exists \texttt{\{0, (0,0)\}} is returned and if infinitely many exists \texttt{\{-1, (0,0)\}} is returned.
-The wrong position will be returned if \texttt{P} is \texttt{Point<ll>} and the intersection point does not have integer coordinates.
+The wrong position will be returned if \texttt{P} is \texttt{complex<ll>} and the intersection point does not have integer coordinates.
 Products of three coordinates are used in intermediate steps so watch out for overflow if using \texttt{int} or \texttt{ll}.
 \end{minipage}%
 \begin{minipage}{15mm}
@@ -25,9 +25,9 @@ Products of three coordinates are used in intermediate steps so watch out for ov
 
 template<class P>
 pair<int, P> lineInter(P s1, P e1, P s2, P e2) {
-	auto d = (e1 - s1).cross(e2 - s2);
+	auto d = crossp(e1 - s1, e2 - s2);
 	if (d == 0) // if parallel
-		return {-(s1.cross(e1, s2) == 0), P(0, 0)};
-	auto p = s2.cross(e1, e2), q = s2.cross(e2, s1);
+		return {-(orient(s1, e1, s2) == 0), P(0, 0)};
+	auto p = orient(s2, e1, e2), q = orient(s2, e2, s1);
 	return {1, (s1 * p + e1 * q) / d};
 }

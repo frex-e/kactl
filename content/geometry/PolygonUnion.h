@@ -14,8 +14,10 @@
 #include "Point.h"
 #include "sideOf.h"
 
-typedef Point<double> P;
-double rat(P a, P b) { return sgn(b.x) ? a.x/b.x : a.y/b.y; }
+typedef pp P;
+double rat(P a, P b) {
+	return b.real() ? a.real()/b.real() : a.imag()/b.imag();
+}
 double polyUnion(vector<vector<P>>& poly) {
 	double ret = 0;
 	rep(i,0,sz(poly)) rep(v,0,sz(poly[i])) {
@@ -26,10 +28,10 @@ double polyUnion(vector<vector<P>>& poly) {
 				P C = poly[j][u], D = poly[j][(u + 1) % sz(poly[j])];
 				int sc = sideOf(A, B, C), sd = sideOf(A, B, D);
 				if (sc != sd) {
-					double sa = C.cross(D, A), sb = C.cross(D, B);
+					double sa = orient(C, D, A), sb = orient(C, D, B);
 					if (min(sc, sd) < 0)
 						segs.emplace_back(sa / (sa - sb), sgn(sc - sd));
-				} else if (!sc && !sd && j<i && sgn((B-A).dot(D-C))>0){
+				} else if (!sc && !sd && j<i && sgn(dotp(B-A, D-C))>0){
 					segs.emplace_back(rat(C - A, B - A), 1);
 					segs.emplace_back(rat(D - A, B - A), -1);
 				}
@@ -43,7 +45,7 @@ double polyUnion(vector<vector<P>>& poly) {
 			if (!cnt) sum += segs[j].first - segs[j - 1].first;
 			cnt += segs[j].second;
 		}
-		ret += A.cross(B) * sum;
+		ret += crossp(A, B) * sum;
 	}
 	return ret / 2;
 }

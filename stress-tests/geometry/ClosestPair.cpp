@@ -4,17 +4,17 @@
 
 namespace old {
 template<class It>
-bool it_less(const It& i, const It& j) { return *i < *j; }
+bool it_less(const It& i, const It& j) { return PointLess{}(*i, *j); }
 template<class It>
-bool y_it_less(const It& i,const It& j) {return i->y < j->y;}
+bool y_it_less(const It& i,const It& j) {return i->imag() < j->imag();}
 
 template<class It, class IIt> /* IIt = vector<It>::iterator */
 double cp_sub(IIt ya, IIt yaend, IIt xa, It &i1, It &i2) {
 	typedef typename iterator_traits<It>::value_type P;
 	int n = yaend-ya, split = n/2;
 	if(n <= 3) { // base case
-		double a = (*xa[1]-*xa[0]).dist(), b = 1e50, c = 1e50;
-		if(n==3) b=(*xa[2]-*xa[0]).dist(), c=(*xa[2]-*xa[1]).dist();
+		double a = dist(*xa[1]-*xa[0]), b = 1e50, c = 1e50;
+		if(n==3) b=dist(*xa[2]-*xa[0]), c=dist(*xa[2]-*xa[1]);
 		if(a <= b) { i1 = xa[1];
 			if(a <= c) return i2 = xa[0], a;
 			else return i2 = xa[2], c;
@@ -24,11 +24,11 @@ double cp_sub(IIt ya, IIt yaend, IIt xa, It &i1, It &i2) {
 	}	}
 	vector<It> ly, ry, stripy;
 	P splitp = *xa[split];
-	double splitx = splitp.x;
+	double splitx = splitp.real();
 	for(IIt i = ya; i != yaend; ++i) { // Divide
-		if(*i != xa[split] && (**i-splitp).dist2() < 1e-12)
+		if(*i != xa[split] && norm(**i-splitp) < 1e-12)
 			return i1 = *i, i2 = xa[split], 0;// nasty special case!
-		if (**i < splitp) ly.push_back(*i);
+		if (PointLess{}(**i, splitp)) ly.push_back(*i);
 		else ry.push_back(*i);
 	} // assert((signed)lefty.size() == split)
 	It j1, j2; // Conquer
@@ -37,15 +37,15 @@ double cp_sub(IIt ya, IIt yaend, IIt xa, It &i1, It &i2) {
 	if(b < a) a = b, i1 = j1, i2 = j2;
 	double a2 = a*a;
 	for(IIt i = ya; i != yaend; ++i) { // Create strip (y-sorted)
-		double x = (*i)->x;
+		double x = (*i)->real();
 		if(x >= splitx-a && x <= splitx+a) stripy.push_back(*i);
 	}
 	for(IIt i = stripy.begin(); i != stripy.end(); ++i) {
 		const P &p1 = **i;
 		for(IIt j = i+1; j != stripy.end(); ++j) {
 			const P &p2 = **j;
-			if(p2.y-p1.y > a) break;
-			double d2 = (p2-p1).dist2();
+			if(p2.imag()-p1.imag() > a) break;
+			double d2 = norm(p2-p1);
 			if(d2 < a2) i1 = *i, i2 = *j, a2 = d2;
 	}	}
 	return sqrt(a2);
@@ -83,12 +83,12 @@ int main() {
 		ll foundDist = -1, oldDist = -1, theDist = -1;
 		if (mode == 1 || mode == 3) {
 			auto pa = closest(ps);
-			theDist = foundDist = (pa.first - pa.second).dist2();
+			theDist = foundDist = norm(pa.first - pa.second);
 		}
 		if (mode == 2 || mode == 3) {
 			vector<P>::iterator i1, i2;
 			old::closestpair(all(ps), i1, i2);
-			theDist = oldDist = (*i1 - *i2).dist2();
+			theDist = oldDist = norm(*i1 - *i2);
 		}
 		sum += theDist;
 		// cerr << theDist << endl;
@@ -114,10 +114,10 @@ int main() {
 		}
 		ll minDist = LLONG_MAX;
 		rep(i,0,n) rep(j,i+1,n) {
-			minDist = min(minDist, (ps[i] - ps[j]).dist2());
+			minDist = min(minDist, norm(ps[i] - ps[j]));
 		}
 		auto pa = closest(ps);
-		ll foundDist = (pa.first - pa.second).dist2();
+		ll foundDist = norm(pa.first - pa.second);
 		if (minDist != foundDist) {
 			cerr << "failed at " << it << endl;
 			return 1;

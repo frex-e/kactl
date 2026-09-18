@@ -14,10 +14,10 @@ int segmentIntersection(const P& s1, const P& e1,
 	}
 	//segment directions and separation
 	P v1 = e1-s1, v2 = e2-s2, d = s2-s1;
-	auto a = v1.cross(v2), a1 = v1.cross(d), a2 = v2.cross(d);
+	auto a = crossp(v1, v2), a1 = crossp(v1, d), a2 = crossp(v2, d);
 	if (a == 0) { //if parallel
-		auto b1=s1.dot(v1), c1=e1.dot(v1),
-			 b2=s2.dot(v1), c2=e2.dot(v1);
+		auto b1=dotp(s1, v1), c1=dotp(e1, v1),
+			 b2=dotp(s2, v1), c2=dotp(e2, v1);
 		if (a1 || a2 || max(b1,min(b2,c2))>min(c1,max(b2,c2)))
 			return 0;
 		r1 = min(b2,c2)<b1 ? s1 : (b2<c2 ? s2 : e2);
@@ -31,9 +31,9 @@ int segmentIntersection(const P& s1, const P& e1,
 	return 1;
 }
 }
-typedef Point<double> P;
+typedef complex<double> P;
 bool eq(P a, P b) {
-	return (a-b).dist()<1e-8;
+	return dist(a-b)<1e-8;
 }
 int main() {
 	rep(t,0,1000000) {
@@ -52,7 +52,7 @@ int main() {
 		} else if (res==2) {
 			vector<P> a(res2.begin(), res2.end());
 			vector<P> b({tmp1, tmp2});
-			sort(all(b));
+			sort(all(b), PointLess{});
 			assert(eq(a[0], b[0]) && eq(a[1],b[1]));
 		}
 	}

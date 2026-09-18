@@ -1,15 +1,15 @@
 #include "../utilities/template.h"
 
 #include "../../content/geometry/DelaunayTriangulation.h"
-#define ll double
 #include "../../content/geometry/ConvexHull.h"
-#undef ll
 #include "../../content/geometry/PolygonArea.h"
 #include "../../content/geometry/circumcircle.h"
 
-typedef Point<double> P;
+typedef complex<double> P;
 int main() {
+	#ifdef __GLIBC__
 	feenableexcept(29);
+	#endif
 	rep(it,0,100000) {{
 		vector<P> ps;
 		int N = rand() % 20 + 1;
@@ -18,18 +18,18 @@ int main() {
 		}
 
 		auto coc = [&](int i, int j, int k, int l) {
-			double a = (ps[i] - ps[j]).dist();
-			double b = (ps[j] - ps[k]).dist();
-			double c = (ps[k] - ps[l]).dist();
-			double d = (ps[l] - ps[i]).dist();
-			double e = (ps[i] - ps[k]).dist();
-			double f = (ps[j] - ps[l]).dist();
+			double a = dist(ps[i] - ps[j]);
+			double b = dist(ps[j] - ps[k]);
+			double c = dist(ps[k] - ps[l]);
+			double d = dist(ps[l] - ps[i]);
+			double e = dist(ps[i] - ps[k]);
+			double f = dist(ps[j] - ps[l]);
 			double q = a*c + b*d - e*f;
 			return abs(q) < 1e-4;
 		};
 
 		rep(i,0,N) rep(j,0,i) rep(k,0,j) {
-			if (ps[i].cross(ps[j], ps[k]) == 0) {  goto fail; }
+			if (orient(ps[i], ps[j], ps[k]) == 0) {  goto fail; }
 		}
 		rep(i,0,N) rep(j,0,i) rep(k,0,j) rep(l,0,k) {
 			if (coc(i,j,k,l) || coc(i,j,l,k) || coc(i,l,j,k) || coc(i,l,k,j)) { goto fail; }
@@ -38,7 +38,7 @@ int main() {
 		auto fail = [&]() {
 			cout << "Points:" << endl;
 			for(auto &p: ps) {
-				cout << p.x << ' ' << p.y << endl;
+				cout << p.real() << ' ' << p.imag() << endl;
 			}
 
 			cout << "Triangles:" << endl;
@@ -53,13 +53,13 @@ int main() {
 		vi used(N);
 		delaunay(ps, [&](int i, int j, int k) {
 			used[i] = used[j] = used[k] = 1;
-			double ar = ps[i].cross(ps[j], ps[k]);
+			double ar = orient(ps[i], ps[j], ps[k]);
 			if (ar < -1e-4) fail();
 			sumar += ar;
 			P c = ccCenter(ps[i], ps[j], ps[k]);
 			double ra = ccRadius(ps[i], ps[j], ps[k]);
 			rep(l,0,N) {
-				if ((ps[l] - c).dist() < ra - 1e-5) fail();
+				if (dist(ps[l] - c) < ra - 1e-5) fail();
 			}
 		});
 		if (N >= 3) rep(i,0,N) if (!used[i]) fail();

@@ -6,7 +6,7 @@
 #include "../../content/geometry/InsidePolygon.h"
 #include "../../content/geometry/SegmentIntersection.h"
 
-typedef Point<double> P;
+typedef complex<double> P;
 int main() {
 	rep(it,0,500) {
 		int N = rand() % 10 + 3;
@@ -46,7 +46,7 @@ int main() {
 
 		// cerr << N << endl;
 		// for(auto &x: ps) {
-			// cout << x.x << ' ' << x.y << endl;
+			// cout << x.real() << ' ' << x.imag() << endl;
 		// }
 	}
 	cout<<"Tests passed!"<<endl;

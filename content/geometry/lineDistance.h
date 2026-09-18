@@ -7,9 +7,10 @@
 \begin{minipage}{\dimexpr\linewidth-15mm\relax}
 Returns the signed distance between point \texttt{p} and the line containing points \texttt{a} and \texttt{b}.
 Positive value on left side and negative on right as seen from \texttt{a} towards \texttt{b}. \texttt{a==b} gives nan.
-P is supposed to be \texttt{Point<T>} or \texttt{Point3D<T>} where \texttt{T} is e.g. \texttt{double} or \texttt{long long}.
+P is \texttt{complex<T>} where T is double or long long.
 It uses products in intermediate steps so watch out for overflow if using \texttt{int} or \texttt{long long}.
-Using \texttt{Point3D} will always give a non-negative distance. For \texttt{Point3D}, call \texttt{.dist} on the result of the cross product.
+In 3D use \texttt{(b-a).cross(p-a).dist()/(b-a).dist()}
+with \texttt{Point3D}; that distance is non-negative.
 \end{minipage}%
 \begin{minipage}{15mm}
 \includegraphics[width=\textwidth]{content/geometry/lineDistance}
@@ -22,5 +23,5 @@ Using \texttt{Point3D} will always give a non-negative distance. For \texttt{Poi
 
 template<class P>
 double lineDist(P a, P b, P p) {
-	return (double)(b-a).cross(p-a)/(b-a).dist();
+	return (double)crossp(b-a, p-a)/dist(b-a);
 }

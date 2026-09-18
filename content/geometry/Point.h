@@ -1,39 +1,45 @@
 /**
- * Author: Ulf Lundstrom
- * Date: 2009-02-26
+ * Author: Ulf Lundstrom, Indra Kusumah-Kasim
  * License: CC0
- * Source: My head with inspiration from tinyKACTL
- * Description: Class to handle points in the plane.
- * 	\texttt{T} can be e.g. \texttt{double} or \texttt{long long}. (Avoid \texttt{int}.)
- * Status: Works fine, used a lot
+ * Description: Complex points: $x=\texttt{real()}$, $y=\texttt{imag()}$.
+ * Use \texttt{pp} for floating geometry, \texttt{complex<ll>}
+ * for exact integer predicates (products must fit in \texttt{ll}).
+ * \texttt{orient(a,b,c)} is positive for a left turn.
+ * \texttt{norm(p)} is squared length; \texttt{abs(p)} is length,
+ * \texttt{arg(p)} is angle, \texttt{p/abs(p)} is a unit vector
+ * (nonzero floating points only). Use \texttt{dist} for integer
+ * length: \texttt{abs(complex<ll>)} truncates. Scalars must match
+ * the coordinate type, e.g. divide \texttt{pp} by \texttt{2.0}.
+ * Sort with \texttt{PointLess\{\}}; complex has no ordering.
+ * Usage: pp a(3,5), rotated = a * polar(1.0, acos(-1.0)/3);
+ * Status: stress-tested
  */
 #pragma once
 
-template <class T> int sgn(T x) { return (x > 0) - (x < 0); }
+typedef double dd;
+typedef complex<dd> pp;
+
+template<class T> int sgn(T x) { return (x > 0) - (x < 0); }
+template<class T> T dotp(complex<T> a, complex<T> b) {
+	return a.real()*b.real() + a.imag()*b.imag();
+}
+template<class T> T crossp(complex<T> a, complex<T> b) {
+	return a.real()*b.imag() - a.imag()*b.real();
+}
 template<class T>
-struct Point {
-	typedef Point P;
-	T x, y;
-	explicit Point(T x=0, T y=0) : x(x), y(y) {}
-	bool operator<(P p) const { return tie(x,y) < tie(p.x,p.y); }
-	bool operator==(P p) const { return tie(x,y)==tie(p.x,p.y); }
-	P operator+(P p) const { return P(x+p.x, y+p.y); }
-	P operator-(P p) const { return P(x-p.x, y-p.y); }
-	P operator*(T d) const { return P(x*d, y*d); }
-	P operator/(T d) const { return P(x/d, y/d); }
-	T dot(P p) const { return x*p.x + y*p.y; }
-	T cross(P p) const { return x*p.y - y*p.x; }
-	T cross(P a, P b) const { return (a-*this).cross(b-*this); }
-	T dist2() const { return x*x + y*y; }
-	double dist() const { return sqrt((double)dist2()); }
-	// angle to x-axis in interval [-pi, pi]
-	double angle() const { return atan2(y, x); }
-	P unit() const { return *this/dist(); } // makes dist()=1
-	P perp() const { return P(-y, x); } // rotates +90 degrees
-	P normal() const { return perp().unit(); }
-	// returns point rotated 'a' radians ccw around the origin
-	P rotate(double a) const {
-		return P(x*cos(a)-y*sin(a),x*sin(a)+y*cos(a)); }
-	friend ostream& operator<<(ostream& os, P p) {
-		return os << "(" << p.x << "," << p.y << ")"; }
+T orient(complex<T> a, complex<T> b, complex<T> c) {
+	return crossp(b-a, c-a);
+}
+template<class T> complex<T> perp(complex<T> p) {
+	return {-p.imag(), p.real()};
+}
+template<class T> double dist(complex<T> p) {
+	return hypot((double)p.real(), (double)p.imag());
+}
+struct PointLess {
+	template<class T>
+	bool operator()(complex<T> a, complex<T> b) const {
+		return make_pair(a.real(), a.imag()) <
+		       make_pair(b.real(), b.imag());
+	}
 };

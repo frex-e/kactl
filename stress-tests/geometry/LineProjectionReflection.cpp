@@ -3,7 +3,7 @@
 #include "../../content/geometry/LineProjectionReflection.h"
 #include "../../content/geometry/lineDistance.h"
 
-typedef Point<double> P;
+typedef complex<double> P;
 int main() {
 	cin.sync_with_stdio(0);
 	cin.tie(0);
@@ -17,8 +17,8 @@ int main() {
 		auto proj = lineProj(a, b, p, false);
 		auto refl = lineProj(a, b, p, true);
 		assert(lineDist(a, b, proj) < 1e-8);
-		auto manProj = (refl + p) / 2;
-		assert((proj-manProj).dist() < 1e-8);
+		auto manProj = (refl + p) / 2.0;
+		assert(dist(proj-manProj) < 1e-8);
 	}
 	cout<<"Tests passed!"<<endl;
 }

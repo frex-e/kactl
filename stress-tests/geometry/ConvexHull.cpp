@@ -1,15 +1,15 @@
 #include "../utilities/template.h"
 
 #include "../../content/geometry/ConvexHull.h"
-#include "../utilities/bench.h"
+typedef complex<ll> P;
 
 namespace old {
 pair<vi, vi> ulHull(const vector<P>& S) {
 	vi Q(sz(S)), U, L;
 	iota(all(Q), 0);
-	sort(all(Q), [&S](int a, int b){ return S[a] < S[b]; });
+	sort(all(Q), [&S](int a, int b){ return PointLess{}(S[a], S[b]); });
 	for(auto &it: Q) {
-#define ADDP(C, cmp) while (sz(C) > 1 && S[C[sz(C)-2]].cross(\
+#define ADDP(C, cmp) while (sz(C) > 1 && orient(S[C[sz(C)-2]], \
 	S[it], S[C.back()]) cmp 0) C.pop_back(); C.push_back(it);
 		ADDP(U, <=); ADDP(L, >=);
 	}

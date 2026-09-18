@@ -5,14 +5,14 @@
 #include "../../content/data-structures/UnionFind.h"
 
 
-typedef Point<int> P;
+typedef complex<int> P;
 typedef int T;
 T rectilinear_mst_n(vector<P> ps) {
 	struct edge { int src, dst; T weight; };
 	vector<edge> edges;
 
 	auto dist = [&](int i, int j) {
-		return abs((ps[i]-ps[j]).x) + abs((ps[i]-ps[j]).y);
+		return abs((ps[i]-ps[j]).real()) + abs((ps[i]-ps[j]).imag());
 	};
 	for (int i = 0; i < sz(ps); ++i)
 		for (int j = i+1; j < sz(ps); ++j)

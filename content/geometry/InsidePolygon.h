@@ -25,7 +25,8 @@ bool inPolygon(vector<P> &p, P a, bool strict = true) {
 		P q = p[(i + 1) % n];
 		if (onSegment(p[i], q, a)) return !strict;
 		//or: if (segDist(p[i], q, a) <= eps) return !strict;
-		cnt ^= ((a.y<p[i].y) - (a.y<q.y)) * a.cross(p[i], q) > 0;
+		int above = (a.imag()<p[i].imag()) - (a.imag()<q.imag());
+		cnt ^= above * orient(a, p[i], q) > 0;
 	}
 	return cnt;
 }

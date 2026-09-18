@@ -21,21 +21,21 @@ namespace old {
 template<class It, class P>
 bool insidePolygon(It begin, It end, const P& p,
 		bool strict = true) {
-	int n = 0; //number of isects with line from p to (inf,p.y)
+	int n = 0; //number of isects with line from p to (inf,p.imag())
 	for (It i = begin, j = end-1; i != end; j = i++) {
 		//if p is on edge of polygon
 		if (onSegment(*i, *j, p)) return !strict;
 		//or: if (segDist(*i, *j, p) <= epsilon) return !strict;
 		//increment n if segment intersects line from p
-		n += (max(i->y,j->y) > p.y && min(i->y,j->y) <= p.y &&
-				((*j-*i).cross(p-*i) > 0) == (i->y <= p.y));
+		n += (max(i->imag(),j->imag()) > p.imag() && min(i->imag(),j->imag()) <= p.imag() &&
+				(crossp(*j-*i, p-*i) > 0) == (i->imag() <= p.imag()));
 	}
 	return n&1; //inside if odd number of intersections
 }
 }
-typedef Point<double> P;
+typedef complex<double> P;
 bool eq(P a, P b) {
-	return (a-b).dist()<EPS;
+	return dist(a-b)<EPS;
 }
 const int NUMPOLY=100;
 const int PTPERPOLY=100;

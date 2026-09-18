@@ -19,7 +19,7 @@
 
 #include "Point.h"
 
-#define cmp(i,j) sgn(dir.perp().cross(poly[(i)%n]-poly[(j)%n]))
+#define cmp(i,j) sgn(crossp(perp(dir), poly[(i)%n]-poly[(j)%n]))
 #define extr(i) cmp(i + 1, i) >= 0 && cmp(i, i - 1 + n) < 0
 template <class P> int extrVertex(vector<P>& poly, P dir) {
 	int n = sz(poly), lo = 0, hi = n;
@@ -33,11 +33,11 @@ template <class P> int extrVertex(vector<P>& poly, P dir) {
 	return lo;
 }
 
-#define cmpL(i) sgn(a.cross(poly[i], b))
+#define cmpL(i) sgn(orient(a, poly[i], b))
 template <class P>
 array<int, 2> lineHull(P a, P b, vector<P>& poly) {
-	int endA = extrVertex(poly, (a - b).perp());
-	int endB = extrVertex(poly, (b - a).perp());
+	int endA = extrVertex(poly, perp(a - b));
+	int endB = extrVertex(poly, perp(b - a));
 	if (cmpL(endA) < 0 || cmpL(endB) > 0)
 		return {-1, -1};
 	array<int, 2> res;

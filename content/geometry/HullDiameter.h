@@ -11,15 +11,18 @@
 #pragma once
 #include "Point.h"
 
-typedef Point<ll> P;
+template<class P>
 array<P, 2> hullDiameter(vector<P> S) {
+	assert(!S.empty());
 	int n = sz(S), j = n < 2 ? 0 : 1;
-	pair<ll, array<P, 2>> res({0, {S[0], S[0]}});
+	auto best = norm(S[0]-S[0]);
+	array<P, 2> res{S[0], S[0]};
 	rep(i,0,j)
 		for (;; j = (j + 1) % n) {
-			res = max(res, {(S[i] - S[j]).dist2(), {S[i], S[j]}});
-			if ((S[(j + 1) % n] - S[j]).cross(S[i + 1] - S[i]) >= 0)
+			if (auto d2 = norm(S[i] - S[j]); d2 > best)
+				best = d2, res = {S[i], S[j]};
+			if (crossp(S[(j + 1) % n] - S[j], S[i + 1] - S[i]) >= 0)
 				break;
 		}
-	return res.second;
+	return res;
 }

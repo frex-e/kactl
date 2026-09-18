@@ -16,15 +16,15 @@
 #include "Point.h"
 #include "lineIntersection.h"
 
-typedef Point<double> P;
+typedef pp P;
 const double HP_EPS = 1e-9, HP_INF = 1e9;
 
 struct HP {
 	P s, e, d;
 	double ang;
 	HP() {}
-	HP(P a, P b) : s(a), e(b), d(b - a), ang(d.angle()) {}
-	bool out(P p) { return d.cross(p - s) < -HP_EPS; }
+	HP(P a, P b) : s(a), e(b), d(b - a), ang(arg(d)) {}
+	bool out(P p) { return crossp(d, p - s) < -HP_EPS; }
 	bool operator<(HP o) const { return ang < o.ang; }
 };
 
@@ -45,8 +45,8 @@ vector<P> halfPlaneInter(vector<HP> h) {
 		while (sz(dq) > 1 && L.out(hpI(dq[0], dq[1])))
 			dq.pop_front();
 		if (!dq.empty() &&
-			fabs(L.d.cross(dq.back().d)) < HP_EPS) {
-			if (L.d.dot(dq.back().d) < 0) return {};
+			fabs(crossp(L.d, dq.back().d)) < HP_EPS) {
+			if (dotp(L.d, dq.back().d) < 0) return {};
 			if (L.out(dq.back().s)) dq.pop_back();
 			else continue;
 		}
@@ -64,15 +64,15 @@ vector<P> halfPlaneInter(vector<HP> h) {
 		res.push_back(hpI(dq[i], dq[(i+1)%sz(dq)]));
 	vector<P> out;
 	for (P p : res) {
-		if (out.empty() || (p - out.back()).dist() > 1e-6)
+		if (out.empty() || abs(p - out.back()) > 1e-6)
 			out.push_back(p);
 	}
-	if (sz(out) >= 2 && (out[0] - out.back()).dist() <= 1e-6)
+	if (sz(out) >= 2 && abs(out[0] - out.back()) <= 1e-6)
 		out.pop_back();
 	if (sz(out) < 3) return {};
 	double a = 0;
 	rep(i,0,sz(out))
-		a += out[i].cross(out[(i+1)%sz(out)]);
+		a += crossp(out[i], out[(i+1)%sz(out)]);
 	if (fabs(a) < 1e-8) return {};
 	return out;
 }

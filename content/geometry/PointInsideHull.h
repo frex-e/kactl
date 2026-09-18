@@ -16,9 +16,10 @@
 #include "sideOf.h"
 #include "OnSegment.h"
 
-typedef Point<ll> P;
 
+template<class P>
 bool inHull(const vector<P>& l, P p, bool strict = true) {
+	if (l.empty()) return false;
 	int a = 1, b = sz(l) - 1, r = !strict;
 	if (sz(l) < 3) return r && onSegment(l[0], l.back(), p);
 	if (sideOf(l[0], l[a], l[b]) > 0) swap(a, b);
@@ -28,5 +29,5 @@ bool inHull(const vector<P>& l, P p, bool strict = true) {
 		int c = (a + b) / 2;
 		(sideOf(l[0], l[c], p) > 0 ? b : a) = c;
 	}
-	return sgn(l[a].cross(l[b], p)) < r;
+	return sgn(orient(l[a], l[b], p)) < r;
 }

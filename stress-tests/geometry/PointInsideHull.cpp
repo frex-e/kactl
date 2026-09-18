@@ -1,6 +1,7 @@
 #include "../utilities/template.h"
 
 #include "../../content/geometry/ConvexHull.h"
+typedef complex<ll> P;
 namespace ignore {
 	#include "../../content/geometry/SegmentDistance.h"
 }

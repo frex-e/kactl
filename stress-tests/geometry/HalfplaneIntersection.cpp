@@ -5,7 +5,7 @@
 #include "../../content/geometry/InsidePolygon.h"
 #include "../../content/geometry/HalfplaneIntersection.h"
 
-typedef Point<double> P;
+typedef complex<double> P;
 
 bool insideAll(const vector<HP>& h, P p) {
 	for (HP L : h) if (L.out(p)) return false;
@@ -53,7 +53,7 @@ void testVsCutAndSample() {
 		rep(i,0,extra) {
 			P a(rand()%21 - 10, rand()%21 - 10);
 			P b(rand()%21 - 10, rand()%21 - 10);
-			if (a.dist2() == b.dist2() && a == b) continue;
+			if (norm(a) == norm(b) && a == b) continue;
 			if (a == b) continue;
 			h.push_back(HP(a, b));
 		}
@@ -72,8 +72,8 @@ void testVsCutAndSample() {
 		rep(s,0,3000) {
 			P p(rand()%21 - 10 + (rand()%100)/100.0,
 				rand()%21 - 10 + (rand()%100)/100.0);
-			if (p.x <= -B+1e-6 || p.x >= B-1e-6 ||
-				p.y <= -B+1e-6 || p.y >= B-1e-6) continue;
+			if (p.real() <= -B+1e-6 || p.real() >= B-1e-6 ||
+				p.imag() <= -B+1e-6 || p.imag() >= B-1e-6) continue;
 			bool inH = insideAll(h, p);
 			if (!inH) {
 				if (!res.empty())
@@ -81,7 +81,7 @@ void testVsCutAndSample() {
 			} else if (!res.empty()) {
 				bool strictOut = false;
 				for (HP L : h)
-					if (L.d.cross(p - L.s) < 1e-6)
+					if (crossp(L.d, p - L.s) < 1e-6)
 						strictOut = true;
 				if (!strictOut)
 					assert(inPolygon(res, p, true));

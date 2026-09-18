@@ -1,5 +1,14 @@
 \chapter{Geometry}
 
+Planar points use \texttt{pp = complex<dd>} with
+\texttt{dd = double}. Use \texttt{real()} and \texttt{imag()}
+for coordinates, and free \texttt{dotp}, \texttt{crossp}, and
+\texttt{orient} for predicates. Integer snippets use
+\texttt{complex<ll>} (or \texttt{complex<int>} for Manhattan MST);
+keep intermediate products in range. Hull routines accept either
+floating or integer points. Three-dimensional routines use
+\texttt{Point3D}.
+
 \section{Geometric primitives}
 	\kactlimport{Point.h}
 	\kactlimport{lineDistance.h}
