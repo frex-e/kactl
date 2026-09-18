@@ -2,7 +2,7 @@
 #include "../utilities/random.h"
 #include "../utilities/genTree.h"
 
-#include "../../content/graph/LinkCutTree.h"
+#include "../../content/extras/LinkCutTree.h"
 #include "../../content/data-structures/UnionFind.h"
 
 vi getPath(const vector<vi>& adj, int u, int v) {
