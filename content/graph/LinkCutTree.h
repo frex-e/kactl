@@ -16,8 +16,6 @@
 #pragma once
 
 struct LinkCut {
-	// Path LCT. Not component/subtree update (ETT),
-	// not a static tree (HLD). Subtree query needs vsub.
 	using V = ll;
 	using U = ll;
 	static constexpr V id = 0, def = 0;
