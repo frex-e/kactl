@@ -10,14 +10,13 @@
 
 #include "Point.h"
 
-typedef pp P;
-bool circleInter(P a,P b,double r1,double r2,pair<P, P>* out) {
+bool circleInter(pp a,pp b,double r1,double r2,pair<pp, pp>* out) {
 	if (a == b) { assert(r1 != r2); return false; }
-	P vec = b - a;
+	pp vec = b - a;
 	double d2 = norm(vec), sum = r1+r2, dif = r1-r2,
 	       p = (d2 + r1*r1 - r2*r2)/(d2*2), h2 = r1*r1 - p*p*d2;
 	if (sum*sum < d2 || dif*dif > d2) return false;
-	P mid = a + vec*p, per = perp(vec) * sqrt(fmax(0, h2) / d2);
+	pp mid = a + vec*p, per = perp(vec) * sqrt(fmax(0, h2) / d2);
 	*out = {mid + per, mid - per};
 	return true;
 }

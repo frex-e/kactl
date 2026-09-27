@@ -17,12 +17,11 @@ The circumcirle of a triangle is the circle intersecting all three vertices. \te
 
 #include "Point.h"
 
-typedef pp P;
-double ccRadius(P A, P B, P C) {
+double ccRadius(pp A, pp B, pp C) {
 	return abs(B-A)*abs(C-B)*abs(A-C)/
 			abs(crossp(B-A, C-A))/2.0;
 }
-P ccCenter(P A, P B, P C) {
-	P b = C-A, c = B-A;
+pp ccCenter(pp A, pp B, pp C) {
+	pp b = C-A, c = B-A;
 	return A + perp(b*norm(c)-c*norm(b))/crossp(b, c)/2.0;
 }

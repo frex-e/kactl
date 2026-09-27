@@ -10,7 +10,7 @@
  *  vector<Angle> v = {w[0], w[0].t360() ...}; // sorted
  *  int j = 0; rep(i,0,n) { while (v[j] < v[i].t180()) ++j; }
  *  // sweeps j such that (j-i) represents the number of positively oriented triangles with vertices at 0 and i
- * Products must fit in ll. Never compare a zero direction.
+ * Never compare a zero direction.
  * Status: stress-tested
  */
 #pragma once
@@ -18,12 +18,12 @@
 #include "Point.h"
 
 struct Angle {
-	complex<ll> p;
+	pp p;
 	int t;
-	Angle(complex<ll> p, int t=0) : p(p), t(t) {}
+	Angle(pp p, int t=0) : p(p), t(t) {}
 	Angle operator-(Angle b) const { return {p-b.p, t}; }
 	int half() const {
-		assert(p != complex<ll>());
+		assert(p != pp());
 		return p.imag() < 0 || (p.imag() == 0 && p.real() < 0);
 	}
 	Angle t90() const {

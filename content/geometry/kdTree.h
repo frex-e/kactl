@@ -9,26 +9,25 @@
 
 #include "Point.h"
 
-typedef long long T;
-typedef complex<T> P;
+typedef double T;
 const T INF = numeric_limits<T>::max();
 
-bool on_x(P a, P b) { return a.real() < b.real(); }
-bool on_y(P a, P b) { return a.imag() < b.imag(); }
+bool on_x(pp a, pp b) { return a.real() < b.real(); }
+bool on_y(pp a, pp b) { return a.imag() < b.imag(); }
 
 struct Node {
-	P pt; // if this is a leaf, the single point in it
+	pp pt; // if this is a leaf, the single point in it
 	T x0 = INF, x1 = -INF, y0 = INF, y1 = -INF; // bounds
 	Node *first = 0, *second = 0;
 
-	T distance(P p) { // min squared distance to a point
+	T distance(pp p) { // min squared distance to a point
 		T x = (p.real() < x0 ? x0 : p.real() > x1 ? x1 : p.real());
 		T y = (p.imag() < y0 ? y0 : p.imag() > y1 ? y1 : p.imag());
-		return norm(P(x,y) - p);
+		return norm(pp(x,y) - p);
 	}
 
-	Node(vector<P>&& vp) : pt(vp[0]) {
-		for (P p : vp) {
+	Node(vector<pp>&& vp) : pt(vp[0]) {
+		for (pp p : vp) {
 			x0 = min(x0, p.real()); x1 = max(x1, p.real());
 			y0 = min(y0, p.imag()); y1 = max(y1, p.imag());
 		}
@@ -46,12 +45,12 @@ struct Node {
 
 struct KDTree {
 	Node* root;
-	KDTree(const vector<P>& vp) : root(new Node({all(vp)})) {}
+	KDTree(const vector<pp>& vp) : root(new Node({all(vp)})) {}
 
-	pair<T, P> search(Node *node, P p) {
+	pair<T, pp> search(Node *node, pp p) {
 		if (!node->first) {
 			// uncomment if we should not find the point itself:
-			// if (p == node->pt) return {INF, P()};
+			// if (p == node->pt) return {INF, pp()};
 			return make_pair(norm(p - node->pt), node->pt);
 		}
 
@@ -70,7 +69,7 @@ struct KDTree {
 
 	// find nearest point to a point, and its squared distance
 	// Requires a nonempty point set.
-	pair<T, P> nearest(P p) {
+	pair<T, pp> nearest(pp p) {
 		return search(root, p);
 	}
 };

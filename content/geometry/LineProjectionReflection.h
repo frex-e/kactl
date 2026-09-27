@@ -4,19 +4,15 @@
  * License: CC0
  * Source: https://vlecomte.github.io/cp-geo.pdf
  * Description: Projects point \texttt{p} onto line \texttt{ab}. Set \texttt{refl=true} to get reflection
- * of point \texttt{p} across line \texttt{ab} instead. The wrong point will be returned if \texttt{P} is
- * an integer point and the desired point doesn't have integer coordinates.
- * Products of three coordinates are used in intermediate steps so watch out
- * for overflow.
+ * of point \texttt{p} across line \texttt{ab} instead.
  * Status: stress-tested
  */
 #pragma once
 
 #include "Point.h"
 
-template<class P>
-P lineProj(P a, P b, P p, bool refl=false) {
-	P v = b - a;
+pp lineProj(pp a, pp b, pp p, bool refl=false) {
+	pp v = b - a;
 	auto d = crossp(v, p-a) * (1+refl);
 	return p - perp(v)*d/norm(v);
 }

@@ -20,14 +20,13 @@ Points on the edge of the hull between two other points are not considered part 
 
 #include "Point.h"
 
-template<class P>
-vector<P> convexHull(vector<P> pts) {
+vector<pp> convexHull(vector<pp> pts) {
 	if (sz(pts) <= 1) return pts;
 	sort(all(pts), PointLess{});
-	vector<P> h(sz(pts)+1);
+	vector<pp> h(sz(pts)+1);
 	int s = 0, t = 0;
 	for (int it = 2; it--; s = --t, reverse(all(pts)))
-		for (P p : pts) {
+		for (pp p : pts) {
 			while (t >= s + 2 && orient(h[t-2], h[t-1], p) <= 0) t--;
 			h[t++] = p;
 		}

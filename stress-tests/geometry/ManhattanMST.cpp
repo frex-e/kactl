@@ -5,8 +5,8 @@
 #include "../../content/data-structures/UnionFind.h"
 
 
-typedef complex<int> P;
-typedef int T;
+typedef pp P;
+typedef double T;
 T rectilinear_mst_n(vector<P> ps) {
 	struct edge { int src, dst; T weight; };
 	vector<edge> edges;
@@ -38,10 +38,12 @@ signed main() {
 				}
 				auto edges = manhattanMST(pts);
 				assert(edges.size() <= 4*pts.size());
-				sort(all(edges));
+				sort(all(edges), [](MEdge x, MEdge y) {
+					return x.d < y.d;
+				});
 				UF uf(sz(pts));
-				int cost = 0, joined = 0;
-				for (auto e: edges) if (uf.join(e[1], e[2])) cost += e[0], joined++;
+				double cost = 0; int joined = 0;
+				for (auto e: edges) if (uf.join(e.a, e.b)) cost += e.d, joined++;
 				if (num_pts > 0) assert(joined == num_pts - 1);
 				assert(cost == rectilinear_mst_n(pts));
 		}

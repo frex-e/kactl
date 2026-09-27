@@ -12,15 +12,8 @@
 #include "../../content/geometry/SegmentIntersection.h"
 
 int main() {
-	using IP = complex<ll>;
 	static_assert(is_same_v<pp, complex<double>>);
-	static_assert(is_same_v<decltype(norm(IP())), ll>);
-	// Exact predicates and squared distances beyond double's integer range.
-	IP a(1000000000, 999999999), b(999999999, 999999998);
-	assert(crossp(a, b) == -1);
-	assert(norm(a) == 1999999998000000001LL);
-	assert(abs(dist(IP(1,1)) - sqrt(2.0)) < 1e-15);
-	assert(orient(IP(), a, b) == -1);
+	assert(abs(dist(pp(1,1)) - sqrt(2.0)) < 1e-15);
 	assert(orient(pp(), pp(1,0), pp(0,1)) == 1);
 	assert(convexHull(vector<pp>{}).empty());
 	assert(!inHull(vector<pp>{}, pp(), false));
@@ -41,10 +34,10 @@ int main() {
 	assert(abs(arg(pp(0,1)) - acos(-1.0)/2) < 1e-15);
 	assert(segInter(pp(0,0), pp(2,2), pp(0,2), pp(2,0)) ==
 	       vector<pp>{pp(1,1)});
-	assert(segInter(IP(0,0), IP(3,0), IP(1,0), IP(4,0)) ==
-	       (vector<IP>{IP(1,0), IP(3,0)}));
-	assert(lineProj(IP(0,0), IP(2,0), IP(1,3)) == IP(1,0));
-	assert(lineProj(IP(0,0), IP(2,0), IP(1,3), true) == IP(1,-3));
+	assert(segInter(pp(0,0), pp(3,0), pp(1,0), pp(4,0)) ==
+	       (vector<pp>{pp(1,0), pp(3,0)}));
+	assert(lineProj(pp(0,0), pp(2,0), pp(1,3)) == pp(1,0));
+	assert(lineProj(pp(0,0), pp(2,0), pp(1,3), true) == pp(1,-3));
 	mt19937 rng(1729);
 	auto rnd = [&]() { return int(rng()%201)-100; };
 	rep(it,0,10000) {

@@ -20,8 +20,7 @@ Returns the shortest distance between point \texttt{p} and the line segment from
 
 #include "Point.h"
 
-typedef pp P;
-double segDist(P s, P e, P p) {
+double segDist(pp s, pp e, pp p) {
 	if (s==e) return abs(p-s);
 	auto d = norm(e-s), t = min(d,max(.0,dotp(p-s, e-s)));
 	return abs((p-s)*d-(e-s)*t)/d;

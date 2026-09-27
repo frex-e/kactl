@@ -1,31 +1,56 @@
 /**
- * Author: Simon Lindholm
- * Date: 2019-04-17
- * License: CC0
- * Source: https://codeforces.com/blog/entry/58747
- * Description: Finds the closest pair of points.
+ * Author: Alex Li
+ * Date: 2026-09-27
+ * License: GPL-2.0
+ * Source: https://algorithms.alexli.ca/closest-pair/
+ * Description: Closest pair by divide and conquer.
+ *  Requires at least two finite points; squared distances must
+ *  not overflow or underflow. Supports fractional coordinates.
  * Time: O(n \log n)
+ * Memory: O(n)
  * Status: stress-tested
  */
 #pragma once
 
 #include "Point.h"
 
-typedef complex<ll> P;
-pair<P, P> closest(vector<P> v) {
+pair<pp, pp> closest(vector<pp> v) {
 	assert(sz(v) > 1);
-	set<P, PointLess> S;
-	sort(all(v), [](P a, P b) { return a.imag() < b.imag(); });
-	pair<ll, pair<P, P>> ret{LLONG_MAX, {P(), P()}};
-	int j = 0;
-	for (P p : v) {
-		P d{1 + (ll)sqrt(ret.first), 0};
-		while (v[j].imag() <= p.imag() - d.real()) S.erase(v[j++]);
-		auto lo = S.lower_bound(p - d), hi = S.upper_bound(p + d);
-		for (; lo != hi; ++lo)
-			if (ll d2 = norm(*lo - p); d2 < ret.first)
-				ret = {d2, {*lo, p}};
-		S.insert(p);
-	}
-	return ret.second;
+	sort(all(v), PointLess{});
+	vector<pp> tmp(sz(v));
+	double best = INFINITY;
+	pair<pp, pp> ret{v[0], v[1]};
+	auto upd = [&](pp a, pp b) {
+		if (double d = norm(a - b); d < best)
+			best = d, ret = {a, b};
+	};
+	auto byY = [](pp a, pp b) { return a.imag() < b.imag(); };
+	auto rec = [&](auto&& self, int l, int r) -> void {
+		if (best == 0) return;
+		if (r - l <= 3) {
+			rep(i,l,r) rep(j,i+1,r) upd(v[i], v[j]);
+			sort(v.begin() + l, v.begin() + r, byY);
+			return;
+		}
+		int m = (l + r) / 2;
+		double x = v[m].real();
+		self(self, l, m), self(self, m, r);
+		if (best == 0) return;
+		auto a = v.begin() + l, b = v.begin() + m;
+		auto c = v.begin() + r;
+		merge(a, b, b, c, tmp.begin(), byY);
+		copy_n(tmp.begin(), r - l, a);
+		int k = 0;
+		rep(i,l,r) {
+			double dx = v[i].real() - x;
+			if (dx * dx < best) tmp[k++] = v[i];
+		}
+		rep(i,0,k) rep(j,i+1,k) {
+			double dy = tmp[j].imag() - tmp[i].imag();
+			if (dy * dy >= best) break;
+			upd(tmp[i], tmp[j]);
+		}
+	};
+	rec(rec, 0, sz(v));
+	return ret;
 }

@@ -18,7 +18,6 @@ Apply the linear transformation (translation, rotation and scaling) which takes 
 
 #include "Point.h"
 
-typedef pp P;
-P linearTransformation(P p0, P p1, P q0, P q1, P r) {
+pp linearTransformation(pp p0, pp p1, pp q0, pp q1, pp r) {
 	return q0 + (r-p0) * (q1-q0) / (p1-p0);
 }

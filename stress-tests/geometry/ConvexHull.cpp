@@ -1,7 +1,7 @@
 #include "../utilities/template.h"
 
 #include "../../content/geometry/ConvexHull.h"
-typedef complex<ll> P;
+typedef pp P;
 
 namespace old {
 pair<vi, vi> ulHull(const vector<P>& S) {

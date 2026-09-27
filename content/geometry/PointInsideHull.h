@@ -17,8 +17,7 @@
 #include "OnSegment.h"
 
 
-template<class P>
-bool inHull(const vector<P>& l, P p, bool strict = true) {
+bool inHull(const vector<pp>& l, pp p, bool strict = true) {
 	if (l.empty()) return false;
 	int a = 1, b = sz(l) - 1, r = !strict;
 	if (sz(l) < 3) return r && onSegment(l[0], l.back(), p);

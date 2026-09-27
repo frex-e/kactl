@@ -14,18 +14,17 @@
 #include "Point.h"
 #include "sideOf.h"
 
-typedef pp P;
-double rat(P a, P b) {
+double rat(pp a, pp b) {
 	return b.real() ? a.real()/b.real() : a.imag()/b.imag();
 }
-double polyUnion(vector<vector<P>>& poly) {
+double polyUnion(vector<vector<pp>>& poly) {
 	double ret = 0;
 	rep(i,0,sz(poly)) rep(v,0,sz(poly[i])) {
-		P A = poly[i][v], B = poly[i][(v + 1) % sz(poly[i])];
+		pp A = poly[i][v], B = poly[i][(v + 1) % sz(poly[i])];
 		vector<pair<double, int>> segs = {{0, 0}, {1, 0}};
 		rep(j,0,sz(poly)) if (i != j) {
 			rep(u,0,sz(poly[j])) {
-				P C = poly[j][u], D = poly[j][(u + 1) % sz(poly[j])];
+				pp C = poly[j][u], D = poly[j][(u + 1) % sz(poly[j])];
 				int sc = sideOf(A, B, C), sd = sideOf(A, B, D);
 				if (sc != sd) {
 					double sa = orient(C, D, A), sb = orient(C, D, B);

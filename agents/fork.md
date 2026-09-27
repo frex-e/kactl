@@ -37,7 +37,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 **Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset `insert<1>`, XOR-min/max, XOR-count, lazy XOR-all, mex, `each`, and merge. XOR queries (`minxor`/`maxxor`/`count`/`mex`) take `xr` (default 0). `each(f)` calls `f(x, cnt)` for each stored value. `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s) and destroys the other trie (safe to delete); `merge<1>` adds multiplicities from `insert<1>`. Values are in $[0,2^{30})$.
 
-**Geometry.** [Point.h](../content/geometry/Point.h) defines `dd = double`, `pp = complex<dd>`, and free `dotp`, `crossp`, `orient`, `perp`, `dist` helpers. All planar snippets use complex coordinates (`real()`/`imag()`); exact integer algorithms retain `complex<ll>` or `complex<int>`. Convex hull, hull diameter, and point-in-hull accept either scalar type. Sorting/sets use `PointLess`, not an added `std` overload. Scalars must match the coordinate type. `Angle` stores a complex direction plus a turn count. `Point3D` remains separate because complex numbers represent only two coordinates.
+**Geometry.** [Point.h](../content/geometry/Point.h) defines `pp = complex<double>` and free `dotp`, `crossp`, `orient`, `perp`, `dist` helpers. All geometry snippets use `pp`; rewrite it and dependent numeric types manually when exact integer geometry is needed. Sorting/sets use `PointLess`, not an added `std` overload. `Angle` stores a complex direction plus a turn count. `Point3D` remains separate because complex numbers represent only two coordinates.
 
 **Unchanged on purpose.** Iterative [content/data-structures/SegmentTree.h](../content/data-structures/SegmentTree.h) (point updates) remains KACTL-style.
 
@@ -87,7 +87,8 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/contest/.vimrc` | personal settings; kept KACTL `:Hash` |
 | `content/data-structures/LazySegmentTree.h` | KACTL pointer `Node` (range set+add) → `LazyUpdateTree` (inclusive, generic `binop` / lazy, point set) |
 | `content/strings/SuffixArray.h` | same SA/LCP, plus rank, RMQ, `getLCP`, `cmpSubstr` |
-| `content/geometry/Point.h` | complex point preamble (`dd`, `pp`), free predicates, explicit lexicographic comparator |
+| `content/geometry/ClosestPair.h` | Alex Li / algorithm-anthology divide-and-conquer closest pair (GPL-2.0), adapted to complex doubles; squared-difference strip checks |
+| `content/geometry/Point.h` | double complex point preamble (`pp`), free predicates, explicit lexicographic comparator |
 
 **Deleted behaviour:** KACTL’s lazy tree (`Node` with `set`/`add`, half-open, bump allocator). HLD now uses `LazyUpdateTree`.
 
@@ -110,7 +111,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/extras/chapter.tex` | segment tree beats; min-plus convolution; link-cut tree |
 | `content/strings/chapter.tex` | Hashing-codeforces in the PDF (alongside `Hashing.h`) |
 | `content/geometry/chapter.tex` | half-plane intersection; remaining upstream snippets in the PDF (`LineProjectionReflection`, `CircleLine`, `PolygonUnion`, `ManhattanMST`, `DelaunayTriangulation`); geometry is last before extras |
-| `content/geometry/*.h` (planar) | complex coordinates and free predicates; `arg` macro removed; hull helpers accept floating or integer points |
+| `content/geometry/*.h` | double coordinates and free predicates; `arg` macro removed |
 | geometry figure captions | same glued 15mm minipages as upstream (with their `\vspace`); text width is `\linewidth-15mm` instead of `75mm` so they fit the printable-margin columns |
 
 ## Tests

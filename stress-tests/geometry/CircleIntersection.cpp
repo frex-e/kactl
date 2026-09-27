@@ -10,12 +10,12 @@ int main() {
 		double rnd[6];
 		rep(i,0,6)
 			rnd[i] = rand() % 21 - 10;
-		P a(rnd[0], rnd[1]);
-		P b(rnd[2], rnd[3]);
+		pp a(rnd[0], rnd[1]);
+		pp b(rnd[2], rnd[3]);
 		double ra = rand() % 10;
 		double rb = rand() % 10;
 		if (a == b) continue;
-		pair<P, P> out;
+		pair<pp, pp> out;
 		bool ret = circleInter(a, b, ra, rb, &out);
 		if (ret) {
 			assert(abs(dist(out.first - a) - ra) < 1e-9);
@@ -25,22 +25,22 @@ int main() {
 		}
 
 		// Hill-climb the answer
-		auto func = [&](P x) {
+		auto func = [&](pp x) {
 			double d1 = dist(x - a) - ra;
 			double d2 = dist(x - b) - rb;
 			return d1*d1 + d2*d2;
 		};
-		P start = (a + b) / 2.0 + perp(a - b);
-		pair<double, P> cur(func(start), start);
+		pp start = (a + b) / 2.0 + perp(a - b);
+		pair<double, pp> cur(func(start), start);
 		for (double jmp = 100; jmp > 1e-20; jmp /= 2) {
 			int iters = 0;
 			for (int imp = 1; imp--;) {
 				if (++iters == 100) goto skip;
 				rep(dx,-1,2) rep(dy,-1,2) {
-					P p = cur.second;
+					pp p = cur.second;
 					p.real(p.real() + dx*jmp);
 					p.imag(p.imag() + dy*jmp);
-					pair<double, P> np{func(p), p};
+					pair<double, pp> np{func(p), p};
 					if (np.first < cur.first ||
 					    (np.first == cur.first && PointLess{}(np.second, cur.second))) cur = np, imp = 1;
 				}

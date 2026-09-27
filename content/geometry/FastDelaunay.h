@@ -7,8 +7,7 @@
  * Each circumcircle contains none of the input points.
  * There must be no duplicate points.
  * If all points are on a line, no triangles will be returned.
- * For floating coordinates, set P to pp and lll to long double;
- * predicates may then have precision issues.
+ * Predicates may have precision issues.
  * Returns triangles in order \texttt{\{t[0][0], t[0][1], t[0][2], t[1][0], ...\}}, all counter-clockwise.
  * Time: O(n \log n)
  * Status: stress-tested
@@ -17,26 +16,25 @@
 
 #include "Point.h"
 
-typedef complex<ll> P;
 typedef struct Quad* Q;
-typedef __int128_t lll; // (can be ll if coords are < 2e4)
-P arb(LLONG_MAX,LLONG_MAX); // not equal to any other point
+typedef long double lll;
+pp arb(DBL_MAX, DBL_MAX); // not equal to any other point
 
 struct Quad {
-	Q rot, o; P p = arb; bool mark;
-	P& F() { return r()->p; }
+	Q rot, o; pp p = arb; bool mark;
+	pp& F() { return r()->p; }
 	Q& r() { return rot->rot; }
 	Q prev() { return rot->o->rot; }
 	Q next() { return r()->prev(); }
 } *H;
 
-bool circ(P p, P a, P b, P c) { // is p in the circumcircle?
+bool circ(pp p, pp a, pp b, pp c) { // is p in the circumcircle?
 	lll p2 = norm(p), A = norm(a)-p2,
 	    B = norm(b)-p2, C = norm(c)-p2;
 	return orient(p,a,b)*C + orient(p,b,c)*A
 	     + orient(p,c,a)*B > 0;
 }
-Q makeEdge(P orig, P dest) {
+Q makeEdge(pp orig, pp dest) {
 	Q r = H ? H : new Quad{new Quad{new Quad{new Quad{0}}}};
 	H = r->o; r->r()->r() = r;
 	rep(i,0,4) r = r->rot, r->p = arb, r->o = i & 1 ? r : r->r();
@@ -53,7 +51,7 @@ Q connect(Q a, Q b) {
 	return q;
 }
 
-pair<Q,Q> rec(const vector<P>& s) {
+pair<Q,Q> rec(const vector<pp>& s) {
 	if (sz(s) <= 3) {
 		Q a = makeEdge(s[0], s[1]), b = makeEdge(s[1], s.back());
 		if (sz(s) == 2) return { a, a->r() };
@@ -93,7 +91,7 @@ pair<Q,Q> rec(const vector<P>& s) {
 	return { ra, rb };
 }
 
-vector<P> triangulate(vector<P> pts) {
+vector<pp> triangulate(vector<pp> pts) {
 	sort(all(pts), PointLess{});
 	assert(unique(all(pts)) == pts.end());
 	if (sz(pts) < 2) return {};

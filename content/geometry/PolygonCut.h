@@ -13,19 +13,18 @@ Returns a vector with the vertices of a polygon with everything to the left of t
 \vspace{-6mm}
 \end{minipage}
  * Usage:
- * 	vector<P> p = ...;
- * 	p = polygonCut(p, P(0,0), P(1,0));
+ * 	vector<pp> p = ...;
+ * 	p = polygonCut(p, pp(0,0), pp(1,0));
  * Status: tested but not extensively
  */
 #pragma once
 
 #include "Point.h"
 
-typedef pp P;
-vector<P> polygonCut(const vector<P>& poly, P s, P e) {
-	vector<P> res;
+vector<pp> polygonCut(const vector<pp>& poly, pp s, pp e) {
+	vector<pp> res;
 	rep(i,0,sz(poly)) {
-		P cur = poly[i], prev = i ? poly[i-1] : poly.back();
+		pp cur = poly[i], prev = i ? poly[i-1] : poly.back();
 		auto a = orient(s, e, cur), b = orient(s, e, prev);
 		if ((a < 0) != (b < 0))
 			res.push_back(cur + (prev - cur) * (a / (a - b)));

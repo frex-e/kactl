@@ -3,41 +3,45 @@
  * Date: 2009-04-14
  * License: CC0
  * Source:
- * Description: Class to handle points in 3D space.
- * 	\texttt{T} can be e.g. \texttt{double} or \texttt{long long}.
+ * Description: Handles points in 3D space using doubles.
  * Usage:
  * Status: tested, except for phi and theta
  */
 #pragma once
 
-template<class T> struct Point3D {
-	typedef Point3D P;
-	T x, y, z;
-	explicit Point3D(T x=0, T y=0, T z=0) : x(x), y(y), z(z) {}
-	bool operator<(P p) const {
+struct Point3D {
+	double x, y, z;
+	explicit Point3D(double x=0, double y=0, double z=0) :
+		x(x), y(y), z(z) {}
+	bool operator<(Point3D p) const {
 		return tie(x, y, z) < tie(p.x, p.y, p.z); }
-	bool operator==(P p) const {
+	bool operator==(Point3D p) const {
 		return tie(x, y, z) == tie(p.x, p.y, p.z); }
-	P operator+(P p) const { return P(x+p.x, y+p.y, z+p.z); }
-	P operator-(P p) const { return P(x-p.x, y-p.y, z-p.z); }
-	P operator*(T d) const { return P(x*d, y*d, z*d); }
-	P operator/(T d) const { return P(x/d, y/d, z/d); }
-	T dot(P p) const { return x*p.x + y*p.y + z*p.z; }
-	P cross(P p) const {
-		return P(y*p.z - z*p.y, z*p.x - x*p.z, x*p.y - y*p.x);
+	Point3D operator+(Point3D p) const {
+		return Point3D(x+p.x, y+p.y, z+p.z); }
+	Point3D operator-(Point3D p) const {
+		return Point3D(x-p.x, y-p.y, z-p.z); }
+	Point3D operator*(double d) const {
+		return Point3D(x*d, y*d, z*d); }
+	Point3D operator/(double d) const {
+		return Point3D(x/d, y/d, z/d); }
+	double dot(Point3D p) const { return x*p.x + y*p.y + z*p.z; }
+	Point3D cross(Point3D p) const {
+		return Point3D(y*p.z-z*p.y, z*p.x-x*p.z, x*p.y-y*p.x);
 	}
-	T dist2() const { return x*x + y*y + z*z; }
-	double dist() const { return sqrt((double)dist2()); }
+	double dist2() const { return x*x + y*y + z*z; }
+	double dist() const { return sqrt(dist2()); }
 	//Azimuthal angle (longitude) to x-axis in interval [-pi, pi]
 	double phi() const { return atan2(y, x); } 
 	//Zenith angle (latitude) to the z-axis in interval [0, pi]
 	double theta() const { return atan2(sqrt(x*x+y*y),z); }
-	P unit() const { return *this/(T)dist(); } //makes dist()=1
+	Point3D unit() const { return *this/dist(); } //makes dist()=1
 	//returns unit vector normal to *this and p
-	P normal(P p) const { return cross(p).unit(); }
+	Point3D normal(Point3D p) const { return cross(p).unit(); }
 	//returns point rotated 'angle' radians ccw around axis
-	P rotate(double angle, P axis) const {
-		double s = sin(angle), c = cos(angle); P u = axis.unit();
+	Point3D rotate(double angle, Point3D axis) const {
+		double s = sin(angle), c = cos(angle);
+		Point3D u = axis.unit();
 		return u*dot(u)*(1-c) + (*this)*c - cross(u)*s;
 	}
 };

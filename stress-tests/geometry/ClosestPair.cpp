@@ -1,6 +1,15 @@
 #include "../utilities/template.h"
 
+#include "../../content/geometry/Point.h"
+
+long long distanceChecks = 0;
+double countedNorm(pp p) {
+	++distanceChecks;
+	return norm(p);
+}
+#define norm countedNorm
 #include "../../content/geometry/ClosestPair.h"
+#undef norm
 
 namespace old {
 template<class It>
@@ -64,8 +73,69 @@ double closestpair(It begin, It end, It &i1, It &i2 ) {
 }
 
 int main() {
+	// Cancellation regression, plus translated/axis-swapped strips.
+	auto check = [](const vector<pp>& ps) {
+		double best = INFINITY;
+		rep(i,0,sz(ps)) rep(j,i+1,sz(ps))
+			best = min(best, norm(ps[i] - ps[j]));
+		auto [a, b] = closest(ps);
+		assert(norm(a - b) == best);
+		assert(find(all(ps), a) != ps.end());
+		assert(find(all(ps), b) != ps.end());
+		if (a == b) assert(count(all(ps), a) >= 2);
+	};
+	check({{0,1}, {1e-17,1}, {2e-17,1}});
+	for (double scale : {1e-100, 1e-17, 1.0, 1e100}) {
+		for (double offset : {-1e100, -1.0, 0.0, 1.0, 1e100}) {
+			for (int swapAxes : {0, 1}) rep(it,0,1000) {
+				vector<pp> ps;
+				int n = rand() % 30 + 2;
+				rep(i,0,n) {
+					double x = scale * (double(rand()) / RAND_MAX);
+					double y = offset + scale * (rand() % 3);
+					ps.emplace_back(swapAxes ? y : x, swapAxes ? x : y);
+				}
+				check(ps);
+			}
+		}
+	}
+	// Dense fractional inputs must not cause quadratic distance checks.
+	for (double scale : {1.0, 1e-9, 1e-100}) {
+		int n = 4000;
+		vector<pp> ps;
+		double best = INFINITY;
+		rep(i,0,n) {
+			double x = scale * i / n;
+			ps.emplace_back(x, x);
+			if (i) best = min(best, norm(ps[i] - ps[i-1]));
+		}
+		distanceChecks = 0;
+		auto pa = closest(ps);
+		assert(norm(pa.first - pa.second) == best);
+		assert(distanceChecks < 10 * n);
+	}
+	{
+		vector<pp> ps(4000, pp(0.125, -0.25));
+		distanceChecks = 0;
+		auto pa = closest(ps);
+		assert(pa.first == ps[0] && pa.second == ps[0]);
+		assert(distanceChecks < 10 * sz(ps));
+	}
+	// Fractional coordinates at different scales, checked by brute force.
+	for (double scale : {1.0, 1e-9, 1e-100}) rep(it,0,10000) {
+		int n = rand() % 15 + 2;
+		vector<pp> ps;
+		rep(i,0,n) ps.emplace_back(
+			scale * (double(rand()) / RAND_MAX - 0.5),
+			scale * (double(rand()) / RAND_MAX - 0.5));
+		double best = INFINITY;
+		rep(i,0,n) rep(j,i+1,n)
+			best = min(best, norm(ps[i] - ps[j]));
+		auto pa = closest(ps);
+		assert(norm(pa.first - pa.second) == best);
+	}
 	// Compare against the old code
-	ll sum = 0;
+	double sum = 0;
 	int mode = 1;
 	if (mode != 0) rep(it,0,100) {
 		// clog << it << ' ';
@@ -74,19 +144,19 @@ int main() {
 		int maxy = rand() % 1000000 + 1;
 		int biasx = -100;
 		int biasy = -100;
-		vector<P> ps;
+		vector<pp> ps;
 		rep(i,0,n) {
 			int x = rand() % maxx + biasx;
 			int y = rand() % maxy + biasy;
 			ps.emplace_back(x, y);
 		}
-		ll foundDist = -1, oldDist = -1, theDist = -1;
+		double foundDist = -1, oldDist = -1, theDist = -1;
 		if (mode == 1 || mode == 3) {
 			auto pa = closest(ps);
 			theDist = foundDist = norm(pa.first - pa.second);
 		}
 		if (mode == 2 || mode == 3) {
-			vector<P>::iterator i1, i2;
+			vector<pp>::iterator i1, i2;
 			old::closestpair(all(ps), i1, i2);
 			theDist = oldDist = norm(*i1 - *i2);
 		}
@@ -106,18 +176,18 @@ int main() {
 		int maxy = rand() % 20 + 1;
 		int biasx = rand() % 20 - 10;
 		int biasy = rand() % 20 - 10;
-		vector<P> ps;
+		vector<pp> ps;
 		rep(i,0,n) {
 			int x = rand() % maxx + biasx;
 			int y = rand() % maxy + biasy;
 			ps.emplace_back(x, y);
 		}
-		ll minDist = LLONG_MAX;
+		double minDist = INFINITY;
 		rep(i,0,n) rep(j,i+1,n) {
 			minDist = min(minDist, norm(ps[i] - ps[j]));
 		}
 		auto pa = closest(ps);
-		ll foundDist = norm(pa.first - pa.second);
+		double foundDist = norm(pa.first - pa.second);
 		if (minDist != foundDist) {
 			cerr << "failed at " << it << endl;
 			return 1;

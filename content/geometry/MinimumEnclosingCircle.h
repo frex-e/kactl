@@ -11,10 +11,10 @@
 
 #include "circumcircle.h"
 
-pair<P, double> mec(vector<P> ps) {
-	if (ps.empty()) return {P(), 0};
+pair<pp, double> mec(vector<pp> ps) {
+	if (ps.empty()) return {pp(), 0};
 	shuffle(all(ps), mt19937(time(0)));
-	P o = ps[0];
+	pp o = ps[0];
 	double r = 0, EPS = 1 + 1e-8;
 	rep(i,0,sz(ps)) if (abs(o - ps[i]) > r * EPS) {
 		o = ps[i], r = 0;

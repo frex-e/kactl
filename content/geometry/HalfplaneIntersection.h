@@ -16,25 +16,24 @@
 #include "Point.h"
 #include "lineIntersection.h"
 
-typedef pp P;
 const double HP_EPS = 1e-9, HP_INF = 1e9;
 
 struct HP {
-	P s, e, d;
+	pp s, e, d;
 	double ang;
 	HP() {}
-	HP(P a, P b) : s(a), e(b), d(b - a), ang(arg(d)) {}
-	bool out(P p) { return crossp(d, p - s) < -HP_EPS; }
+	HP(pp a, pp b) : s(a), e(b), d(b - a), ang(arg(d)) {}
+	bool out(pp p) { return crossp(d, p - s) < -HP_EPS; }
 	bool operator<(HP o) const { return ang < o.ang; }
 };
 
-P hpI(HP a, HP b) {
+pp hpI(HP a, HP b) {
 	return lineInter(a.s, a.e, b.s, b.e).second;
 }
 
-vector<P> halfPlaneInter(vector<HP> h) {
-	P box[] = {P(HP_INF, HP_INF), P(-HP_INF, HP_INF),
-		P(-HP_INF, -HP_INF), P(HP_INF, -HP_INF)};
+vector<pp> halfPlaneInter(vector<HP> h) {
+	pp box[] = {pp(HP_INF, HP_INF), pp(-HP_INF, HP_INF),
+		pp(-HP_INF, -HP_INF), pp(HP_INF, -HP_INF)};
 	rep(i,0,4) h.push_back(HP(box[i], box[(i+1)%4]));
 	sort(all(h));
 	deque<HP> dq;
@@ -59,11 +58,11 @@ vector<P> halfPlaneInter(vector<HP> h) {
 		dq.back().out(hpI(dq[0], dq[1])))
 		dq.pop_front();
 	if (sz(dq) < 3) return {};
-	vector<P> res;
+	vector<pp> res;
 	rep(i,0,sz(dq))
 		res.push_back(hpI(dq[i], dq[(i+1)%sz(dq)]));
-	vector<P> out;
-	for (P p : res) {
+	vector<pp> out;
+	for (pp p : res) {
 		if (out.empty() || abs(p - out.back()) > 1e-6)
 			out.push_back(p);
 	}

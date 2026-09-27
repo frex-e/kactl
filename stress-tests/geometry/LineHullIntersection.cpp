@@ -3,7 +3,7 @@
 #include "../../content/geometry/Point.h"
 
 #include "../../content/geometry/ConvexHull.h"
-typedef complex<ll> P;
+typedef pp P;
 #include "../../content/geometry/LineHullIntersection.h"
 
 pp toDouble(P p) { return {(double)p.real(), (double)p.imag()}; }
@@ -50,7 +50,7 @@ int main() {
 
 		N = sz(ps);
 
-		P delta = q - p, farp = p - delta * 50LL, farq = p + delta * 50LL;
+		P delta = q - p, farp = p - delta * 50.0, farq = p + delta * 50.0;
 
 		auto res = lineHull(p, q, ps);
 		pii r = {res[0], res[1]};

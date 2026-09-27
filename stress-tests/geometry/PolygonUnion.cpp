@@ -83,14 +83,14 @@ db polygon_union(vector<pt> poly[], int n) {
 
 namespace approximate {
 #include "../../content/geometry/InsidePolygon.h"
-double polygonUnion(vector<vector<P>> &polygons, int lim) {
+double polygonUnion(vector<vector<pp>> &polygons, int lim) {
 	int cnt = 0;
 	int total = 0;
 	for (double y = -lim + 1e-5; y < lim; y += lim / 500.0) {
 		for (double x = -lim + 1.1e-5; x < lim; x += lim / 500.0) {
 			total++;
 			for (auto &i : polygons) {
-				if (inPolygon(i, P(x, y))) {
+				if (inPolygon(i, pp(x, y))) {
 					cnt++;
 					break;
 				}
@@ -162,16 +162,16 @@ db polygon_union(vector<cpoi> py[], int n) {
 }
 } // namespace lovelive
 
-P randPt(int lim) { return P(randRange(-lim, lim), randRange(-lim, lim)); }
+pp randPt(int lim) { return pp(randRange(-lim, lim), randRange(-lim, lim)); }
 
-P rndUlp(int lim, long long ulps = 5) { return P(randNearIntUlps(lim, ulps), randNearIntUlps(lim, ulps)); }
+pp rndUlp(int lim, long long ulps = 5) { return pp(randNearIntUlps(lim, ulps), randNearIntUlps(lim, ulps)); }
 
-P rndEps(int lim, double eps) { return P(randNearIntEps(lim, eps), randNearIntEps(lim, eps)); }
+pp rndEps(int lim, double eps) { return pp(randNearIntEps(lim, eps), randNearIntEps(lim, eps)); }
 
 void testRandom(int n, int numPts = 10, int lim = 5, bool brute = false) {
-	vector<vector<P>> polygons;
+	vector<vector<pp>> polygons;
 	for (int i = 0; i < n; i++) {
-		vector<P> pts;
+		vector<pp> pts;
 		int k = randIncl(3, numPts);
 		for (int j = 0; j < k; j++) {
 			pts.push_back(randPt(lim)); // rndEps(lim, 1e-10));

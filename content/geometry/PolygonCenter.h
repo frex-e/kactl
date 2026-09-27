@@ -11,9 +11,8 @@
 
 #include "Point.h"
 
-typedef pp P;
-P polygonCenter(const vector<P>& v) {
-	P res(0, 0); double A = 0;
+pp polygonCenter(const vector<pp>& v) {
+	pp res(0, 0); double A = 0;
 	for (int i = 0, j = sz(v) - 1; i < sz(v); j = i++) {
 		res = res + (v[i] + v[j]) * crossp(v[j], v[i]);
 		A += crossp(v[j], v[i]);

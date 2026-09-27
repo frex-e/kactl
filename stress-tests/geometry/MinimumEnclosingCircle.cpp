@@ -7,13 +7,13 @@ int main() {
 	rep(it,0,1000000) {
 		int N = rand() % 20 + 1;
 		// int N = 4;
-		vector<P> ps;
+		vector<pp> ps;
 		rep(i,0,N) {
 			ps.emplace_back(rand() % 21 - 10, rand() % 21 - 10);
 		}
 
-		pair<P, double> pa = mec(ps);
-		P mid = pa.first;
+		pair<pp, double> pa = mec(ps);
+		pp mid = pa.first;
 		double rad = pa.second;
 		double maxDist = 0;
 		for(auto &p: ps) {
@@ -23,7 +23,7 @@ int main() {
 		assert(abs(maxDist - rad) < 1e-6);
 
 		rep(it2,0,50) {
-			P q2 = mid - (P(0, 1e-6)) * polar(1.0, (double)it2);
+			pp q2 = mid - pp(0, 1e-6) * polar(1.0, (double)it2);
 			for(auto &p: ps) {
 				if(dist(p - q2) > rad - 1e-7) goto fail;
 			}
