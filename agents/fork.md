@@ -49,6 +49,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 |---|---|
 | `content/contest/Random.h` | RNG + random ints / shuffle / odd hash bases |
 | `content/contest/Output.h` | `std::format` binary printing + fixed precision |
+| `content/data-structures/UnorderedMap-codeforces.h` | web-only standard `unordered_map` with a per-run randomized SplitMix64 hash for Codeforces |
 | `content/data-structures/BinaryTrie.h` | insert/`insert<1>`/erase, XOR-min/max, count, lazy XOR, mex, each, set-union merge / `merge<1>` |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
 | `content/data-structures/LiChao.h` | min Li Chao (kept alongside `LineContainer.h`) |
@@ -93,6 +94,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 | File | What |
 |---|---|
+| `content/data-structures/HashMap.h` | shared `chash` for PBDS and standard `unordered_map`, with optional per-run randomization |
 | `content/data-structures/Treap.h` | generic aggregate and lazy update; defaults to range add/sum |
 | `content/graph/HLD.h` | uses `LazyUpdateTree`; converts half-open HLD ranges to inclusive `[l, r-1]` |
 | `content/various/KnuthDP.h` | quadrangle notes (verified patterns) + `knuthDP` implementation |
