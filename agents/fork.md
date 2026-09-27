@@ -47,6 +47,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 
 | File | What |
 |---|---|
+| `content/data-structures/CartesianTree.h` | linear min Cartesian tree; parent/left/right indices, leftmost tie-breaking |
 | `content/contest/Random.h` | RNG + random ints / shuffle / odd hash bases |
 | `content/contest/Output.h` | `std::format` binary printing + fixed precision |
 | `content/data-structures/UnorderedMap-codeforces.h` | web-only standard `unordered_map` with a per-run randomized SplitMix64 hash for Codeforces |
