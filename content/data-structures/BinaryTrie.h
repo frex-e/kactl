@@ -7,6 +7,8 @@
  *  \texttt{erase}, multiset \texttt{insert<1>}, XOR-min/max,
  *  count $x\oplus y<k$ (\texttt{count<0>}) or $>k$
  *  (\texttt{count<1>}), lazy XOR-all, mex (set).
+ *  \texttt{kth(k)}: 0-indexed kth smallest (with repeats),
+ *  requires $0 \le k < \texttt{cnt}$.
  *  XOR queries take $xr$ (default 0). \texttt{cnt} is the
  *  size. \texttt{each}($f$) calls $f(x,\texttt{cnt})$. \texttt{merge}
  *  is set-union (destroys $o$; safe to delete);
@@ -49,6 +51,14 @@ struct BinaryTrie {
 			sub = c[b] ? c[b]->erase(x, i) : 0;
 		}
 		return cnt -= sub, sub;
+	}
+	int kth(int k, int i = B) {
+		assert(0 <= k && k < cnt);
+		if (!i) return 0;
+		push(i);
+		int n = cc(0), b = k >= n;
+		return c[b]->kth(k - (b ? n : 0), i - 1)
+			| (b << (i - 1));
 	}
 	int minxor(int xr = 0, int i = B) {
 		if (!i || !cnt) return 0;

@@ -44,7 +44,13 @@ map<int, int> collect(BinaryTrie& t) {
 	return got;
 }
 
+void checkKth(BinaryTrie& t, const multiset<int>& vals) {
+	int k = 0;
+	for (int v : vals) assert(t.kth(k++) == v);
+}
+
 void checkEach(BinaryTrie& t, const multiset<int>& vals) {
+	checkKth(t, vals);
 	map<int, int> want;
 	for (int v : vals) want[v]++;
 	assert(collect(t) == want);
@@ -52,6 +58,7 @@ void checkEach(BinaryTrie& t, const multiset<int>& vals) {
 
 void checkSet(BinaryTrie& t, const set<int>& vals, int xr) {
 	assert(t.cnt == sz(vals));
+	checkKth(t, multiset<int>(all(vals)));
 	assert(t.mex(xr) == bruteMex(vals, xr));
 	multiset<int> ms(all(vals));
 	assert(t.minxor(xr) == bruteMinxor(ms, xr));
@@ -335,7 +342,31 @@ void testEachAndDeleteAfterMerge() {
 	delete c;
 }
 
+void testKthBoundaries() {
+	BinaryTrie t;
+	int hi = (1 << BinaryTrie::B) - 1;
+	multiset<int> vals = {0, 0, 1, 1 << (BinaryTrie::B - 1), hi};
+	for (int v : vals) t.insert<1>(v);
+	checkKth(t, vals);
+	for (int xr : {hi, 1, hi, 1}) {
+		t.xorAll(xr);
+		multiset<int> xored;
+		for (int v : vals) xored.insert(v ^ xr);
+		vals.swap(xored);
+		checkKth(t, vals);
+	}
+	while (!vals.empty()) {
+		int v = *vals.begin();
+		assert(t.erase(v));
+		vals.erase(vals.begin());
+		checkKth(t, vals);
+	}
+	t.insert(hi);
+	assert(t.kth(0) == hi);
+}
+
 int main() {
+	testKthBoundaries();
 	testDuplicatesAndEmpty();
 	testSetOps();
 	testMulti();
