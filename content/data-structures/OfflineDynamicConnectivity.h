@@ -1,14 +1,13 @@
 /**
  * Author: caterpillow, me
- * Date: 2026-08-20
+ * Date: 2026-08-31
  * License: CC0
  * Source: https://github.com/caterpillow/cactl Dynacon.h
  * Description: Offline dynamic connectivity. Times are
- *  operation indices. \texttt{toggle} adds or deletes an
+ *  query indices. \texttt{toggle} adds or deletes an
  *  undirected edge. \texttt{query} records a component-count
  *  query. \texttt{ans} returns answers in order.
- *  $q$ must be at least the number of \texttt{toggle}/
- *  \texttt{query} calls.
+ *  $q$ must be at least the number of \texttt{query} calls.
  * Time: $O(Q\log Q\log N)$
  * Status: stress-tested
  */
@@ -32,14 +31,12 @@ struct DynCon {
 		}
 	}
 	void toggle(int u, int v) {
-		assert(t < q);
 		if (u > v) swap(u, v);
 		pii e{u, v};
 		if (eds.count(e)) {
 			add(eds[e], t, e);
 			eds.erase(e);
 		} else eds[e] = t;
-		++t;
 	}
 	void query() {
 		assert(t < q);

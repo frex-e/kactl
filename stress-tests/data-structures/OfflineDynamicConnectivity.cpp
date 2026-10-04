@@ -51,7 +51,7 @@ void test(int n, int ops) {
 int main() {
 	rep(n,1,12) rep(it,0,80) test(n, rand() % 25 + 1);
 	test(20, 80);
-	DynCon dc(3, 8);
+	DynCon dc(3, 3);
 	dc.toggle(0, 1);
 	dc.query();
 	dc.toggle(1, 2);
@@ -60,5 +60,25 @@ int main() {
 	dc.query();
 	vi got = dc.ans();
 	assert((got == vi{2, 1, 2}));
+	// q is query count; many toggles share a time slot
+	DynCon tight(3, 3);
+	tight.toggle(0, 1);
+	tight.toggle(1, 2);
+	tight.toggle(0, 2);
+	tight.query();
+	tight.toggle(0, 1);
+	tight.query();
+	tight.toggle(1, 2);
+	tight.toggle(0, 2);
+	tight.query();
+	got = tight.ans();
+	assert((got == vi{1, 1, 3}));
+	DynCon same(2, 2);
+	same.toggle(0, 1);
+	same.toggle(0, 1);
+	same.query();
+	same.query();
+	got = same.ans();
+	assert((got == vi{2, 2}));
 	cout << "Tests passed!" << endl;
 }
