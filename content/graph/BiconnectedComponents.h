@@ -19,6 +19,7 @@
  */
 #pragma once
 
+// consider cut vertices, and cut edges
 vi num, st;
 vector<vector<pii>> ed;
 int Time;

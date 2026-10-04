@@ -1369,7 +1369,7 @@
       "source": "folklore",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "vi num, st;\nvector<vector<pii>> ed;\nint Time;\ntemplate<class F>\nint dfs(int at, int par, F& f) {\n\tint me = num[at] = ++Time, top = me;\n\tfor (auto [y, e] : ed[at]) if (e != par) {\n\t\tif (num[y]) {\n\t\t\ttop = min(top, num[y]);\n\t\t\tif (num[y] < me)\n\t\t\t\tst.push_back(e);\n\t\t} else {\n\t\t\tint si = sz(st);\n\t\t\tint up = dfs(y, e, f);\n\t\t\ttop = min(top, up);\n\t\t\tif (up == me) {\n\t\t\t\tst.push_back(e);\n\t\t\t\tf(vi(st.begin() + si, st.end()));\n\t\t\t\tst.resize(si);\n\t\t\t}\n\t\t\telse if (up < me) st.push_back(e);\n\t\t\telse { /* e is a bridge */ }\n\t\t}\n\t}\n\treturn top;\n}\n\ntemplate<class F>\nvoid bicomps(F f) {\n\tnum.assign(sz(ed), 0);\n\trep(i,0,sz(ed)) if (!num[i]) dfs(i, -1, f);\n}"
+      "code": "// consider cut vertices, and cut edges\nvi num, st;\nvector<vector<pii>> ed;\nint Time;\ntemplate<class F>\nint dfs(int at, int par, F& f) {\n\tint me = num[at] = ++Time, top = me;\n\tfor (auto [y, e] : ed[at]) if (e != par) {\n\t\tif (num[y]) {\n\t\t\ttop = min(top, num[y]);\n\t\t\tif (num[y] < me)\n\t\t\t\tst.push_back(e);\n\t\t} else {\n\t\t\tint si = sz(st);\n\t\t\tint up = dfs(y, e, f);\n\t\t\ttop = min(top, up);\n\t\t\tif (up == me) {\n\t\t\t\tst.push_back(e);\n\t\t\t\tf(vi(st.begin() + si, st.end()));\n\t\t\t\tst.resize(si);\n\t\t\t}\n\t\t\telse if (up < me) st.push_back(e);\n\t\t\telse { /* e is a bridge */ }\n\t\t}\n\t}\n\treturn top;\n}\n\ntemplate<class F>\nvoid bicomps(F f) {\n\tnum.assign(sz(ed), 0);\n\trep(i,0,sz(ed)) if (!num[i]) dfs(i, -1, f);\n}"
     },
     {
       "id": "graph/BinaryLifting.h",
