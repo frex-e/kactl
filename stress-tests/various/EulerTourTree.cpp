@@ -1,5 +1,5 @@
 #include "../utilities/template.h"
-#include "../../content/extras/EulerTourTree.h"
+#include "../../content/various/EulerTourTree.h"
 
 struct Forest {
 	int n;

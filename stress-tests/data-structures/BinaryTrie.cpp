@@ -50,9 +50,11 @@ void checkKth(BinaryTrie& t, const multiset<int>& vals) {
 }
 
 void checkEach(BinaryTrie& t, const multiset<int>& vals) {
-	checkKth(t, vals);
 	map<int, int> want;
 	for (int v : vals) want[v]++;
+	for (auto [x, c] : want) assert(t.count(x) == c);
+	rep(x,0,64) assert(t.count(x) == (int)vals.count(x));
+	checkKth(t, vals);
 	assert(collect(t) == want);
 }
 
@@ -66,8 +68,8 @@ void checkSet(BinaryTrie& t, const set<int>& vals, int xr) {
 	checkEach(t, ms);
 	rep(it,0,8) {
 		int k = randVal();
-		assert(t.count<0>(xr, k) == bruteCount(ms, xr, k, 0));
-		assert(t.count<1>(xr, k) == bruteCount(ms, xr, k, 1));
+		assert(t.countLG<0>(xr, k) == bruteCount(ms, xr, k, 0));
+		assert(t.countLG<1>(xr, k) == bruteCount(ms, xr, k, 1));
 	}
 }
 
@@ -113,8 +115,8 @@ void testMulti() {
 			assert(t.minxor(xr) == bruteMinxor(vals, xr));
 			assert(t.maxxor(xr) == bruteMaxxor(vals, xr));
 			int k = rand() % 64;
-			assert(t.count<0>(xr, k) == bruteCount(vals, xr, k, 0));
-			assert(t.count<1>(xr, k) == bruteCount(vals, xr, k, 1));
+			assert(t.countLG<0>(xr, k) == bruteCount(vals, xr, k, 0));
+			assert(t.countLG<1>(xr, k) == bruteCount(vals, xr, k, 1));
 		}
 	}
 }
@@ -137,8 +139,8 @@ void testXorAllAndMex() {
 	assert(t.mex() == 0);
 	assert(t.minxor() == 0);
 	assert(t.maxxor() == 0);
-	assert(t.count<0>() == 0);
-	assert(t.count<1>() == 0);
+	assert(t.countLG<0>() == 0);
+	assert(t.countLG<1>() == 0);
 	t.insert(1); t.insert(2); t.insert(3);
 	t.xorAll(1);
 	assert(t.mex() == 1);
@@ -241,8 +243,8 @@ void testMergeMulti() {
 		assert(a.minxor(xr) == bruteMinxor(vals, xr));
 		assert(a.maxxor(xr) == bruteMaxxor(vals, xr));
 		int k = rand() % 32;
-		assert(a.count<0>(xr, k) == bruteCount(vals, xr, k, 0));
-		assert(a.count<1>(xr, k) == bruteCount(vals, xr, k, 1));
+		assert(a.countLG<0>(xr, k) == bruteCount(vals, xr, k, 0));
+		assert(a.countLG<1>(xr, k) == bruteCount(vals, xr, k, 1));
 	}
 }
 
@@ -365,7 +367,43 @@ void testKthBoundaries() {
 	assert(t.kth(0) == hi);
 }
 
+void testCount() {
+	BinaryTrie t;
+	int hi = (1 << BinaryTrie::B) - 1;
+	assert(t.count(0) == 0);
+	assert(t.count(hi) == 0);
+	multiset<int> vals = {0, 0, 1, 1 << (BinaryTrie::B - 1), hi};
+	for (int v : vals) t.insert<1>(v);
+	for (int xr : {hi, 1, hi, 1}) {
+		t.xorAll(xr);
+		multiset<int> xored;
+		for (int v : vals) xored.insert(v ^ xr);
+		vals.swap(xored);
+		checkEach(t, vals);
+		assert(t.count(hi - 2) == 0);
+		for (int mask : {0, 1 << (BinaryTrie::B - 1), hi})
+			for (int k : {0, 1, hi}) {
+				assert(t.countLG<0>(mask, k) ==
+					bruteCount(vals, mask, k, 0));
+				assert(t.countLG<1>(mask, k) ==
+					bruteCount(vals, mask, k, 1));
+			}
+	}
+	while (!vals.empty()) {
+		int v = *vals.begin();
+		assert(t.erase(v));
+		vals.erase(vals.begin());
+		assert(t.count(v) == (int)vals.count(v));
+	}
+	t.xorAll(hi);
+	assert(t.count(hi) == 0);
+	t.insert(hi);
+	assert(t.count(hi) == 1);
+	assert(t.count(0) == 0);
+}
+
 int main() {
+	testCount();
 	testKthBoundaries();
 	testDuplicatesAndEmpty();
 	testSetOps();

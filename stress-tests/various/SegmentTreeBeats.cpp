@@ -1,6 +1,6 @@
 #include "../utilities/template.h"
 
-#include "../../content/extras/SegmentTreeBeats.h"
+#include "../../content/various/SegmentTreeBeats.h"
 
 int main() {
 	rep(n,1,25) {

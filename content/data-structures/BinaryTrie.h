@@ -5,8 +5,9 @@
  * Source: https://github.com/caterpillow/cactl Trie.h
  * Description: Binary trie on $[0,2^B)$. Set \texttt{insert}/
  *  \texttt{erase}, multiset \texttt{insert<1>}, XOR-min/max,
- *  count $x\oplus y<k$ (\texttt{count<0>}) or $>k$
- *  (\texttt{count<1>}), lazy XOR-all, mex (set).
+ *  count $x\oplus y<k$ (\texttt{countLG<0>}) or $>k$
+ *  (\texttt{countLG<1>}), lazy XOR-all, mex (set).
+ *  \texttt{count(x)} counts copies of $x$.
  *  \texttt{kth(k)}: 0-indexed kth smallest (with repeats),
  *  requires $0 \le k < \texttt{cnt}$.
  *  XOR queries take $xr$ (default 0). \texttt{cnt} is the
@@ -18,6 +19,7 @@
  */
 #pragma once
 
+// Only implement required functions
 struct BinaryTrie {
 	using T = BinaryTrie;
 	static const int B = 30;
@@ -52,6 +54,12 @@ struct BinaryTrie {
 		}
 		return cnt -= sub, sub;
 	}
+	int count(int x, int i = B) {
+		if (!i || !cnt) return cnt;
+		push(i);
+		int b = x >> --i & 1;
+		return c[b] ? c[b]->count(x, i) : 0;
+	}
 	int kth(int k, int i = B) {
 		assert(0 <= k && k < cnt);
 		if (!i) return 0;
@@ -75,12 +83,12 @@ struct BinaryTrie {
 			c[!b]->maxxor(xr, i);
 	}
 	template<int sgn = 0>
-	int count(int xr = 0, int k = 0, int i = B) {
+	int countLG(int xr = 0, int k = 0, int i = B) {
 		if (!i || !cnt) return 0;
 		push(i);
 		int b = (xr ^ k) >> --i & 1;
 		return ((k >> i & 1) ^ sgn ? cc(!b) : 0) +
-			(c[b] ? c[b]->count<sgn>(xr, k, i) : 0);
+			(c[b] ? c[b]->countLG<sgn>(xr, k, i) : 0);
 	}
 	int mex(int xr = 0, int i = B) { // unique values
 		if (!i) return 0;

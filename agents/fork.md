@@ -35,7 +35,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 **Offline dynamic connectivity.** [content/data-structures/OfflineDynamicConnectivity.h](../content/data-structures/OfflineDynamicConnectivity.h) is sequential: `toggle(u, v)` adds or deletes an undirected edge, `query()` records a component-count snapshot, `ans()` returns answers. $q$ is an upper bound on the number of `toggle`/`query` calls.
 
-**Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset `insert<1>`, XOR-min/max, XOR-count, lazy XOR-all, mex, `each`, and merge. XOR queries (`minxor`/`maxxor`/`count`/`mex`) take `xr` (default 0). `each(f)` calls `f(x, cnt)` for each stored value. `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s) and destroys the other trie (safe to delete); `merge<1>` adds multiplicities from `insert<1>`. Values are in $[0,2^{30})$.
+**Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset `insert<1>`, XOR-min/max, XOR-count, lazy XOR-all, mex, `each`, and merge. `count(x)` counts copies of a value after lazy XOR-all. `countLG<0>(xr, k)` counts values with `(value ^ xr) < k`; `countLG<1>(xr, k)` counts those with `(value ^ xr) > k`. XOR queries (`minxor`/`maxxor`/`countLG`/`mex`) take `xr` (default 0). `each(f)` calls `f(x, cnt)` for each stored value. `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s) and destroys the other trie (safe to delete); `merge<1>` adds multiplicities from `insert<1>`. Values are in $[0,2^{30})$.
 
 **Geometry.** [Point.h](../content/geometry/Point.h) defines `pp = complex<double>` and free `dotp`, `crossp`, `orient`, `perp`, `dist` helpers. All geometry snippets use `pp`; rewrite it and dependent numeric types manually when exact integer geometry is needed. Sorting/sets use `PointLess`, not an added `std` overload. `Angle` stores a complex direction plus a turn count. `Point3D` remains separate because complex numbers represent only two coordinates.
 
@@ -51,7 +51,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/contest/Random.h` | RNG + random ints / shuffle / odd hash bases |
 | `content/contest/Output.h` | `std::format` binary printing + fixed precision |
 | `content/data-structures/UnorderedMap-codeforces.h` | web-only standard `unordered_map` with a per-run randomized SplitMix64 hash for Codeforces |
-| `content/data-structures/BinaryTrie.h` | insert/`insert<1>`/erase, XOR-min/max, count, lazy XOR, mex, each, set-union merge / `merge<1>` |
+| `content/data-structures/BinaryTrie.h` | insert/`insert<1>`/erase, count, XOR-min/max, countLG, lazy XOR, mex, each, set-union merge / `merge<1>` |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
 | `content/data-structures/LiChao.h` | min Li Chao (kept alongside `LineContainer.h`) |
 | `content/number-theory/LinearSieve.h` | linear sieve + least prime factor (kept alongside Eratosthenes) |
@@ -59,17 +59,17 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/numerical/RREF.h` | rectangular reduced row echelon form |
 | `content/numerical/XORBasis.h` | incremental unsigned XOR basis (kept alongside `SolveLinearBinary.h`) |
 | `content/numerical/QuadRoots.h` | stable real quadratic roots (from cactl / cp-geo) |
-| `content/extras/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested) |
+| `content/various/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested) |
 | `content/various/MemoryUsage.h` | `getrusage` peak RSS (lifetime, not current) |
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
 | `content/graph/Centroid.h` | centroid decomposition |
-| `content/extras/EulerTourTree.h` | treap Euler tours: link/cut/connectivity, generic point set/get and lazy component update/query/size; recycled edge tokens |
+| `content/various/EulerTourTree.h` | treap Euler tours: link/cut/connectivity, generic point set/get and lazy component update/query/size; recycled edge tokens |
 | `content/data-structures/PersistentSegmentTree.h` | persistent implicit lazy tree with point set |
 | `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/query/ans) |
 | `content/data-structures/StaticRangeQuery.h` | disjoint sparse table, any associative op |
-| `content/extras/SegmentTreeBeats.h` | range chmin/chmax/add + sum/min/max (USACO Guide) |
-| `content/extras/LinkCutTree.h` | moved from graph; unrooted path lazy via `binop`/`rev`/`applyUpdate`/`mergeUpdate` (default add+sum) |
+| `content/various/SegmentTreeBeats.h` | range chmin/chmax/add + sum/min/max (USACO Guide) |
+| `content/various/LinkCutTree.h` | moved from graph; unrooted path lazy via `binop`/`rev`/`applyUpdate`/`mergeUpdate` (default add+sum) |
 | `content/data-structures/MonotonicMap.h` | prefix/suffix min/max with insertions (monotonic map) |
 | `content/graph/Blossom.h` | Gabow--Edmonds matching (ei1333 / LC), 0-indexed |
 | `content/graph/DominatorTree.h` | Lengauer--Tarjan dominator tree (from cactl / Benq); runtime $n$, ctor takes adj+root |
@@ -105,22 +105,21 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/combinatorial/chapter.tex` | 12-fold way table (balls/bins / functions $[n]\to[k]$) |
 | `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks; primitive roots |
 | `content/contest/chapter.tex` | Random + Output.h |
-| `content/various/chapter.tex` | builtins, pragmas, memory |
+| `content/various/chapter.tex` | builtins, pragmas, memory; former Extras snippets before Debugging tricks |
 | `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ / monotonic map |
 | `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, MatrixInverse-mod; Fourier → Convolutions |
-| `content/extras/chapter.tex` | segment tree beats; min-plus convolution; link-cut tree |
 | `content/strings/chapter.tex` | Hashing-codeforces in the PDF (alongside `Hashing.h`) |
-| `content/geometry/chapter.tex` | half-plane intersection; remaining upstream snippets in the PDF (`LineProjectionReflection`, `CircleLine`, `PolygonUnion`, `ManhattanMST`, `DelaunayTriangulation`); geometry is last before extras |
+| `content/geometry/chapter.tex` | half-plane intersection; remaining upstream snippets in the PDF (`LineProjectionReflection`, `CircleLine`, `PolygonUnion`, `ManhattanMST`, `DelaunayTriangulation`); geometry is last before appendix |
 | `content/geometry/*.h` | double coordinates and free predicates; `arg` macro removed |
 | geometry figure captions | same glued 15mm minipages as upstream (with their `\vspace`); text width is `\linewidth-15mm` instead of `75mm` so they fit the printable-margin columns |
 
 ## Tests
 
-- `stress-tests/extras/EulerTourTree.cpp`: naive forest comparisons, treap/tour invariants, edge recycling, large paths and stars
+- `stress-tests/various/EulerTourTree.cpp`: naive forest comparisons, treap/tour invariants, edge recycling, large paths and stars
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
-- `stress-tests/extras/LinkCutTree.cpp` covers link/cut connectivity plus path sum/add, point set, and rooted LCA
+- `stress-tests/various/LinkCutTree.cpp` covers link/cut connectivity plus path sum/add, point set, and rooted LCA
 - New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`
 
