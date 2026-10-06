@@ -1452,6 +1452,22 @@
       "code": "struct Dinic {\n\tstruct Edge {\n\t\tint to, rev;\n\t\tll c, oc;\n\t\tll flow() { return max(oc - c, 0LL); } // if you need flows\n\t};\n\tvi lvl, ptr, q;\n\tvector<vector<Edge>> adj;\n\tDinic(int n) : lvl(n), ptr(n), q(n), adj(n) {}\n\tvoid addEdge(int a, int b, ll c, ll rcap = 0) {\n\t\tadj[a].push_back({b, sz(adj[b]), c, c});\n\t\tadj[b].push_back({a, sz(adj[a]) - 1, rcap, rcap});\n\t}\n\tll dfs(int v, int t, ll f) {\n\t\tif (v == t || !f) return f;\n\t\tfor (int& i = ptr[v]; i < sz(adj[v]); i++) {\n\t\t\tEdge& e = adj[v][i];\n\t\t\tif (lvl[e.to] == lvl[v] + 1)\n\t\t\t\tif (ll p = dfs(e.to, t, min(f, e.c))) {\n\t\t\t\t\te.c -= p, adj[e.to][e.rev].c += p;\n\t\t\t\t\treturn p;\n\t\t\t\t}\n\t\t}\n\t\treturn 0;\n\t}\n\tll calc(int s, int t) {\n\t\tll flow = 0; q[0] = s;\n\t\trep(L,0,31) do { // 'int L=30' maybe faster for random data\n\t\t\tlvl = ptr = vi(sz(q));\n\t\t\tint qi = 0, qe = lvl[s] = 1;\n\t\t\twhile (qi < qe && !lvl[t]) {\n\t\t\t\tint v = q[qi++];\n\t\t\t\tfor (Edge e : adj[v])\n\t\t\t\t\tif (!lvl[e.to] && e.c >> (30 - L))\n\t\t\t\t\t\tq[qe++] = e.to, lvl[e.to] = lvl[v] + 1;\n\t\t\t}\n\t\t\twhile (ll p = dfs(s, t, LLONG_MAX)) flow += p;\n\t\t} while (lvl[t]);\n\t\treturn flow;\n\t}\n\tbool leftOfMinCut(int a) { return lvl[a] != 0; }\n};"
     },
     {
+      "id": "graph/Dinic2.h",
+      "name": "Dinic2.h",
+      "chapter": "graph",
+      "language": "cpp",
+      "description": "Dinic without capacity scaling: smaller edges,\none blocking-flow DFS per phase, and dead-end pruning.\nOften faster than Dinic.h; scaling can win on some graphs.\nSupports self-loops and parallel edges. DFS is recursive.\nRequires nonnegative capacities, $s\\ne t$, $lim\\ge0$.\nResidual sums and total flow must fit in \\texttt{ll}.\n\\texttt{calc(s,t,lim)} returns at most lim additional units;\nrepeated calls continue from the current residual graph.\n\\texttt{leftOfMinCut} requires exhausted augmenting paths.\nIf stopped at lim, finish with \\texttt{calc(s,t)}.\nNo original caps are stored. For edge e, signed net flow is\n\\texttt{adj[e.to][e.rev].c - original\\_rcap}.\nUsually rcap $=0$.\nSee chapter notes for capacity edits between calls.",
+      "usage": "",
+      "time": "$O(V^2E)$; $O(\\min(E^{1/2},V^{2/3})E)$ for unit caps;\n$O(\\sqrt{V}E)$ for bipartite matching.",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "caterpillow, Claude",
+      "source": "caterpillow/cactl, content/graph/Dinic2.h\nhttps://github.com/caterpillow/cactl",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct Dinic2 {\n\tstruct Edge { int to, rev; ll c; };\n\tvector<vector<Edge>> adj;\n\tvi lvl, ptr, q;\n\tDinic2(int n) : adj(n), lvl(n), ptr(n), q(n) {}\n\tvoid addEdge(int a, int b, ll c, ll rcap = 0) {\n\t\tint i = sz(adj[a]), j = sz(adj[b]) + (a == b);\n\t\tadj[a].push_back({b, j, c});\n\t\tadj[b].push_back({a, i, rcap});\n\t}\n\tll dfs(int v, int t, ll f) {\n\t\tif (v == t || !f) return f;\n\t\tll g = 0;\n\t\tfor (int& i = ptr[v]; i < sz(adj[v]); i++) {\n\t\t\tauto& [to, rev, c] = adj[v][i];\n\t\t\tif (lvl[to] != lvl[v] + 1 || !c) continue;\n\t\t\tll w = min(f - g, c), p = dfs(to, t, w);\n\t\t\tif (p < w) lvl[to] = -1; // dead end this phase\n\t\t\tc -= p, adj[to][rev].c += p, g += p;\n\t\t\tif (g == f) break; // edge may still have room\n\t\t}\n\t\treturn g;\n\t}\n\tll calc(int s, int t, ll lim = LLONG_MAX) {\n\t\tassert(s != t && lim >= 0);\n\t\tll flow = 0; q[0] = s;\n\t\tdo {\n\t\t\tfill(all(lvl), 0), fill(all(ptr), 0);\n\t\t\tint qi = 0, qe = lvl[s] = 1;\n\t\t\twhile (qi < qe && !lvl[t]) {\n\t\t\t\tint v = q[qi++];\n\t\t\t\tfor (Edge e : adj[v]) if (!lvl[e.to] && e.c)\n\t\t\t\t\tq[qe++] = e.to, lvl[e.to] = lvl[v] + 1;\n\t\t\t}\n\t\t\tll p = dfs(s, t, lim); flow += p, lim -= p;\n\t\t} while (lvl[t] && lim);\n\t\treturn flow;\n\t}\n\tbool leftOfMinCut(int a) { return lvl[a] != 0; }\n};"
+    },
+    {
       "id": "graph/DirectedMST.h",
       "name": "DirectedMST.h",
       "chapter": "graph",
@@ -4246,6 +4262,12 @@
     },
     {
       "type": "snippet",
+      "id": "graph/Dinic2.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
       "id": "graph/MinCut.h",
       "chapter": "graph",
       "includedInPdf": true
@@ -4264,6 +4286,21 @@
     },
     {
       "type": "heading",
+      "id": "graph/h/dinic-variants-and-capacity-edits",
+      "chapter": "graph",
+      "level": 3,
+      "title": "Dinic variants and capacity edits",
+      "searchText": "Dinic variants and capacity edits"
+    },
+    {
+      "type": "prose",
+      "id": "graph/p/2",
+      "chapter": "graph",
+      "latex": "\\texttt{Dinic} uses capacity scaling; \\texttt{Dinic2} uses smaller edges and a blocking-flow DFS without scaling. Choose by workload: \\texttt{Dinic2} is often faster, while scaling gives the stronger general worst-case bound. \\texttt{Dinic2(n)} starts a fresh graph; to reset, assign \\texttt{D = Dinic2(n)}. Save edge indices and original capacities yourself if needed.\n\n\\noindent\\textbf{Incremental flow (Dinic2).} Track the total separately: \\texttt{F += D.calc(s,t)}. Between calls the residuals must stay nonnegative, each pair must sum to its current cap plus reverse cap, and flow must be conserved away from $s,t$. For edge $e=\\texttt{adj[a][i]}$ to $b$, let $r=\\texttt{adj[b][e.rev]}$ and $f=r.c-\\text{rcap}$. Raise its cap by $d$: \\texttt{e.c += d}, then augment. Lower its cap by $d$ without going below $f$: \\texttt{e.c -= d}, then augment.\n\n\\noindent\\textbf{Lower below flow.} For new cap $c'<f$, put $x=f-c'$, \\texttt{e.c=0; r.c-=x}. Reroute with \\texttt{z=x-D.calc(a,b,x)}; cancel the rest with \\texttt{D.calc(a,s,z)} if $a\\ne s$ and \\texttt{D.calc(t,b,z)} if $b\\ne t$. Then \\texttt{F -= z; F += D.calc(s,t)}. Self-loops carry zero flow and need no rerouting. Min-cut labels refer to the last exhausted $s$--$t$ call; a call stopped by a flow limit does not certify a cut.",
+      "searchText": "Dinic uses capacity scaling; Dinic2 uses smaller edges and a blocking-flow DFS without scaling. Choose by workload: Dinic2 is often faster, while scaling gives the stronger general worst-case bound. Dinic2(n) starts a fresh graph; to reset, assign D = Dinic2(n) . Save edge indices and original capacities yourself if needed. Incremental flow (Dinic2). Track the total separately: F += D.calc(s,t) . Between calls the residuals must stay nonnegative, each pair must sum to its current cap plus reverse cap, and flow must be conserved away from s,t . For edge e= adj[a][i] to b , let r= adj[b][e.rev] and f=r.c- rcap . Raise its cap by d : e.c += d , then augment. Lower its cap by d without going below f : e.c -= d , then augment. Lower below flow. For new cap c'<f , put x=f-c' , e.c=0; r.c-=x . Reroute with z=x-D.calc(a,b,x) ; cancel the rest with D.calc(a,s,z) if a s and D.calc(t,b,z) if b t . Then F -= z; F += D.calc(s,t) . Self-loops carry zero flow and need no rerouting. Min-cut labels refer to the last exhausted s -- t call; a call stopped by a flow limit does not certify a cut."
+    },
+    {
+      "type": "heading",
       "id": "graph/h/demands-and-lower-bounds",
       "chapter": "graph",
       "level": 3,
@@ -4272,7 +4309,7 @@
     },
     {
       "type": "prose",
-      "id": "graph/p/2",
+      "id": "graph/p/3",
       "chapter": "graph",
       "latex": "\\noindent\\textbf{Lower bounds.} Edge $u\\to v$ with capacity in $[L,R]$: force $L$ units via \\texttt{demand[v]+=L}, \\texttt{demand[u]-=L}, then replace the edge by capacity $R-L$. ($L=0$ is an ordinary capacity-$R$ edge.) Original flow is $L$ plus flow on the rewritten cap-$(R-L)$ edge.\n\n\\noindent\\textbf{Circulation.} $d(v)$ is the forced net inflow (positive = excess). Residual flow must send net outflow $d(v)$ from each excess vertex. Add super-source $S$ and super-sink $T$: $S\\to v$ of cap $d(v)$ if $d(v)>0$, $v\\to T$ of cap $-d(v)$ if $d(v)<0$. Feasible iff $\\sum d=0$ and max flow $S\\to T$ equals $\\sum_{d>0} d(v)$. A circulation is this check after the lower-bound rewrite.\n\n\\noindent\\textbf{Max $s$--$t$ flow.} Add $t\\to s$ cap $\\infty$, find a feasible circulation. Let $F$ be the flow on $t\\to s$; delete $S$, $T$, and $t\\to s$, then max-augment $s\\to t$. Value $= F$ plus the extra max flow.\n\n\\noindent\\textbf{Min $s$--$t$ flow.} Binary search the capacity $C$ of $t\\to s$; a feasible circulation exists iff a flow of value $\\le C$ exists. Minimize $C$; the $s$--$t$ value is $C$ (flow on $t\\to s$).",
       "searchText": "Lower bounds. Edge u v with capacity in [L,R] : force L units via demand[v]+=L , demand[u]-=L , then replace the edge by capacity R-L . ( L=0 is an ordinary capacity- R edge.) Original flow is L plus flow on the rewritten cap- (R-L) edge. Circulation. d(v) is the forced net inflow (positive = excess). Residual flow must send net outflow d(v) from each excess vertex. Add super-source S and super-sink T : S v of cap d(v) if d(v)>0 , v T of cap -d(v) if d(v)<0 . Feasible iff d=0 and max flow S T equals _ d>0 d(v) . A circulation is this check after the lower-bound rewrite. Max s -- t flow. Add t s cap , find a feasible circulation. Let F be the flow on t s ; delete S , T , and t s , then max-augment s t . Value = F plus the extra max flow. Min s -- t flow. Binary search the capacity C of t s ; a feasible circulation exists iff a flow of value C exists. Minimize C ; the s -- t value is C (flow on t s )."
@@ -4287,7 +4324,7 @@
     },
     {
       "type": "prose",
-      "id": "graph/p/3",
+      "id": "graph/p/4",
       "chapter": "graph",
       "latex": "\\noindent\\textbf{Kőnig.} A vertex cover meets every edge. On a bipartite graph, max matching = min vertex cover; the complement of a min cover is a max independent set. Hall: a matching saturates $L$ iff $|N(S)|\\ge|S|$ for every $S\\subseteq L$. \\texttt{cover} (Matching): from unmatched left vertices follow unmatched $L\\to R$ and matched $R\\to L$; the cover is unvisited left plus visited right. NP-hard on general graphs.\n\n\\noindent\\textbf{Path cover.} Min vertex-disjoint path cover of a DAG: split each $v$ into $v_L$ (left) and $v_R$ (right); each edge $u\\to v$ becomes $u_L\\to v_R$. Size $= n$ minus max matching. A match $u\\mapsto v$ means $u$ is followed by $v$ on a path. NP-hard on general digraphs.\n\n\\noindent\\textbf{Dilworth.} In a poset, min chain cover = max antichain. Build the comparability DAG ($u\\to v$ iff $u<v$) and take a min path cover. Max antichain = $\\{x:$ neither copy of $x$ is in the Kőnig cover$\\}$. Mirsky (dual): min antichain cover = max chain; partition by longest-path height. On a sequence, min decreasing-subsequence cover = LIS.",
       "searchText": "Kőnig. A vertex cover meets every edge. On a bipartite graph, max matching = min vertex cover; the complement of a min cover is a max independent set. Hall: a matching saturates L iff |N(S)| |S| for every S L . cover (Matching): from unmatched left vertices follow unmatched L R and matched R L ; the cover is unvisited left plus visited right. NP-hard on general graphs. Path cover. Min vertex-disjoint path cover of a DAG: split each v into v_L (left) and v_R (right); each edge u v becomes u_L v_R . Size = n minus max matching. A match u v means u is followed by v on a path. NP-hard on general digraphs. Dilworth. In a poset, min chain cover = max antichain. Build the comparability DAG ( u v iff u<v ) and take a min path cover. Max antichain = x: neither copy of x is in the Kőnig cover . Mirsky (dual): min antichain cover = max chain; partition by longest-path height. On a sequence, min decreasing-subsequence cover = LIS."
@@ -4476,7 +4513,7 @@
     },
     {
       "type": "prose",
-      "id": "graph/p/4",
+      "id": "graph/p/5",
       "chapter": "graph",
       "latex": "Create an $N\\times N$ matrix \\texttt{mat}, and for each edge $a \\rightarrow b \\in G$, do \\texttt{mat[a][b]-{}-}, \\texttt{mat[b][b]++} (and \\texttt{mat[b][a]-{}-}, \\texttt{mat[a][a]++} if $G$ is undirected). Delete row and column $i$ and take the determinant to get the number of directed spanning trees rooted at~$i$ (if undirected, any row/column).",
       "searchText": "Create an N N matrix mat , and for each edge a b G , do mat[a][b]- - , mat[b][b]++ (and mat[b][a]- - , mat[a][a]++ if G is undirected). Delete row and column i and take the determinant to get the number of directed spanning trees rooted at i (if undirected, any row/column)."
@@ -4491,7 +4528,7 @@
     },
     {
       "type": "prose",
-      "id": "graph/p/5",
+      "id": "graph/p/6",
       "chapter": "graph",
       "latex": "A simple graph with node degrees $d_1 \\ge \\dots \\ge d_n$ exists iff $d_1 + \\dots + d_n$ is even and for every $k = 1\\dots n$, \\[ \\sum _{i=1}^{k}d_{i}\\leq k(k-1)+\\sum _{i=k+1}^{n}\\min(d_{i},k). \\]",
       "searchText": "A simple graph with node degrees d_1 d_n exists iff d_1 + + d_n is even and for every k = 1 n , _ i=1 ^ k d_ i k(k-1)+ _ i=k+1 ^ n (d_ i ,k)."
