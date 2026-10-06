@@ -31,7 +31,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 **HLD.** [content/graph/HLD.h](../content/graph/HLD.h) uses `LazyUpdateTree`. Internal `process` still talks in half-open `[l, r)` then converts with `r - 1` for `tree.update` / `tree.query`. Do not “simplify” those calls back to half-open, and do not call a removed `tree->set` API. Subtree query is already inclusive: `pos[v] + VALS_EDGES` .. `pos[v] + siz[v] - 1`.
 
-**Suffix array.** Same SA/LCP as upstream, plus rank, RMQ, `getLCP`, `cmpSubstr`. Stress test covers the extras.
+**Suffix array.** Same SA/LCP algorithm as upstream, plus rank, RMQ, `getLCP`, `cmpSubstr`. Construction and substring comparisons use unsigned byte order. Stress test covers the extras and nonzero bytes through 255.
 
 **Offline dynamic connectivity.** [content/data-structures/OfflineDynamicConnectivity.h](../content/data-structures/OfflineDynamicConnectivity.h) is sequential: `toggle(u, v)` adds or deletes an undirected edge, `query()` records a component-count snapshot, `ans()` returns answers. $q$ is an upper bound on the number of `toggle`/`query` calls.
 
@@ -52,7 +52,8 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/data-structures/WaveletTree.h` | static range kth, countLess, and value-range count; compressed signed int values, half-open bounds, 64-bit thresholds |
 | `content/data-structures/PrefixSum.h` | static box sums with runtime dimension count and per-axis widths; flat row-major input, half-open bounds |
 | `content/contest/Random.h` | RNG + random ints / shuffle / odd hash bases |
-| `content/contest/Output.h` | `std::format` binary printing + fixed precision |
+| `content/contest/Input.h` | `scanf` type specifiers, bounded strings, whitespace, and assignment counts |
+| `content/contest/Output.h` | binary output, precision, padding/alignment with streams and `std::format`, plus `printf` type specifiers and runtime width/precision |
 | `content/data-structures/UnorderedMap-codeforces.h` | web-only standard `unordered_map` with a per-run randomized SplitMix64 hash for Codeforces |
 | `content/data-structures/BinaryTrie.h` | insert/`insert<1>`/erase, count, XOR-min/max, countLG, lazy XOR, mex, each, set-union merge / `merge<1>` |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
@@ -64,6 +65,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/numerical/XORBasis.h` | incremental unsigned XOR basis (kept alongside `SolveLinearBinary.h`) |
 | `content/numerical/QuadRoots.h` | stable real quadratic roots (from cactl / cp-geo) |
 | `content/various/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested) |
+| `content/various/BigInt.h` | fixed-width unsigned base-10^9 bigint (adapted from cactl); linear decimal parsing/formatting, modular add/subtract, small-integer multiply/divide/remainder |
 | `content/various/MemoryUsage.h` | `getrusage` peak RSS (lifetime, not current) |
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
@@ -92,7 +94,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/contest/template.cpp` | `pb` / `fr` / `sc`; dropped `cin.exceptions` |
 | `content/contest/.vimrc` | personal settings; kept KACTL `:Hash` |
 | `content/data-structures/LazySegmentTree.h` | KACTL pointer `Node` (range set+add) → `LazyUpdateTree` (inclusive, generic `binop` / lazy, point set) |
-| `content/strings/SuffixArray.h` | same SA/LCP, plus rank, RMQ, `getLCP`, `cmpSubstr` |
+| `content/strings/SuffixArray.h` | unsigned byte order; same SA/LCP algorithm, plus rank, RMQ, `getLCP`, `cmpSubstr` |
 | `content/geometry/ClosestPair.h` | Alex Li / algorithm-anthology divide-and-conquer closest pair (GPL-2.0), adapted to complex doubles; squared-difference strip checks |
 | `content/geometry/Point.h` | double complex point preamble (`pp`), free predicates, explicit lexicographic comparator |
 
@@ -102,6 +104,10 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 | File | What |
 |---|---|
+| `content/number-theory/ModPow.h` | explicit runtime modulus or `modpow<mod>(b, e)` for a compile-time modulus (default 10^9+7); shared by NTT and modular square root without a global modulus |
+| `content/numerical/NumberTheoreticTransform.h` | shared modular exponentiation; convolution uses the smallest sufficient power-of-two transform, including at the $2^{23}$ coefficient limit |
+| `content/numerical/BerlekampMassey.h`, `MatrixInverse-mod.h` | template modulus (default 10^9+7); use shared modular exponentiation |
+| `content/graph/GeneralMatching.h` | local modulus passed to matrix inversion and modular exponentiation |
 | `content/data-structures/HashMap.h` | shared `chash` for PBDS and standard `unordered_map`, with optional per-run randomization |
 | `content/data-structures/Treap.h` | generic aggregate and lazy update; defaults to range add/sum |
 | `content/graph/HLD.h` | uses `LazyUpdateTree`; converts half-open HLD ranges to inclusive `[l, r-1]` |
@@ -110,17 +116,21 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/graph/chapter.tex` | Johnson’s notes; Dinic; centroid; demands / lower bounds; blossom; dominator tree; Steiner tree; Kőnig / path cover / Dilworth |
 | `content/combinatorial/chapter.tex` | 12-fold way table (balls/bins / functions $[n]\to[k]$) |
 | `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks; primitive roots |
-| `content/contest/chapter.tex` | Random + Output.h |
+| `content/contest/chapter.tex` | Random + Input.h + Output.h |
 | `content/various/chapter.tex` | tree snippets and min-plus convolution directly in Various; builtins, pragmas, memory |
 | `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ / monotonic map |
 | `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, MatrixInverse-mod; Fourier → Convolutions |
 | `content/strings/chapter.tex` | Hashing-codeforces in the PDF (alongside `Hashing.h`) |
 | `content/geometry/chapter.tex` | half-plane intersection; remaining upstream snippets in the PDF (`LineProjectionReflection`, `CircleLine`, `PolygonUnion`, `ManhattanMST`, `DelaunayTriangulation`); geometry is last before appendix |
 | `content/geometry/*.h` | double coordinates and free predicates; `arg` macro removed |
+| `content/geometry/PolygonArea.h`, `PolygonCenter.h` | local coordinates avoid cancellation after large translations |
+| `content/geometry/HalfplaneIntersection.h` | unit directions, local line intersections, distance tolerance; retains small polygons and near-parallel boundaries |
+| `content/geometry/sphericalDistance.h` | chord/sum `atan2` formula preserves accuracy near coincident and antipodal points |
 | geometry figure captions | same glued 15mm minipages as upstream (with their `\vspace`); text width is `\linewidth-15mm` instead of `75mm` so they fit the printable-margin columns |
 
 ## Tests
 
+- `stress-tests/various/BigInt.cpp`: decimal-digit and native 128-bit oracles; parsing/formatting, modular arithmetic, small-integer multiplication/division/remainder, aliasing, carries/borrows, and long input
 - `stress-tests/various/EulerTourTree.cpp`: naive forest comparisons, treap/tour invariants, edge recycling, large paths and stars
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
@@ -128,6 +138,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 - `stress-tests/graph/Dinic2.cpp`: brute min-cut and Dinic comparisons, residual pairs and conservation, self-loops, reverse/parallel edges, flow limits, capacity edits, and 64-bit capacities
 - `stress-tests/various/LinkCutTree.cpp` covers link/cut connectivity plus path sum/add, point set, and rooted LCA
 - New stress tests: SparseLazySegmentTree, LiChao, MonotonicCHT, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
-- `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`
+- `stress-tests/strings/SuffixArray.cpp` also checks rank, `getLCP`, and `cmpSubstr`, including nonzero bytes through 255 and bounded substring comparisons
 
 - Geometry stress tests use complex coordinates; `ComplexGeometry`, `Angle`, and `kdTree` cover primitives, integer precision, floating hulls, cross-header use, rotations, transformations, and nearest-neighbor queries.
+- Geometry precision regressions cover translated area/centroid, small half-plane polygons, direction scaling, rotated duplicate boundaries, near-parallel lines, and antipodal spherical distances.

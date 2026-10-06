@@ -45,11 +45,11 @@ class TestStripAnnotations(unittest.TestCase):
         path = CONTENT / "contest" / "Output.h"
         processed = process_path(path)
         self.assertFalse(processed.error)
-        self.assertIn('cout << format("{:06b}", b);', processed.code)
-        self.assertIn('cout << format("{:b}", b);', processed.code)
-        self.assertIn("setprecision(6)", processed.code)
+        self.assertIn('cout << format("{:08b}", 5);', processed.code)
+        self.assertIn('cout << format("{:b}", 5);', processed.code)
+        self.assertIn("setprecision(2)", processed.code)
         self.assertNotIn("include-line", processed.code)
-        self.assertNotIn("bitset", processed.code)
+        self.assertIn("cout << bitset<8>(5);", processed.code)
 
     def test_keep_include_stays_in_listing(self):
         path = CONTENT / "data-structures" / "OrderStatisticTree.h"

@@ -3,6 +3,7 @@
  * Date: 2016-12-08
  * Source: The regular matrix inverse code
  * Description: Invert matrix $A$ modulo a prime.
+ * Template modulus defaults to $10^9+7$.
  * Returns \texttt{rank}; result is stored in $A$ unless singular (\texttt{rank < n}).
  * For prime powers, repeatedly set $A^{-1} = A^{-1} (2I - AA^{-1})\  (\text{mod }p^k)$ where $A^{-1}$ starts as
  * the inverse of \texttt{A} mod \texttt{p}, and $k$ is doubled in each step.
@@ -13,6 +14,7 @@
 
 #include "../number-theory/ModPow.h"
 
+template<ll mod = 1000000007>
 int matInv(vector<vector<ll>>& A) {
 	int n = sz(A); vi col(n);
 	vector<vector<ll>> tmp(n, vector<ll>(n));
@@ -29,7 +31,7 @@ found:
 		rep(j,0,n)
 			swap(A[j][i], A[j][c]), swap(tmp[j][i], tmp[j][c]);
 		swap(col[i], col[c]);
-		ll v = modpow(A[i][i], mod - 2);
+		ll v = modpow<mod>(A[i][i], mod - 2);
 		rep(j,i+1,n) {
 			ll f = A[j][i] * v % mod;
 			A[j][i] = 0;

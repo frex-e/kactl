@@ -1,17 +1,6 @@
 #include "../utilities/template.h"
 
-typedef vector<ll> vl;
-namespace ignore {
-#include "../../content/number-theory/ModPow.h"
-}
-ll modpow(ll a, ll e);
 #include "../../content/numerical/NumberTheoreticTransform.h"
-ll modpow(ll a, ll e) {
-	if (e == 0)
-		return 1;
-	ll x = modpow(a * a % mod, e >> 1);
-	return e & 1 ? x * a % mod : x;
-}
 
 vl simpleConv(vl a, vl b) {
 	int s = sz(a) + sz(b) - 1;
@@ -31,6 +20,38 @@ int ra() {
 	return (X >> 1);
 }
 
+void testSizes() {
+	assert(conv({}, {1}).empty());
+	assert(conv({1}, {}).empty());
+	rep(p,0,10) rep(d,-1,2) rep(it,0,3) {
+		int s = (1 << p) + d;
+		if (s < 1) continue;
+		int as = 1 + ra() % s;
+		vl a(as), b(s - as + 1);
+		for (auto &x : a) x = ra() % mod;
+		for (auto &x : b) x = ra() % mod;
+		assert(conv(a, b) == simpleConv(a, b));
+	}
+}
+
+void testMaxSize() {
+	// Dense inputs with an exact power-of-two result length.
+	// (-1) * (-1) gives a triangular/trapezoidal coefficient count.
+	int n = 1 << 23, as = n / 2, bs = n / 2 + 1;
+	vl a(as, mod - 1), b(bs, mod - 1);
+	vl c = conv(a, b);
+	assert(sz(c) == n);
+	rep(i,0,n) {
+		ll expected = min({i + 1, as, bs, n - i});
+		if (c[i] != expected) {
+			cerr << "Maximum-size convolution mismatch at " << i
+			     << ": got " << c[i] << ", expected " << expected
+			     << endl;
+			abort();
+		}
+	}
+}
+
 int main() {
 	ll res = 0, res2 = 0;
 	int ind = 0, ind2 = 0;
@@ -47,10 +68,13 @@ int main() {
 			ntt(a2);
 			rep(k, 0, sz(a2)) {
 				ll sum = 0;
-				rep(x, 0, sz(a2)) { sum = (sum + a[x] * modpow(root, k * x * (mod - 1) / sz(a))) % mod; }
+				rep(x, 0, sz(a2)) { sum = (sum + a[x] * modpow<mod>(root, k * x * (mod - 1) / sz(a))) % mod; }
 				assert(sum == a2[k]);
 			}
 	}
 	assert(res==res2);
+	testSizes();
+	testMaxSize();
+	testSizes(); // Reuse the cached roots at smaller sizes.
 	cout<<"Tests passed!"<<endl;
 }

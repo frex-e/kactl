@@ -50,7 +50,7 @@ void gen(string& s, int at, int alpha, F f) {
 	}
 }
 
-void test(const string& s, int alpha) {
+void test(const string& s, int alpha = 255) {
 	// cout << display(s) << endl;
 	string copy = s;
 	SuffixArray sa(copy, alpha+1);
@@ -67,7 +67,7 @@ void test(const string& s, int alpha) {
 
 	rep(i,0,sz(s)) {
 		int j = 0;
-		while (max(j + suffixes[i], suffixes[i+1]) < sz(s) &&
+		while (max(suffixes[i], suffixes[i+1]) + j < sz(s) &&
 				s[j + suffixes[i]] == s[j + suffixes[i+1]])
 			j++;
 		lcp[i+1] = j;
@@ -96,6 +96,44 @@ void test(const string& s, int alpha) {
 	if (!s.empty()) {
 		assert(sa.cmpSubstr(0, 0, 0, 0, s) == 0);
 		assert(sa.cmpSubstr(0, 0, 0, 1, s) == -1);
+	}
+}
+
+void testBytes() {
+	rep(c,128,256) {
+		test(string(1, (char)c));
+		test(string(8, (char)c));
+	}
+	string alphabet;
+	rep(c,1,256) alphabet += (char)c;
+	test(alphabet);
+	reverse(all(alphabet));
+	test(alphabet + alphabet);
+
+	const int bytes[] = {1, 127, 128, 255};
+	rep(n,0,6) {
+		string s(n, 'x');
+		gen(s, 0, 4, [&]() {
+			string mapped = s;
+			for (char& c : mapped) c = (char)bytes[c - 1];
+			test(mapped);
+		});
+	}
+	srand(2);
+	rep(it,0,200) {
+		string s(rand() % 180 + 1, 'x');
+		for (char& c : s) c = (char)(1 + rand() % 255);
+		test(s);
+		SuffixArray sa(s);
+		rep(q,0,100) {
+			int a = rand() % (sz(s) + 1);
+			int b = rand() % (sz(s) + 1);
+			int lena = rand() % (sz(s) - a + 1);
+			int lenb = rand() % (sz(s) - b + 1);
+			string A = s.substr(a, lena), B = s.substr(b, lenb);
+			int exp = A < B ? -1 : A > B ? 1 : 0;
+			assert(sa.cmpSubstr(a, lena, b, lenb, s) == exp);
+		}
 	}
 }
 
@@ -261,6 +299,7 @@ void perf2() {
 
 int main() {
 	// compare();
+	testBytes();
 	stress(0);
 	srand(1);
 	rep(it,0,40) {

@@ -4,7 +4,40 @@
 #include "../../content/geometry/PolygonCenter.h"
 #include "../../content/geometry/InsidePolygon.h"
 
+void testTranslations() {
+	vector<vector<pp>> shapes = {
+		{{0,0},{1,0},{1,1},{0,1}},
+		{{0,0},{6,4},{0,9}},
+		{{0,0},{4,0},{4,1},{1,1},{1,4},{0,4}},
+	};
+	vector<double> areas = {2, 54, 14};
+	vector<pp> centers = {{0.5,0.5},{2,13.0/3},
+		{19.0/14,19.0/14}};
+	rep(i,0,sz(shapes)) for (double scale : {1e-3,1.,1e3})
+		for (pp shift : vector<pp>{{0,0},{1e8,1e8},
+			{1e9,-1e9},{-1e12,1e12}}) {
+			vector<pp> v;
+			for (pp p : shapes[i]) v.push_back(p*scale+shift);
+			// Account for rounding of translated input vertices.
+			double err = 16*numeric_limits<double>::epsilon()
+				* max(1.,abs(shift));
+			rep(reversed,0,2) {
+				double expected = areas[i]*scale*scale;
+				if (reversed) expected = -expected;
+				assert(abs(polygonArea2(v)-expected) <=
+					1e-12*abs(expected)+err*scale*20);
+				assert(abs(polygonCenter(v)-
+					(centers[i]*scale+shift)) <= err+1e-12*scale);
+				reverse(all(v));
+			}
+		}
+	assert(polygonArea2({}) == 0);
+	assert(polygonArea2({{1e9,1e9}}) == 0);
+	assert(polygonArea2({{1e9,1e9},{1e9+1,1e9}}) == 0);
+}
+
 int main() {
+	testTranslations();
 	srand(0);
 	typedef complex<double> P;
 	vector<P> ps = {P{0,0}, P{6,4}, P{0,9}};

@@ -14,7 +14,9 @@
  * Also stores \texttt{rank} (inverse SA) and an RMQ table on
  * LCP so \texttt{getLCP(i,j)} / \texttt{cmpSubstr} are
  * $O(1)$. The input string must not contain any nul chars.
- * Time: O(n \log n) build
+ * Bytes are ordered as unsigned; lim must exceed all bytes.
+ * Time: O((n + \texttt{lim}) \log n) build
+ * Memory: O(n \log n + \texttt{lim})
  * Status: stress-tested
  */
 #pragma once
@@ -22,9 +24,10 @@
 struct SuffixArray {
 	vi sa, lcp, rank, lg;
 	vector<vi> st;
-	SuffixArray(string s, int lim = 256) { // or vector<int>
+	SuffixArray(string s, int lim = 256) {
 		s.push_back(0); int n = sz(s), k = 0, a, b;
-		vi x(all(s)), y(n), ws(max(n, lim));
+		vi x(n), y(n), ws(max(n, lim));
+		rep(i,0,n) x[i] = (unsigned char)s[i];
 		sa = lcp = y, iota(all(sa), 0);
 		for (int j = 0, p = 0; p < n; j = max(1, j * 2), lim = p) {
 			p = j, iota(all(y), n - j);
@@ -71,6 +74,7 @@ struct SuffixArray {
 			if (lena == lenb) return 0;
 			return lena < lenb ? -1 : 1;
 		}
-		return s[a + common] < s[b + common] ? -1 : 1;
+		return (unsigned char)s[a + common] <
+			(unsigned char)s[b + common] ? -1 : 1;
 	}
 };

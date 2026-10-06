@@ -95,20 +95,36 @@
       "code": "# Hashes a file, ignoring all whitespace and comments. Use for\n# verifying that code was correctly typed.\ncpp -dD -P -fpreprocessed | tr -d '[:space:]' | {\n\tif command -v md5sum >/dev/null 2>&1; then md5sum\n\telse md5 -q\n\tfi\n} | cut -c-6"
     },
     {
-      "id": "contest/Output.h",
-      "name": "Output.h",
+      "id": "contest/Input.h",
+      "name": "Input.h",
       "chapter": "contest",
       "language": "cpp",
-      "description": "Fixed-precision decimals and binary\nprinting with \\texttt{std::format}.",
+      "description": "\\texttt{scanf} reference. Arguments are\npointers to the exact types below. The return value\nis the number of assignments, or EOF if input ends\nbefore the first conversion. Check it before use.",
       "usage": "",
       "time": "",
       "memory": "",
-      "status": "untested",
+      "status": "examples checked",
       "author": "me",
       "source": "me",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "cout << fixed << setprecision(6);\ncout << format(\"{:06b}\", b); // fixed width\ncout << format(\"{:b}\", b); // variable width"
+      "code": "// int: %d (decimal), unsigned: %u, long long: %lld,\n// unsigned long long: %llu. %i auto-detects octal/hex.\nint i; unsigned u; ll n;\nif (scanf(\"%d %u %lld\", &i, &u, &n) != 3) return 0;\n\n// Unlike printf: %f needs float*, %lf needs double*.\nfloat f; double x; long double y;\nif (scanf(\"%f %lf %Lf\", &f, &x, &y) != 3) return 0;\n\n// %s reads a token; bound width to buffer size minus 1.\nchar s[100];\nif (scanf(\"%99s\", s) != 1) return 0; // no &s\n// It appends '\\0'; don't pass std::string to scanf.\nchar c;\nif (scanf(\" %c\", &c) != 1) return 0;\n// %c alone reads whitespace too; leading space skips it.\n// Format whitespace consumes any amount of whitespace;\n// avoid trailing spaces or '\\n' (can wait for more input).\n// With sync_with_stdio(false), don't mix cin and scanf."
+    },
+    {
+      "id": "contest/Output.h",
+      "name": "Output.h",
+      "chapter": "contest",
+      "language": "cpp",
+      "description": "Output formatting with streams,\nC++20 \\texttt{std::format}, and \\texttt{printf}.\nField width is a minimum.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "examples checked",
+      "author": "me",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "#include <format>\n\n// Binary: format needs C++20 library support.\ncout << format(\"{:b}\", 5); // 101\ncout << format(\"{:08b}\", 5); // 00000101\ncout << bitset<8>(5); // 00000101, low 8 bits\n// bitset<N> prints exactly N bits; N is compile-time.\n\n// Streams: precision/fill/alignment persist; setw is once.\ncout << fixed << setprecision(2) << 1.5; // 1.50\ncout << defaultfloat << setprecision(3) << 1.2345;\n// Above: 1.23 (defaultfloat uses significant digits).\ncout << setfill('0') << setw(5) << 42; // 00042\ncout << setfill(' ') << left << setw(5) << \"hi\";\n// Above: \"hi   \"; restore right for right alignment.\ncout << right;\n\n// format: padding/alignment, decimal places, runtime width.\ncout << format(\"{:05}\", 42); // 00042\ncout << format(\"{:<5}\", \"hi\"); // \"hi   \"\ncout << format(\"{:8.2f}\", 1.5); // \"    1.50\"\ncout << format(\"{:.{}f}\", 1.5, 3); // 1.500\ncout << format(\"{:0{}b}\", 5, 8); // 00000101\n\n// printf: int %d, unsigned %u, long long %lld,\n// unsigned long long %llu, C string %s, char %c.\n// float promotes to double: %f; long double: %Lf.\nint i = 42; unsigned u = 7; ll n = 12345678901LL;\nstring s = \"hi\"; double x = 1.5; long double y = 2.5L;\nprintf(\"%d %u %lld\\n\", i, u, n);\nprintf(\"%s %c\\n\", s.c_str(), 'A');\nprintf(\"%.2f %.2Lf\\n\", x, y); // 1.50 2.50\nprintf(\"%05d\\n\", i); // 00042 (sign before zeros)\nprintf(\"%-5s!\\n\", s.c_str()); // \"hi   !\"\nprintf(\"%8.2f\\n\", x); // \"    1.50\"\nprintf(\"%*.*f\\n\", 8, 2, x); // runtime width/precision\n// %e: scientific; %.3g: 3 significant digits; %%: literal %.\n// With sync_with_stdio(false), don't mix cout and printf."
     },
     {
       "id": "contest/Random.h",
@@ -305,6 +321,22 @@
       "code": "template<class T, int N> struct Matrix {\n\ttypedef Matrix M;\n\tarray<array<T, N>, N> d{};\n\tM operator*(const M& m) const {\n\t\tM a;\n\t\trep(i,0,N) rep(j,0,N)\n\t\t\trep(k,0,N) a.d[i][k] += d[i][j] * m.d[j][k];\n\t\treturn a;\n\t}\n\tarray<T, N> operator*(const array<T, N>& vec) const {\n\t\tarray<T, N> ret{};\n\t\trep(i,0,N) rep(j,0,N) ret[i] += d[i][j] * vec[j];\n\t\treturn ret;\n\t}\n\tM operator^(ll p) const {\n\t\tassert(p >= 0);\n\t\tM a, b(*this);\n\t\trep(i,0,N) a.d[i][i] = 1;\n\t\twhile (p) {\n\t\t\tif (p&1) a = a*b;\n\t\t\tb = b*b;\n\t\t\tp >>= 1;\n\t\t}\n\t\treturn a;\n\t}\n};"
     },
     {
+      "id": "data-structures/MonotonicCHT.h",
+      "name": "MonotonicCHT.h",
+      "chapter": "data-structures",
+      "language": "cpp",
+      "description": "Add lines $kx+m$ in nondecreasing slope order\nand query maximum values at nondecreasing $x$. Additions\nand queries may be interleaved; query requires a line.\nFor minimum, negate slopes, intercepts and answers\n(original slopes must then be nonincreasing).\nAnswers must fit in ll; products of coefficient\ndifferences must fit in signed \\texttt{\\_\\_int128}.\nLineContainer handles arbitrary slopes and queries.",
+      "usage": "",
+      "time": "$O(1)$ amortized per operation, $O(N+Q)$ total.",
+      "memory": "$O(N)$",
+      "status": "stress-tested",
+      "author": "caterpillow",
+      "source": "https://github.com/caterpillow/cactl\ncontent/data-structures/MonotonicCHT.h",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct MonotonicCHT {\n\tusing T = __int128;\n\tstruct Line {\n\t\tll k, m;\n\t\tT eval(ll x) const { return (T)k * x + m; }\n\t};\n\tvector<Line> h;\n\tint p = 0;\n\tbool bad(Line a, Line b, Line c) {\n\t\treturn (T(b.k)-a.k) * (T(c.m)-b.m)\n\t\t\t>= (T(b.m)-a.m) * (T(c.k)-b.k);\n\t}\n\tvoid add(ll k, ll m) {\n\t\tLine l{k, m};\n\t\tif (sz(h) && h.back().k == k && h.back().m >= m)\n\t\t\treturn;\n\t\twhile (sz(h) && (h.back().k == k || (sz(h) > 1\n\t\t\t&& bad(h[sz(h)-2], h.back(), l))))\n\t\t\th.pop_back();\n\t\th.push_back(l), p = min(p, sz(h)-1);\n\t}\n\tll query(ll x) {\n\t\tassert(sz(h));\n\t\twhile (p+1 < sz(h) && h[p+1].eval(x) > h[p].eval(x))\n\t\t\tp++;\n\t\treturn (ll)h[p].eval(x);\n\t}\n};"
+    },
+    {
       "id": "data-structures/MonotonicMap.h",
       "name": "MonotonicMap.h",
       "chapter": "data-structures",
@@ -371,20 +403,20 @@
       "code": "#include <bits/extc++.h>\nusing namespace __gnu_pbds;\n\ntemplate<class T>\nusing Tree = tree<T, null_type, less<T>, rb_tree_tag,\n    tree_order_statistics_node_update>;\n// MEGA WARNING: use A.swap(B) instead of swap(A, B)!\n\nvoid example() {\n\tTree<int> t, t2; t.insert(8);\n\tauto it = t.insert(10).first;\n\tassert(it == t.lower_bound(9));\n\tassert(t.order_of_key(10) == 1);\n\tassert(t.order_of_key(11) == 2);\n\tassert(*t.find_by_order(0) == 8);\n\tt.join(t2); // assuming T < T2 or T > T2, merge t2 into t\n}"
     },
     {
-      "id": "data-structures/PersistentSegmentTree.h",
-      "name": "PersistentSegmentTree.h",
+      "id": "data-structures/PrefixSum.h",
+      "name": "PrefixSum.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Persistent implicit segment tree with lazy\nrange updates and point set. Update/set return a new\nroot; old roots stay valid. No destructor (nodes are\nshared). Bounds inclusive. Change \\texttt{V}, \\texttt{U},\n\\texttt{id}, \\texttt{def}, \\texttt{idU}, \\texttt{binop},\n\\texttt{applyUpdate}, \\texttt{mergeUpdate}. Default is\nrange add / range max.",
-      "usage": "",
-      "time": "$O(\\log R)$",
-      "memory": "",
+      "description": "Static sums in any number of dimensions.\nGive each dimension's width and flat row-major values\n(last coordinate varies fastest). Queries use half-open\nboxes $[l_i,r_i)$; empty widths and boxes are allowed.\nRequires at least one dimension and valid bounds.",
+      "usage": "PrefixSum<ll> p({2, 3}, {1, 2, 3, 4, 5, 6});\np.sum({0, 1}, {2, 3}); // 2 + 3 + 5 + 6 = 16",
+      "time": "$O(dN)$ build, $O(2^d)$ query, where\n$N=\\prod_i w_i$ and $d$ is the number of dimensions.",
+      "memory": "$O(N)$ prefix table.",
       "status": "stress-tested",
-      "author": "me",
-      "source": "folklore",
+      "author": "Indra Kusumah-Kasim",
+      "source": "",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "struct Node {\n\tusing V = int;\n\tusing U = int;\n\tusing T = Node;\n\tstatic constexpr V id = INT_MIN;\n\tstatic constexpr V def = 0;\n\tstatic constexpr U idU = 0;\n\tV binop(V a, V b) { return max(a, b); }\n\tV applyUpdate(U u, V v) { return v + u; }\n\tU mergeUpdate(U oldU, U nw) { return oldU + nw; }\n\tT *lt = 0, *rt = 0;\n\tV val = def;\n\tU lazy = idU;\n\tvoid updateNode(int, int, U u) {\n\t\tlazy = mergeUpdate(lazy, u);\n\t\tval = applyUpdate(u, val);\n\t}\n\tvoid push(int l, int r) {\n\t\tint mid = l + (r - l) / 2;\n\t\tlt = new T(lt ? *lt : T());\n\t\trt = new T(rt ? *rt : T());\n\t\tlt->updateNode(l, mid, lazy);\n\t\trt->updateNode(mid + 1, r, lazy);\n\t\tlazy = idU;\n\t}\n\tT* update(int l, int r, int ql, int qr, U u) {\n\t\tif (qr < l || r < ql) return this;\n\t\tT* n = new T(*this);\n\t\tif (ql <= l && r <= qr) {\n\t\t\tn->updateNode(l, r, u);\n\t\t\treturn n;\n\t\t}\n\t\tn->push(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tn->lt = n->lt->update(l, mid, ql, qr, u);\n\t\tn->rt = n->rt->update(mid + 1, r, ql, qr, u);\n\t\tn->val = binop(n->lt->val, n->rt->val);\n\t\treturn n;\n\t}\n\tT* set(int l, int r, int i, V v) {\n\t\tif (i < l || r < i) return this;\n\t\tT* n = new T(*this);\n\t\tif (l == r) { n->val = v; n->lazy = idU; return n; }\n\t\tn->push(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tif (i <= mid) n->lt = n->lt->set(l, mid, i, v);\n\t\telse n->rt = n->rt->set(mid + 1, r, i, v);\n\t\tn->val = binop(n->lt->val, n->rt->val);\n\t\treturn n;\n\t}\n\tV query(int l, int r, int ql, int qr) {\n\t\tif (qr < l || r < ql) return id;\n\t\tif (ql <= l && r <= qr) return val;\n\t\tint mid = l + (r - l) / 2;\n\t\tT a = lt ? *lt : T();\n\t\tT b = rt ? *rt : T();\n\t\ta.updateNode(l, mid, lazy);\n\t\tb.updateNode(mid + 1, r, lazy);\n\t\treturn binop(a.query(l, mid, ql, qr),\n\t\t\tb.query(mid + 1, r, ql, qr));\n\t}\n};"
+      "code": "template<class T>\nstruct PrefixSum {\n\tvi n;\n\tvector<size_t> stride;\n\tvector<T> p;\n\tPrefixSum(vi widths, vector<T> values)\n\t\t: n(widths), stride(sz(n) + 1, 1), p(move(values)) {\n\t\tassert(!n.empty());\n\t\tfor (int d = sz(n); d--;) {\n\t\t\tassert(n[d] >= 0);\n\t\t\tstride[d] = stride[d+1] * (size_t)n[d];\n\t\t}\n\t\tassert(p.size() == stride[0]);\n\t\trep(d,0,sz(n)) for (size_t i = 0; i < p.size(); ++i)\n\t\t\tif (i / stride[d+1] % (size_t)n[d])\n\t\t\t\tp[i] += p[i - stride[d+1]];\n\t}\n\tT sum(const vi& l, const vi& r) const {\n\t\tassert(sz(l) == sz(n) && sz(r) == sz(n));\n\t\tbool empty = false;\n\t\trep(d,0,sz(n)) {\n\t\t\tassert(0 <= l[d] && l[d] <= r[d] && r[d] <= n[d]);\n\t\t\tempty |= l[d] == r[d];\n\t\t}\n\t\treturn empty ? T{} : query(l, r, 0, 0);\n\t}\n\tT query(const vi& l, const vi& r, int d, size_t i) const {\n\t\tif (d == sz(n)) return p[i];\n\t\tsize_t s = stride[d+1];\n\t\tT ans = query(l, r, d+1, i + (size_t)(r[d]-1)*s);\n\t\tif (l[d])\n\t\t\tans -= query(l, r, d+1, i + (size_t)(l[d]-1)*s);\n\t\treturn ans;\n\t}\n};"
     },
     {
       "id": "data-structures/RMQ.h",
@@ -401,6 +433,22 @@
       "dependencies": [],
       "includedInPdf": true,
       "code": "template<class T>\nstruct RMQ {\n\tvector<vector<T>> jmp;\n\tRMQ(const vector<T>& V) : jmp(1, V) {\n\t\tfor (int pw = 1, k = 1; pw * 2 <= sz(V); pw *= 2, ++k) {\n\t\t\tjmp.emplace_back(sz(V) - pw * 2 + 1);\n\t\t\trep(j,0,sz(jmp[k]))\n\t\t\t\tjmp[k][j] = min(jmp[k - 1][j], jmp[k - 1][j + pw]);\n\t\t}\n\t}\n\tT query(int a, int b) {\n\t\tassert(a < b); // or return inf if a == b\n\t\tint dep = 31 - __builtin_clz(b - a);\n\t\treturn min(jmp[dep][a], jmp[dep][b - (1 << dep)]);\n\t}\n};"
+    },
+    {
+      "id": "data-structures/Rope.h",
+      "name": "Rope.h",
+      "chapter": "data-structures",
+      "language": "cpp",
+      "description": "GNU extension for editable sequences.\nCopies share storage; later edits leave copies unchanged.\nIndices are 0-based; erase/substr take (position, length).\nNo range aggregates or lazy reversal. Requires libstdc++.",
+      "usage": "",
+      "time": "Index $O(\\log N)$, copy $O(1)$. Edits typically\n$O(\\log N)$ plus new data, but can take $O(N)$.",
+      "memory": "",
+      "status": "tested",
+      "author": "me",
+      "source": "GNU libstdc++ ext/rope",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "#include <ext/rope>\nusing __gnu_cxx::rope;\n\nvoid ropeExample() {\n\tint a[] = {0, 1, 2, 3, 4};\n\trope<int> r(a, a + 5); // or rope<int>(n, value)\n\trope<int> saved = r; // cheap snapshot\n\tr.insert(2, rope<int>(3, 10)); // insert before index 2\n\tr.erase(1, 3); // remove [1, 4): {0, 10, 2, 3, 4}\n\tr.replace(0, 9); // set index 0 (also r[0] = 9)\n\trope<int> sub = r.substr(1, 2); // {10, 2}\n\tr += sub; // concatenate; r.push_back(x) also works\n\tvector<int> v(all(r)); // materialize in O(N)\n\tassert(v == (vi{9, 10, 2, 3, 4, 10, 2}));\n\tassert(saved[0] == 0 && saved.size() == 5);\n\trope<char> s(\"abc\"); // string variant\n\ts.insert(1, \"XY\"); // aXYbc\n}"
     },
     {
       "id": "data-structures/SegmentTree.h",
@@ -531,11 +579,27 @@
       "code": "struct RandomHash {\n\tstatic uint64_t mix(uint64_t x) {\n\t\tx += 0x9e3779b97f4a7c15;\n\t\tx = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;\n\t\tx = (x ^ (x >> 27)) * 0x94d049bb133111eb;\n\t\treturn x ^ (x >> 31);\n\t}\n\tsize_t operator()(uint64_t x) const {\n\t\tstatic const uint64_t seed = chrono::steady_clock::now()\n\t\t\t.time_since_epoch().count();\n\t\treturn mix(x + seed);\n\t}\n};\nunordered_map<ll, int, RandomHash> h;"
     },
     {
+      "id": "data-structures/WaveletTree.h",
+      "name": "WaveletTree.h",
+      "chapter": "data-structures",
+      "language": "cpp",
+      "description": "Static range order statistics on an int array.\nCompresses values; preserves input. Indices and value\nranges are half-open. kth(l,r,k) is the 0-indexed kth\nsmallest in a[l,r), including duplicates; requires\n$0 \\le k < r-l$. countLess(l,r,x) counts values $<x$;\ncount(l,r,lo,hi) counts $lo \\le a_i < hi$.\nCounts allow empty ranges. Thresholds are ll so x+1LL\nis safe for inclusive bounds, even at \\texttt{INT\\_MAX}.",
+      "usage": "WaveletTree w({5, 1, 5, -2, 7});\nw.kth(1, 5, 1); // 1: sorted subarray is -2,1,5,7\nw.count(0, 5, 5, 6); // 2 copies of 5\nw.kth(l, r, (r-l-1)/2); // lower median (l < r)\nint k = w.countLess(l, r, x);\nif (k < r-l) w.kth(l, r, k); // smallest >= x",
+      "time": "$O(N\\log N)$ build, $O(\\log(\\sigma+1))$ query.",
+      "memory": "$O(N\\log(\\sigma+1))$, $\\sigma$ distinct values.",
+      "status": "stress-tested",
+      "author": "me",
+      "source": "",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct WaveletTree {\n\tint n;\n\tvi vals;\n\tvector<vi> b;\n\tWaveletTree(const vi& a) : n(sz(a)), vals(a) {\n\t\tsort(all(vals));\n\t\tvals.erase(unique(all(vals)), vals.end());\n\t\tb.resize(4 * sz(vals));\n\t\tif (n) build(a, 1, 0, sz(vals));\n\t}\n\tvoid build(const vi& a, int v, int lo, int hi) {\n\t\tif (hi-lo <= 1) return;\n\t\tint m = lo + (hi-lo)/2;\n\t\tvi c[2];\n\t\tb[v].resize(sz(a) + 1);\n\t\trep(i,0,sz(a)) {\n\t\t\tint left = a[i] < vals[m];\n\t\t\tb[v][i+1] = b[v][i] + left;\n\t\t\tc[!left].push_back(a[i]);\n\t\t}\n\t\tbuild(c[0], 2*v, lo, m);\n\t\tbuild(c[1], 2*v+1, m, hi);\n\t}\n\tint kth(int l, int r, int k) const {\n\t\tassert(0 <= l && l <= r && r <= n);\n\t\tassert(0 <= k && k < r-l);\n\t\tint v = 1, lo = 0, hi = sz(vals);\n\t\twhile (hi-lo > 1) {\n\t\t\tint m = lo + (hi-lo)/2, lb = b[v][l], rb = b[v][r];\n\t\t\tif (k < rb-lb) {\n\t\t\t\tl = lb; r = rb; hi = m; v *= 2;\n\t\t\t} else {\n\t\t\t\tk -= rb-lb; l -= lb; r -= rb;\n\t\t\t\tlo = m; v = 2*v+1;\n\t\t\t}\n\t\t}\n\t\treturn vals[lo];\n\t}\n\tint countLess(int l, int r, ll x) const {\n\t\tassert(0 <= l && l <= r && r <= n);\n\t\tif (l == r) return 0;\n\t\tint v = 1, lo = 0, hi = sz(vals), ans = 0;\n\t\twhile (hi-lo > 1) {\n\t\t\tint m = lo + (hi-lo)/2, lb = b[v][l], rb = b[v][r];\n\t\t\tif (x <= vals[m]) {\n\t\t\t\tl = lb; r = rb; hi = m; v *= 2;\n\t\t\t} else {\n\t\t\t\tans += rb-lb; l -= lb; r -= rb;\n\t\t\t\tlo = m; v = 2*v+1;\n\t\t\t}\n\t\t}\n\t\treturn ans + (vals[lo] < x ? r-l : 0);\n\t}\n\tint count(int l, int r, ll lo, ll hi) const {\n\t\tassert(lo <= hi);\n\t\treturn countLess(l, r, hi) - countLess(l, r, lo);\n\t}\n};"
+    },
+    {
       "id": "numerical/BerlekampMassey.h",
       "name": "BerlekampMassey.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "Recovers any $n$-order linear recurrence relation from the first\n$2n$ terms of the recurrence.\nUseful for guessing linear recurrences after brute-forcing the first terms.\nShould work on any field, but numerical stability for floats is not guaranteed.\nOutput will have size $\\le n$.",
+      "description": "Recovers any $n$-order linear recurrence relation from the first\n$2n$ terms of the recurrence.\nUseful for guessing linear recurrences after brute-forcing the first terms.\nShould work on any field, but numerical stability for floats is not guaranteed.\nOutput will have size $\\le n$.\nTemplate modulus defaults to $10^9+7$.",
       "usage": "berlekampMassey({0, 1, 1, 3, 5, 11}) // {1, 2}",
       "time": "$O(N^2)$",
       "memory": "",
@@ -546,7 +610,7 @@
         "number-theory/ModPow.h"
       ],
       "includedInPdf": true,
-      "code": "vector<ll> berlekampMassey(vector<ll> s) {\n\tint n = sz(s), L = 0, m = 0;\n\tvector<ll> C(n), B(n), T;\n\tC[0] = B[0] = 1;\n\n\tll b = 1;\n\trep(i,0,n) { ++m;\n\t\tll d = s[i] % mod;\n\t\trep(j,1,L+1) d = (d + C[j] * s[i - j]) % mod;\n\t\tif (!d) continue;\n\t\tT = C; ll coef = d * modpow(b, mod-2) % mod;\n\t\trep(j,m,n) C[j] = (C[j] - coef * B[j - m]) % mod;\n\t\tif (2 * L > i) continue;\n\t\tL = i + 1 - L; B = T; b = d; m = 0;\n\t}\n\n\tC.resize(L + 1); C.erase(C.begin());\n\tfor (ll& x : C) x = (mod - x) % mod;\n\treturn C;\n}"
+      "code": "template<ll mod = 1000000007>\nvector<ll> berlekampMassey(vector<ll> s) {\n\tint n = sz(s), L = 0, m = 0;\n\tvector<ll> C(n), B(n), T;\n\tC[0] = B[0] = 1;\n\n\tll b = 1;\n\trep(i,0,n) { ++m;\n\t\tll d = s[i] % mod;\n\t\trep(j,1,L+1) d = (d + C[j] * s[i - j]) % mod;\n\t\tif (!d) continue;\n\t\tT = C; ll coef = d * modpow<mod>(b, mod-2) % mod;\n\t\trep(j,m,n) C[j] = (C[j] - coef * B[j - m]) % mod;\n\t\tif (2 * L > i) continue;\n\t\tL = i + 1 - L; B = T; b = d; m = 0;\n\t}\n\n\tC.resize(L + 1); C.erase(C.begin());\n\tfor (ll& x : C) x = (mod - x) % mod;\n\treturn C;\n}"
     },
     {
       "id": "numerical/Determinant.h",
@@ -715,7 +779,7 @@
       "name": "MatrixInverse-mod.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "Invert matrix $A$ modulo a prime.\nReturns \\texttt{rank}; result is stored in $A$ unless singular (\\texttt{rank < n}).\nFor prime powers, repeatedly set $A^{-1} = A^{-1} (2I - AA^{-1})\\  (\\text{mod }p^k)$ where $A^{-1}$ starts as\nthe inverse of \\texttt{A} mod \\texttt{p}, and $k$ is doubled in each step.",
+      "description": "Invert matrix $A$ modulo a prime.\nTemplate modulus defaults to $10^9+7$.\nReturns \\texttt{rank}; result is stored in $A$ unless singular (\\texttt{rank < n}).\nFor prime powers, repeatedly set $A^{-1} = A^{-1} (2I - AA^{-1})\\  (\\text{mod }p^k)$ where $A^{-1}$ starts as\nthe inverse of \\texttt{A} mod \\texttt{p}, and $k$ is doubled in each step.",
       "usage": "",
       "time": "$O(n^3)$",
       "memory": "",
@@ -726,7 +790,7 @@
         "number-theory/ModPow.h"
       ],
       "includedInPdf": true,
-      "code": "int matInv(vector<vector<ll>>& A) {\n\tint n = sz(A); vi col(n);\n\tvector<vector<ll>> tmp(n, vector<ll>(n));\n\trep(i,0,n) tmp[i][i] = 1, col[i] = i;\n\n\trep(i,0,n) {\n\t\tint r = i, c = i;\n\t\trep(j,i,n) rep(k,i,n) if (A[j][k]) {\n\t\t\tr = j; c = k; goto found;\n\t\t}\n\t\treturn i;\nfound:\n\t\tA[i].swap(A[r]); tmp[i].swap(tmp[r]);\n\t\trep(j,0,n)\n\t\t\tswap(A[j][i], A[j][c]), swap(tmp[j][i], tmp[j][c]);\n\t\tswap(col[i], col[c]);\n\t\tll v = modpow(A[i][i], mod - 2);\n\t\trep(j,i+1,n) {\n\t\t\tll f = A[j][i] * v % mod;\n\t\t\tA[j][i] = 0;\n\t\t\trep(k,i+1,n) A[j][k] = (A[j][k] - f*A[i][k]) % mod;\n\t\t\trep(k,0,n) tmp[j][k] = (tmp[j][k] - f*tmp[i][k]) % mod;\n\t\t}\n\t\trep(j,i+1,n) A[i][j] = A[i][j] * v % mod;\n\t\trep(j,0,n) tmp[i][j] = tmp[i][j] * v % mod;\n\t\tA[i][i] = 1;\n\t}\n\n\tfor (int i = n-1; i > 0; --i) rep(j,0,i) {\n\t\tll v = A[j][i];\n\t\trep(k,0,n) tmp[j][k] = (tmp[j][k] - v*tmp[i][k]) % mod;\n\t}\n\n\trep(i,0,n) rep(j,0,n)\n\t\tA[col[i]][col[j]] = tmp[i][j] % mod + (tmp[i][j] < 0)*mod;\n\treturn n;\n}"
+      "code": "template<ll mod = 1000000007>\nint matInv(vector<vector<ll>>& A) {\n\tint n = sz(A); vi col(n);\n\tvector<vector<ll>> tmp(n, vector<ll>(n));\n\trep(i,0,n) tmp[i][i] = 1, col[i] = i;\n\n\trep(i,0,n) {\n\t\tint r = i, c = i;\n\t\trep(j,i,n) rep(k,i,n) if (A[j][k]) {\n\t\t\tr = j; c = k; goto found;\n\t\t}\n\t\treturn i;\nfound:\n\t\tA[i].swap(A[r]); tmp[i].swap(tmp[r]);\n\t\trep(j,0,n)\n\t\t\tswap(A[j][i], A[j][c]), swap(tmp[j][i], tmp[j][c]);\n\t\tswap(col[i], col[c]);\n\t\tll v = modpow<mod>(A[i][i], mod - 2);\n\t\trep(j,i+1,n) {\n\t\t\tll f = A[j][i] * v % mod;\n\t\t\tA[j][i] = 0;\n\t\t\trep(k,i+1,n) A[j][k] = (A[j][k] - f*A[i][k]) % mod;\n\t\t\trep(k,0,n) tmp[j][k] = (tmp[j][k] - f*tmp[i][k]) % mod;\n\t\t}\n\t\trep(j,i+1,n) A[i][j] = A[i][j] * v % mod;\n\t\trep(j,0,n) tmp[i][j] = tmp[i][j] * v % mod;\n\t\tA[i][i] = 1;\n\t}\n\n\tfor (int i = n-1; i > 0; --i) rep(j,0,i) {\n\t\tll v = A[j][i];\n\t\trep(k,0,n) tmp[j][k] = (tmp[j][k] - v*tmp[i][k]) % mod;\n\t}\n\n\trep(i,0,n) rep(j,0,n)\n\t\tA[col[i]][col[j]] = tmp[i][j] % mod + (tmp[i][j] < 0)*mod;\n\treturn n;\n}"
     },
     {
       "id": "numerical/MatrixInverse.h",
@@ -749,7 +813,7 @@
       "name": "NumberTheoreticTransform.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "\\texttt{ntt(a)} computes $\\hat f(k) = \\sum_x a[x] g^{xk}$ for all $k$, where $g=\\text{root}^{(mod-1)/N}$.\n$N$ must be a power of 2.\nUseful for convolution modulo specific nice primes of the form $2^a b+1$,\nwhere the convolution result has size at most $2^a$. For arbitrary modulo, see FFTMod.\n\\texttt{conv(a, b) = c}, where $c[x] = \\sum a[i]b[x-i]$.\nFor manual convolution: NTT the inputs, multiply\npointwise, divide by $n$, \\texttt{reverse(start+1, end)}, NTT back.\nInputs must be in \\texttt{[0, mod)}.",
+      "description": "\\texttt{ntt(a)} computes $\\hat f(k) = \\sum_x a[x] g^{xk}$ for all $k$, where $g=\\text{root}^{(mod-1)/N}$.\n$N$ must be a power of 2 dividing $mod-1$.\nUseful for convolution modulo specific nice primes of the form $2^a b+1$,\nwhere the convolution result has size at most $2^a$. For arbitrary modulo, see FFTMod.\n\\texttt{conv(a, b) = c}, where $c[x] = \\sum a[i]b[x-i]$.\nFor manual convolution: NTT the inputs, multiply\npointwise, divide by $n$, \\texttt{reverse(start+1, end)}, NTT back.\nInputs must be in \\texttt{[0, mod)}.",
       "usage": "",
       "time": "$O(N \\log N)$",
       "memory": "",
@@ -760,7 +824,7 @@
         "number-theory/ModPow.h"
       ],
       "includedInPdf": true,
-      "code": "const ll mod = (119 << 23) + 1, root = 62; // = 998244353\n// For p < 2^30 there is also e.g. 5 << 25, 7 << 26, 479 << 21\n// and 483 << 21 (same root). The last two are > 10^9.\ntypedef vector<ll> vl;\nvoid ntt(vl &a) {\n\tint n = sz(a), L = 31 - __builtin_clz(n);\n\tstatic vl rt(2, 1);\n\tfor (static int k = 2, s = 2; k < n; k *= 2, s++) {\n\t\trt.resize(n);\n\t\tll z[] = {1, modpow(root, mod >> s)};\n\t\trep(i,k,2*k) rt[i] = rt[i / 2] * z[i & 1] % mod;\n\t}\n\tvi rev(n);\n\trep(i,0,n) rev[i] = (rev[i / 2] | (i & 1) << L) / 2;\n\trep(i,0,n) if (i < rev[i]) swap(a[i], a[rev[i]]);\n\tfor (int k = 1; k < n; k *= 2)\n\t\tfor (int i = 0; i < n; i += 2 * k) rep(j,0,k) {\n\t\t\tll z = rt[j + k] * a[i + j + k] % mod, &ai = a[i + j];\n\t\t\ta[i + j + k] = ai - z + (z > ai ? mod : 0);\n\t\t\tai += (ai + z >= mod ? z - mod : z);\n\t\t}\n}\nvl conv(const vl &a, const vl &b) {\n\tif (a.empty() || b.empty()) return {};\n\tint s = sz(a) + sz(b) - 1, B = 32 - __builtin_clz(s),\n\t    n = 1 << B;\n\tint inv = modpow(n, mod - 2);\n\tvl L(a), R(b), out(n);\n\tL.resize(n), R.resize(n);\n\tntt(L), ntt(R);\n\trep(i,0,n)\n\t\tout[-i & (n - 1)] = (ll)L[i] * R[i] % mod * inv % mod;\n\tntt(out);\n\treturn {out.begin(), out.begin() + s};\n}"
+      "code": "const ll mod = (119 << 23) + 1, root = 62; // = 998244353\n// For p < 2^30 there is also e.g. 5 << 25, 7 << 26, 479 << 21\n// and 483 << 21 (same root). The last two are > 10^9.\ntypedef vector<ll> vl;\nvoid ntt(vl &a) {\n\tint n = sz(a), L = 31 - __builtin_clz(n);\n\tstatic vl rt(2, 1);\n\tfor (static int k = 2, s = 2; k < n; k *= 2, s++) {\n\t\trt.resize(n);\n\t\tll z[] = {1, modpow<mod>(root, mod >> s)};\n\t\trep(i,k,2*k) rt[i] = rt[i / 2] * z[i & 1] % mod;\n\t}\n\tvi rev(n);\n\trep(i,0,n) rev[i] = (rev[i / 2] | (i & 1) << L) / 2;\n\trep(i,0,n) if (i < rev[i]) swap(a[i], a[rev[i]]);\n\tfor (int k = 1; k < n; k *= 2)\n\t\tfor (int i = 0; i < n; i += 2 * k) rep(j,0,k) {\n\t\t\tll z = rt[j + k] * a[i + j + k] % mod, &ai = a[i + j];\n\t\t\ta[i + j + k] = ai - z + (z > ai ? mod : 0);\n\t\t\tai += (ai + z >= mod ? z - mod : z);\n\t\t}\n}\nvl conv(const vl &a, const vl &b) {\n\tif (a.empty() || b.empty()) return {};\n\tint s = sz(a) + sz(b) - 1, n = 1;\n\twhile (n < s) n *= 2;\n\tint inv = modpow<mod>(n, mod - 2);\n\tvl L(a), R(b), out(n);\n\tL.resize(n), R.resize(n);\n\tntt(L), ntt(R);\n\trep(i,0,n)\n\t\tout[-i & (n - 1)] = (ll)L[i] * R[i] % mod * inv % mod;\n\tntt(out);\n\treturn {out.begin(), out.begin() + s};\n}"
     },
     {
       "id": "numerical/PolyInterpolate.h",
@@ -1194,16 +1258,16 @@
       "name": "ModPow.h",
       "chapter": "number-theory",
       "language": "cpp",
-      "description": "",
-      "usage": "",
-      "time": "",
+      "description": "Computes $b^e \\bmod m$ for $0 \\le b < m$\nand $e \\ge 0$. Requires $m > 1$ and products to fit\nin \\texttt{ll}.\nCompile-time modulus defaults to $10^9+7$.",
+      "usage": "modpow(b, e) // default modulus\nmodpow<998244353>(b, e) // compile-time modulus\nmodpow(b, e, p) // runtime modulus",
+      "time": "$O(\\log e)$",
       "memory": "",
       "status": "tested",
       "author": "Noam527",
       "source": "folklore",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "const ll mod = 1000000007; // faster if const\n\nll modpow(ll b, ll e) {\n\tll ans = 1;\n\tfor (; e; b = b * b % mod, e /= 2)\n\t\tif (e & 1) ans = ans * b % mod;\n\treturn ans;\n}"
+      "code": "ll modpow(ll b, ll e, ll mod) {\n\tll ans = 1;\n\tfor (; e; b = b * b % mod, e /= 2)\n\t\tif (e & 1) ans = ans * b % mod;\n\treturn ans;\n}\n\ntemplate<ll mod = 1000000007>\nll modpow(ll b, ll e) { return modpow(b, e, mod); }"
     },
     {
       "id": "number-theory/ModSqrt.h",
@@ -1581,7 +1645,7 @@
         "numerical/MatrixInverse-mod.h"
       ],
       "includedInPdf": false,
-      "code": "vector<pii> generalMatching(int N, vector<pii>& ed) {\n\tvector<vector<ll>> mat(N, vector<ll>(N)), A;\n\tfor (pii pa : ed) {\n\t\tint a = pa.first, b = pa.second, r = rand() % mod;\n\t\tmat[a][b] = r, mat[b][a] = (mod - r) % mod;\n\t}\n\n\tint r = matInv(A = mat), M = 2*N - r, fi, fj;\n\tassert(r % 2 == 0);\n\n\tif (M != N) do {\n\t\tmat.resize(M, vector<ll>(M));\n\t\trep(i,0,N) {\n\t\t\tmat[i].resize(M);\n\t\t\trep(j,N,M) {\n\t\t\t\tint r = rand() % mod;\n\t\t\t\tmat[i][j] = r, mat[j][i] = (mod - r) % mod;\n\t\t\t}\n\t\t}\n\t} while (matInv(A = mat) != M);\n\n\tvi has(M, 1); vector<pii> ret;\n\trep(it,0,M/2) {\n\t\trep(i,0,M) if (has[i])\n\t\t\trep(j,i+1,M) if (A[i][j] && mat[i][j]) {\n\t\t\t\tfi = i; fj = j; goto done;\n\t\t} assert(0); done:\n\t\tif (fj < N) ret.emplace_back(fi, fj);\n\t\thas[fi] = has[fj] = 0;\n\t\trep(sw,0,2) {\n\t\t\tll a = modpow(A[fi][fj], mod-2);\n\t\t\trep(i,0,M) if (has[i] && A[i][fj]) {\n\t\t\t\tll b = A[i][fj] * a % mod;\n\t\t\t\trep(j,0,M) A[i][j] = (A[i][j] - A[fi][j] * b) % mod;\n\t\t\t}\n\t\t\tswap(fi,fj);\n\t\t}\n\t}\n\treturn ret;\n}"
+      "code": "vector<pii> generalMatching(int N, vector<pii>& ed) {\n\tconst ll mod = 1000000007;\n\tvector<vector<ll>> mat(N, vector<ll>(N)), A;\n\tfor (pii pa : ed) {\n\t\tint a = pa.first, b = pa.second, r = rand() % mod;\n\t\tmat[a][b] = r, mat[b][a] = (mod - r) % mod;\n\t}\n\n\tint r = matInv<mod>(A = mat), M = 2*N - r, fi, fj;\n\tassert(r % 2 == 0);\n\n\tif (M != N) do {\n\t\tmat.resize(M, vector<ll>(M));\n\t\trep(i,0,N) {\n\t\t\tmat[i].resize(M);\n\t\t\trep(j,N,M) {\n\t\t\t\tint r = rand() % mod;\n\t\t\t\tmat[i][j] = r, mat[j][i] = (mod - r) % mod;\n\t\t\t}\n\t\t}\n\t} while (matInv<mod>(A = mat) != M);\n\n\tvi has(M, 1); vector<pii> ret;\n\trep(it,0,M/2) {\n\t\trep(i,0,M) if (has[i])\n\t\t\trep(j,i+1,M) if (A[i][j] && mat[i][j]) {\n\t\t\t\tfi = i; fj = j; goto done;\n\t\t} assert(0); done:\n\t\tif (fj < N) ret.emplace_back(fi, fj);\n\t\thas[fi] = has[fj] = 0;\n\t\trep(sw,0,2) {\n\t\t\tll a = modpow<mod>(A[fi][fj], mod-2);\n\t\t\trep(i,0,M) if (has[i] && A[i][fj]) {\n\t\t\t\tll b = A[i][fj] * a % mod;\n\t\t\t\trep(j,0,M) A[i][j] = (A[i][j] - A[fi][j] * b) % mod;\n\t\t\t}\n\t\t\tswap(fi,fj);\n\t\t}\n\t}\n\treturn ret;\n}"
     },
     {
       "id": "graph/GlobalMinCut.h",
@@ -1966,16 +2030,16 @@
       "name": "SuffixArray.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "Builds suffix array for a string.\n\\texttt{sa[i]} is the starting index of the suffix which\nis $i$'th in the sorted suffix array.\nThe returned vector is of size $n+1$, and \\texttt{sa[0] = n}.\nThe \\texttt{lcp} array contains longest common prefixes for\nneighbouring strings in the suffix array:\n\\texttt{lcp[i] = lcp(sa[i], sa[i-1])}, \\texttt{lcp[0] = 0}.\nAlso stores \\texttt{rank} (inverse SA) and an RMQ table on\nLCP so \\texttt{getLCP(i,j)} / \\texttt{cmpSubstr} are\n$O(1)$. The input string must not contain any nul chars.",
+      "description": "Builds suffix array for a string.\n\\texttt{sa[i]} is the starting index of the suffix which\nis $i$'th in the sorted suffix array.\nThe returned vector is of size $n+1$, and \\texttt{sa[0] = n}.\nThe \\texttt{lcp} array contains longest common prefixes for\nneighbouring strings in the suffix array:\n\\texttt{lcp[i] = lcp(sa[i], sa[i-1])}, \\texttt{lcp[0] = 0}.\nAlso stores \\texttt{rank} (inverse SA) and an RMQ table on\nLCP so \\texttt{getLCP(i,j)} / \\texttt{cmpSubstr} are\n$O(1)$. The input string must not contain any nul chars.\nBytes are ordered as unsigned; lim must exceed all bytes.",
       "usage": "",
-      "time": "$O(n \\log n)$ build",
-      "memory": "",
+      "time": "$O((n + \\texttt{lim}) \\log n)$ build",
+      "memory": "$O(n \\log n + \\texttt{lim})$",
       "status": "stress-tested",
       "author": "罗穗骞, chilli",
       "source": "Suffix array - a powerful tool for dealing with strings\n(Chinese IOI National team training paper, 2009)",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "struct SuffixArray {\n\tvi sa, lcp, rank, lg;\n\tvector<vi> st;\n\tSuffixArray(string s, int lim = 256) { // or vector<int>\n\t\ts.push_back(0); int n = sz(s), k = 0, a, b;\n\t\tvi x(all(s)), y(n), ws(max(n, lim));\n\t\tsa = lcp = y, iota(all(sa), 0);\n\t\tfor (int j = 0, p = 0; p < n; j = max(1, j * 2), lim = p) {\n\t\t\tp = j, iota(all(y), n - j);\n\t\t\trep(i,0,n) if (sa[i] >= j) y[p++] = sa[i] - j;\n\t\t\tfill(all(ws), 0);\n\t\t\trep(i,0,n) ws[x[i]]++;\n\t\t\trep(i,1,lim) ws[i] += ws[i - 1];\n\t\t\tfor (int i = n; i--;) sa[--ws[x[y[i]]]] = y[i];\n\t\t\tswap(x, y), p = 1, x[sa[0]] = 0;\n\t\t\trep(i,1,n) a = sa[i - 1], b = sa[i], x[b] =\n\t\t\t\t(y[a] == y[b] && y[a + j] == y[b + j]) ? p - 1 : p++;\n\t\t}\n\t\tfor (int i = 0, j; i < n - 1; lcp[x[i++]] = k)\n\t\t\tfor (k && k--, j = sa[x[i] - 1];\n\t\t\t\t\ts[i + k] == s[j + k]; k++);\n\t\trank = x;\n\t\tbuildRMQ();\n\t}\n\tvoid buildRMQ() {\n\t\tint n = sz(lcp);\n\t\tlg.assign(n + 1, 0);\n\t\trep(i,2,n+1) lg[i] = lg[i / 2] + 1;\n\t\tst.assign(lg[n] + 1, vi(n));\n\t\tst[0] = lcp;\n\t\trep(k,1,sz(st)) rep(i,0,n - (1 << k) + 1)\n\t\t\tst[k][i] = min(st[k-1][i], st[k-1][i + (1<<(k-1))]);\n\t}\n\tint rmq(int l, int r) { // inclusive\n\t\tif (l > r) return INT_MAX;\n\t\tint k = lg[r - l + 1];\n\t\treturn min(st[k][l], st[k][r - (1 << k) + 1]);\n\t}\n\tint getLCP(int i, int j) {\n\t\tif (i == j) return sz(sa) - 1 - i; // ignore sentinel\n\t\tint ri = rank[i], rj = rank[j];\n\t\tif (ri > rj) swap(ri, rj);\n\t\treturn rmq(ri + 1, rj);\n\t}\n\t// compare s[a..a+lena) vs s[b..b+lenb); -1 / 0 / 1\n\tint cmpSubstr(int a, int lena, int b, int lenb,\n\t\t\tconst string& s) {\n\t\tint common = min(getLCP(a, b), min(lena, lenb));\n\t\tif (common == min(lena, lenb)) {\n\t\t\tif (lena == lenb) return 0;\n\t\t\treturn lena < lenb ? -1 : 1;\n\t\t}\n\t\treturn s[a + common] < s[b + common] ? -1 : 1;\n\t}\n};"
+      "code": "struct SuffixArray {\n\tvi sa, lcp, rank, lg;\n\tvector<vi> st;\n\tSuffixArray(string s, int lim = 256) {\n\t\ts.push_back(0); int n = sz(s), k = 0, a, b;\n\t\tvi x(n), y(n), ws(max(n, lim));\n\t\trep(i,0,n) x[i] = (unsigned char)s[i];\n\t\tsa = lcp = y, iota(all(sa), 0);\n\t\tfor (int j = 0, p = 0; p < n; j = max(1, j * 2), lim = p) {\n\t\t\tp = j, iota(all(y), n - j);\n\t\t\trep(i,0,n) if (sa[i] >= j) y[p++] = sa[i] - j;\n\t\t\tfill(all(ws), 0);\n\t\t\trep(i,0,n) ws[x[i]]++;\n\t\t\trep(i,1,lim) ws[i] += ws[i - 1];\n\t\t\tfor (int i = n; i--;) sa[--ws[x[y[i]]]] = y[i];\n\t\t\tswap(x, y), p = 1, x[sa[0]] = 0;\n\t\t\trep(i,1,n) a = sa[i - 1], b = sa[i], x[b] =\n\t\t\t\t(y[a] == y[b] && y[a + j] == y[b + j]) ? p - 1 : p++;\n\t\t}\n\t\tfor (int i = 0, j; i < n - 1; lcp[x[i++]] = k)\n\t\t\tfor (k && k--, j = sa[x[i] - 1];\n\t\t\t\t\ts[i + k] == s[j + k]; k++);\n\t\trank = x;\n\t\tbuildRMQ();\n\t}\n\tvoid buildRMQ() {\n\t\tint n = sz(lcp);\n\t\tlg.assign(n + 1, 0);\n\t\trep(i,2,n+1) lg[i] = lg[i / 2] + 1;\n\t\tst.assign(lg[n] + 1, vi(n));\n\t\tst[0] = lcp;\n\t\trep(k,1,sz(st)) rep(i,0,n - (1 << k) + 1)\n\t\t\tst[k][i] = min(st[k-1][i], st[k-1][i + (1<<(k-1))]);\n\t}\n\tint rmq(int l, int r) { // inclusive\n\t\tif (l > r) return INT_MAX;\n\t\tint k = lg[r - l + 1];\n\t\treturn min(st[k][l], st[k][r - (1 << k) + 1]);\n\t}\n\tint getLCP(int i, int j) {\n\t\tif (i == j) return sz(sa) - 1 - i; // ignore sentinel\n\t\tint ri = rank[i], rj = rank[j];\n\t\tif (ri > rj) swap(ri, rj);\n\t\treturn rmq(ri + 1, rj);\n\t}\n\t// compare s[a..a+lena) vs s[b..b+lenb); -1 / 0 / 1\n\tint cmpSubstr(int a, int lena, int b, int lenb,\n\t\t\tconst string& s) {\n\t\tint common = min(getLCP(a, b), min(lena, lenb));\n\t\tif (common == min(lena, lenb)) {\n\t\t\tif (lena == lenb) return 0;\n\t\t\treturn lena < lenb ? -1 : 1;\n\t\t}\n\t\treturn (unsigned char)s[a + common] <\n\t\t\t(unsigned char)s[b + common] ? -1 : 1;\n\t}\n};"
     },
     {
       "id": "strings/SuffixTree.h",
@@ -2008,6 +2072,22 @@
       "dependencies": [],
       "includedInPdf": true,
       "code": "vi Z(const string& S) {\n\tvi z(sz(S));\n\tint l = -1, r = -1;\n\trep(i,1,sz(S)) {\n\t\tz[i] = i >= r ? 0 : min(r - i, z[i - l]);\n\t\twhile (i + z[i] < sz(S) && S[i + z[i]] == S[z[i]])\n\t\t\tz[i]++;\n\t\tif (i + z[i] > r)\n\t\t\tl = i, r = i + z[i];\n\t}\n\treturn z;\n}"
+    },
+    {
+      "id": "various/BigInt.h",
+      "name": "BigInt.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Unsigned integer with $N>0$ base-$10^9$\nlimbs, most significant first (up to $9N$ digits).\nArithmetic and parsing wrap modulo $10^{9N}$.\nString input must be nonempty decimal digits; output\nhas no leading zeros. Multiply/divide by an unsigned\n32-bit integer; division requires a nonzero divisor.\n\\texttt{div(b)} divides in place and returns the remainder.",
+      "usage": "Big<4> x(\"12345678901234567890\"); x.toString();",
+      "time": "$O(N)$ arithmetic, $O(N+D)$ string conversion\nfor $D$ decimal digits.",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "caterpillow, Claude, adapted locally",
+      "source": "https://github.com/caterpillow/cactl",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "using ull = unsigned long long;\ntemplate<int N> struct Big : array<unsigned, N> {\n\tstatic_assert(N > 0);\n\tstatic constexpr unsigned base = 1000000000;\n\tBig(ull x = 0) : array<unsigned, N>{} {\n\t\tfor (int i = N; i-- && x; x /= base)\n\t\t\t(*this)[i] = unsigned(x % base);\n\t}\n\texplicit Big(string_view s) : Big() {\n\t\tassert(!s.empty());\n\t\tfor (char c : s) assert('0' <= c && c <= '9');\n\t\tint end = sz(s);\n\t\tfor (int i = N; i-- && end > 0;) {\n\t\t\tint start = max(0, end-9);\n\t\t\tunsigned x = 0;\n\t\t\trep(j,start,end) x = x*10 + unsigned(s[j]-'0');\n\t\t\t(*this)[i] = x, end = start;\n\t\t}\n\t}\n\tstring toString() const {\n\t\tint i = 0;\n\t\twhile (i < N-1 && !(*this)[i]) i++;\n\t\tstring s = to_string((*this)[i]);\n\t\twhile (++i < N) {\n\t\t\tstring t = to_string((*this)[i]);\n\t\t\ts += string(9-sz(t), '0') + t;\n\t\t}\n\t\treturn s;\n\t}\n\tBig& operator+=(const Big& b) {\n\t\tunsigned carry = 0;\n\t\tfor (int i = N; i--;) {\n\t\t\tunsigned t = (*this)[i] + b[i] + carry;\n\t\t\t(*this)[i] = t % base, carry = t / base;\n\t\t}\n\t\treturn *this;\n\t}\n\tBig operator-() const {\n\t\tBig r = *this;\n\t\tfor (unsigned& x : r) x = base-1-x;\n\t\treturn r += 1;\n\t}\n\tBig& operator-=(const Big& b) { return *this += -b; }\n\tfriend Big operator+(Big a, const Big& b) { return a += b; }\n\tfriend Big operator-(Big a, const Big& b) { return a -= b; }\n\tBig& operator*=(unsigned b) {\n\t\tull carry = 0;\n\t\tfor (int i = N; i--;) {\n\t\t\tull t = ull((*this)[i]) * b + carry;\n\t\t\t(*this)[i] = unsigned(t % base), carry = t / base;\n\t\t}\n\t\treturn *this;\n\t}\n\tunsigned div(unsigned b) {\n\t\tassert(b);\n\t\tull rem = 0;\n\t\trep(i,0,N) {\n\t\t\tull t = rem * base + (*this)[i];\n\t\t\t(*this)[i] = unsigned(t / b), rem = t % b;\n\t\t}\n\t\treturn unsigned(rem);\n\t}\n\tBig& operator/=(unsigned b) { div(b); return *this; }\n\tfriend Big operator*(Big a, unsigned b) { return a *= b; }\n\tfriend Big operator*(unsigned b, Big a) { return a *= b; }\n\tfriend Big operator/(Big a, unsigned b) { return a /= b; }\n\tfriend unsigned operator%(Big a, unsigned b) {\n\t\treturn a.div(b);\n\t}\n};"
     },
     {
       "id": "various/BumpAllocator.h",
@@ -2250,6 +2330,22 @@
       "code": "// Row-minima indices for totally monotone f(x,y). O(N + M)\ntemplate<class Fn>\nvi min_smawk_rec(Fn& f, const vi& row, vi col) {\n\tint n = sz(row);\n\tif (!n) return {};\n\tvi red;\n\tfor (int c : col) {\n\t\twhile (sz(red) &&\n\t\t\tf(row[sz(red)-1], c) < f(row[sz(red)-1], red.back()))\n\t\t\tred.pop_back();\n\t\tif (sz(red) < n) red.pb(c);\n\t}\n\tcol = move(red);\n\n\tvi odd;\n\tfor (int i = 1; i < n; i += 2) odd.pb(row[i]);\n\tvi oddans = min_smawk_rec(f, odd, col), ans(n);\n\trep(i,0,sz(odd)) ans[2*i+1] = oddans[i];\n\tfor (int i = 0, j = 0; i < n; i += 2) {\n\t\tans[i] = col[j];\n\t\tint last = i+1 < n ? ans[i+1] : col.back();\n\t\twhile (col[j] != last) {\n\t\t\tj++;\n\t\t\tif (f(row[i], col[j]) < f(row[i], ans[i]))\n\t\t\t\tans[i] = col[j];\n\t\t}\n\t}\n\treturn ans;\n}\ntemplate<class Fn>\nvi min_smawk(Fn f, int r, int c) {\n\tvi row(r), col(c);\n\tiota(all(row), 0), iota(all(col), 0);\n\treturn min_smawk_rec(f, row, col);\n}\n\n// Min-plus c[k]=min_{i+j=k}(a[i]+b[j]), convex b. O(N+M)\ntemplate<class V>\nvector<V> min_plus_smawk(const vector<V>& a,\n\t\tconst vector<V>& b) {\n\tint n = sz(a), m = sz(b);\n\tassert(n && m);\n\tauto f = [&](int r, int c) -> tuple<int,V,int> {\n\t\tif (r < c) return {1, V{}, c};\n\t\tif (r-c >= m) return {1, V{}, -c};\n\t\treturn {0, a[c]+b[r-c], 0};\n\t};\n\tvi cols = min_smawk(f, n+m-1, n);\n\tvector<V> d(n+m-1);\n\trep(r,0,n+m-1) d[r] = a[cols[r]]+b[r-cols[r]];\n\treturn d;\n}\n\n// Min-plus conv for concave b. O(N log M + M)\ntemplate<class V>\nvector<V> min_plus_concave_one(const vector<V>& a,\n\t\tconst vector<V>& b) {\n\tint n = sz(a), m = sz(b), z = n+m-1;\n\tassert(n && m);\n\tvector<V> c(z, numeric_limits<V>::max());\n\tauto solve = [&](int l, int r, bool rev) {\n\t\tauto val = [&](int j, int k) {\n\t\t\tif (rev) j = n-1-j, k = z-1-k;\n\t\t\treturn a[j]+b[k-j];\n\t\t};\n#define better(i,j,k) val(i,k) <= val(j,k)\n\t\tauto improve = [&](int u, int v, int l, int r) {\n\t\t\twhile (r-l > 1) {\n\t\t\t\tint m = (l+r)/2;\n\t\t\t\t(better(u,v,m) ? r : l) = m;\n\t\t\t}\n\t\t\treturn l;\n\t\t};\n\t\tvector<array<int,2>> stk;\n\t\tfor (int i = l, k = l, s = -1; k < r; i++, k++) {\n\t\t\twhile (s >= 0 && i < n &&\n\t\t\t\t\tbetter(i, stk[s][0], stk[s][1])) {\n\t\t\t\tstk.pop_back(), s--;\n\t\t\t}\n\t\t\tif (i < n) {\n\t\t\t\tint t = s < 0 ? r-1\n\t\t\t\t\t: improve(stk[s][0], i, k-1, stk[s][1]);\n\t\t\t\tif (t >= k) stk.pb({i,t}), s++;\n\t\t\t}\n\t\t\tint out = rev ? z-1-k : k;\n\t\t\tc[out] = min(c[out], val(stk[s][0], k));\n\t\t\tif (stk[s][1] == k) stk.pop_back(), s--;\n\t\t}\n\t};\n\n\tsolve(0,m,0), solve(0,m,1);\n\tfor (int k = m; k < z-m; k += m+1)\n\t\tsolve(k+1,k+m+1,0), solve(z-k-m,z-k,1);\n#undef better\n\treturn c;\n}"
     },
     {
+      "id": "various/PersistentSegmentTree.h",
+      "name": "PersistentSegmentTree.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Persistent implicit segment tree with lazy\nrange updates and point set. Update/set return a new\nroot; old roots stay valid. No destructor (nodes are\nshared). Bounds inclusive. Change \\texttt{V}, \\texttt{U},\n\\texttt{id}, \\texttt{def}, \\texttt{idU}, \\texttt{binop},\n\\texttt{applyUpdate}, \\texttt{mergeUpdate}. Default is\nrange add / range max.",
+      "usage": "",
+      "time": "$O(\\log R)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "me",
+      "source": "folklore",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct Node {\n\tusing V = int;\n\tusing U = int;\n\tusing T = Node;\n\tstatic constexpr V id = INT_MIN;\n\tstatic constexpr V def = 0;\n\tstatic constexpr U idU = 0;\n\tV binop(V a, V b) { return max(a, b); }\n\tV applyUpdate(U u, V v) { return v + u; }\n\tU mergeUpdate(U oldU, U nw) { return oldU + nw; }\n\tT *lt = 0, *rt = 0;\n\tV val = def;\n\tU lazy = idU;\n\tvoid updateNode(int, int, U u) {\n\t\tlazy = mergeUpdate(lazy, u);\n\t\tval = applyUpdate(u, val);\n\t}\n\tvoid push(int l, int r) {\n\t\tint mid = l + (r - l) / 2;\n\t\tlt = new T(lt ? *lt : T());\n\t\trt = new T(rt ? *rt : T());\n\t\tlt->updateNode(l, mid, lazy);\n\t\trt->updateNode(mid + 1, r, lazy);\n\t\tlazy = idU;\n\t}\n\tT* update(int l, int r, int ql, int qr, U u) {\n\t\tif (qr < l || r < ql) return this;\n\t\tT* n = new T(*this);\n\t\tif (ql <= l && r <= qr) {\n\t\t\tn->updateNode(l, r, u);\n\t\t\treturn n;\n\t\t}\n\t\tn->push(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tn->lt = n->lt->update(l, mid, ql, qr, u);\n\t\tn->rt = n->rt->update(mid + 1, r, ql, qr, u);\n\t\tn->val = binop(n->lt->val, n->rt->val);\n\t\treturn n;\n\t}\n\tT* set(int l, int r, int i, V v) {\n\t\tif (i < l || r < i) return this;\n\t\tT* n = new T(*this);\n\t\tif (l == r) { n->val = v; n->lazy = idU; return n; }\n\t\tn->push(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tif (i <= mid) n->lt = n->lt->set(l, mid, i, v);\n\t\telse n->rt = n->rt->set(mid + 1, r, i, v);\n\t\tn->val = binop(n->lt->val, n->rt->val);\n\t\treturn n;\n\t}\n\tV query(int l, int r, int ql, int qr) {\n\t\tif (qr < l || r < ql) return id;\n\t\tif (ql <= l && r <= qr) return val;\n\t\tint mid = l + (r - l) / 2;\n\t\tT a = lt ? *lt : T();\n\t\tT b = rt ? *rt : T();\n\t\ta.updateNode(l, mid, lazy);\n\t\tb.updateNode(mid + 1, r, lazy);\n\t\treturn binop(a.query(l, mid, ql, qr),\n\t\t\tb.query(mid + 1, r, ql, qr));\n\t}\n};"
+    },
+    {
       "id": "various/Pragmas.h",
       "name": "Pragmas.h",
       "chapter": "various",
@@ -2314,6 +2410,22 @@
       ],
       "includedInPdf": true,
       "code": "template<class T> struct ptr {\n\tunsigned ind;\n\tptr(T* p = 0) : ind(p ? unsigned((char*)p - buf) : 0) {\n\t\tassert(ind < sizeof buf);\n\t}\n\tT& operator*() const { return *(T*)(buf + ind); }\n\tT* operator->() const { return &**this; }\n\tT& operator[](int a) const { return (&**this)[a]; }\n\texplicit operator bool() const { return ind; }\n};"
+    },
+    {
+      "id": "various/SparseSegmentTree2d.h",
+      "name": "SparseSegmentTree2d.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Online sparse 2D segment tree on\n$[0,n) \\times [0,m)$. Point assignment with\n\\texttt{set(x,y,v)}, rectangle query with\n\\texttt{query(x1,x2,y1,y2)} (half-open bounds).\nUnassigned points have value \\texttt{unit}.\nChange \\texttt{V}, \\texttt{unit}, \\texttt{f} for any\ncommutative monoid. Queries allocate no nodes.",
+      "usage": "",
+      "time": "$O(\\log n \\log m)$ per operation.",
+      "memory": "$O(k \\log n \\log m)$ for $k$ distinct updated\npoints. Allocated nodes are retained until destruction.",
+      "status": "stress-tested",
+      "author": "me",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct Tree2D {\n\tusing V = ll;\n\tstatic constexpr V unit = LLONG_MIN;\n\tstatic V f(V a, V b) { return max(a, b); }\n\tstruct Y {\n\t\tusing T = Y;\n\t\tT *lt = 0, *rt = 0;\n\t\tV val = unit;\n\t\tstatic V get(T* p) { return p ? p->val : unit; }\n\t\tvoid set(int l, int r, int y, V v) {\n\t\t\tif (r - l == 1) { val = v; return; }\n\t\t\tint mid = l + (r - l) / 2;\n\t\t\tT*& ch = y < mid ? lt : rt;\n\t\t\tif (!ch) ch = new T;\n\t\t\tif (y < mid) ch->set(l, mid, y, v);\n\t\t\telse ch->set(mid, r, y, v);\n\t\t\tval = f(get(lt), get(rt));\n\t\t}\n\t\tV query(int l, int r, int a, int b) const {\n\t\t\tif (b <= l || r <= a) return unit;\n\t\t\tif (a <= l && r <= b) return val;\n\t\t\tint mid = l + (r - l) / 2;\n\t\t\treturn f(lt ? lt->query(l, mid, a, b) : unit,\n\t\t\t\trt ? rt->query(mid, r, a, b) : unit);\n\t\t}\n\t\t~Y() { delete lt; delete rt; }\n\t};\n\tstruct Node {\n\t\tusing T = Node;\n\t\tT *lt = 0, *rt = 0;\n\t\tY tree;\n\t\tvoid set(int l, int r, int m, int x, int y, V v) {\n\t\t\tif (r - l > 1) {\n\t\t\t\tint mid = l + (r - l) / 2;\n\t\t\t\tT*& ch = x < mid ? lt : rt;\n\t\t\t\tif (!ch) ch = new T;\n\t\t\t\tif (x < mid) ch->set(l, mid, m, x, y, v);\n\t\t\t\telse ch->set(mid, r, m, x, y, v);\n\t\t\t\tv = f(lt ? lt->tree.query(0, m, y, y+1) : unit,\n\t\t\t\t\trt ? rt->tree.query(0, m, y, y+1) : unit);\n\t\t\t}\n\t\t\ttree.set(0, m, y, v);\n\t\t}\n\t\tV query(int l, int r, int m, int a, int b,\n\t\t\tint c, int d) const {\n\t\t\tif (b <= l || r <= a) return unit;\n\t\t\tif (a <= l && r <= b)\n\t\t\t\treturn tree.query(0, m, c, d);\n\t\t\tint mid = l + (r - l) / 2;\n\t\t\treturn f(lt ? lt->query(l,mid,m,a,b,c,d) : unit,\n\t\t\t\trt ? rt->query(mid,r,m,a,b,c,d) : unit);\n\t\t}\n\t\t~Node() { delete lt; delete rt; }\n\t} root;\n\tint n, m;\n\tTree2D(int n, int m) : n(n), m(m) {\n\t\tassert(n > 0 && m > 0);\n\t}\n\tTree2D(const Tree2D&) = delete;\n\tTree2D& operator=(const Tree2D&) = delete;\n\tvoid set(int x, int y, V v) {\n\t\tassert(0 <= x && x < n && 0 <= y && y < m);\n\t\troot.set(0, n, m, x, y, v);\n\t}\n\tV query(int x1, int x2, int y1, int y2) const {\n\t\tif (x1 >= x2 || y1 >= y2) return unit;\n\t\treturn root.query(0, n, m, x1, x2, y1, y2);\n\t}\n};"
     },
     {
       "id": "various/TernarySearch.h",
@@ -2551,7 +2663,7 @@
       "name": "HalfplaneIntersection.h",
       "chapter": "geometry",
       "language": "cpp",
-      "description": "Intersection of half-planes, each the left\nside of directed line $s\\to e$ (including the boundary).\nAdds a bounding box of side $2\\cdot 10^9$. Returns\nvertices of the bounded convex polygon in order, or\nempty if the intersection is empty.",
+      "description": "Intersection of half-planes, each the left\nside of directed line $s\\to e$ (including the boundary).\nAdds a bounding box of side $2\\cdot 10^9$. Returns\nvertices of the bounded convex polygon in order, or\nempty if the intersection is empty or has zero area.\nRequires $s\\ne e$. \\texttt{HP\\_EPS} is a distance\ntolerance.",
       "usage": "",
       "time": "$O(N\\log N)$",
       "memory": "",
@@ -2560,10 +2672,10 @@
       "source": "cp-algorithms (sort-and-incremental)",
       "dependencies": [
         "geometry/Point.h",
-        "geometry/lineIntersection.h"
+        "geometry/PolygonArea.h"
       ],
       "includedInPdf": true,
-      "code": "const double HP_EPS = 1e-9, HP_INF = 1e9;\n\nstruct HP {\n\tpp s, e, d;\n\tdouble ang;\n\tHP() {}\n\tHP(pp a, pp b) : s(a), e(b), d(b - a), ang(arg(d)) {}\n\tbool out(pp p) { return crossp(d, p - s) < -HP_EPS; }\n\tbool operator<(HP o) const { return ang < o.ang; }\n};\n\npp hpI(HP a, HP b) {\n\treturn lineInter(a.s, a.e, b.s, b.e).second;\n}\n\nvector<pp> halfPlaneInter(vector<HP> h) {\n\tpp box[] = {pp(HP_INF, HP_INF), pp(-HP_INF, HP_INF),\n\t\tpp(-HP_INF, -HP_INF), pp(HP_INF, -HP_INF)};\n\trep(i,0,4) h.push_back(HP(box[i], box[(i+1)%4]));\n\tsort(all(h));\n\tdeque<HP> dq;\n\tfor (HP L : h) {\n\t\twhile (sz(dq) > 1 &&\n\t\t\tL.out(hpI(dq.back(), dq[sz(dq)-2])))\n\t\t\tdq.pop_back();\n\t\twhile (sz(dq) > 1 && L.out(hpI(dq[0], dq[1])))\n\t\t\tdq.pop_front();\n\t\tif (!dq.empty() &&\n\t\t\tfabs(crossp(L.d, dq.back().d)) < HP_EPS) {\n\t\t\tif (dotp(L.d, dq.back().d) < 0) return {};\n\t\t\tif (L.out(dq.back().s)) dq.pop_back();\n\t\t\telse continue;\n\t\t}\n\t\tdq.push_back(L);\n\t}\n\twhile (sz(dq) > 2 &&\n\t\tdq[0].out(hpI(dq.back(), dq[sz(dq)-2])))\n\t\tdq.pop_back();\n\twhile (sz(dq) > 2 &&\n\t\tdq.back().out(hpI(dq[0], dq[1])))\n\t\tdq.pop_front();\n\tif (sz(dq) < 3) return {};\n\tvector<pp> res;\n\trep(i,0,sz(dq))\n\t\tres.push_back(hpI(dq[i], dq[(i+1)%sz(dq)]));\n\tvector<pp> out;\n\tfor (pp p : res) {\n\t\tif (out.empty() || abs(p - out.back()) > 1e-6)\n\t\t\tout.push_back(p);\n\t}\n\tif (sz(out) >= 2 && abs(out[0] - out.back()) <= 1e-6)\n\t\tout.pop_back();\n\tif (sz(out) < 3) return {};\n\tdouble a = 0;\n\trep(i,0,sz(out))\n\t\ta += crossp(out[i], out[(i+1)%sz(out)]);\n\tif (fabs(a) < 1e-8) return {};\n\treturn out;\n}"
+      "code": "const double HP_EPS = 1e-9, HP_INF = 1e9;\n\nstruct HP {\n\tpp s, e, d;\n\tdouble ang;\n\tHP() {}\n\tHP(pp a, pp b) : s(a), e(b), d((b-a)/abs(b-a)),\n\t\tang(arg(d)) {}\n\tbool out(pp p) { return crossp(d, p - s) < -HP_EPS; }\n\tbool operator<(HP o) const { return ang < o.ang; }\n};\n\npp hpI(HP a, HP b) {\n\treturn a.s + a.d * (crossp(b.s-a.s, b.d) /\n\t\tcrossp(a.d, b.d));\n}\n\nvector<pp> halfPlaneInter(vector<HP> h) {\n\tpp box[] = {pp(HP_INF, HP_INF), pp(-HP_INF, HP_INF),\n\t\tpp(-HP_INF, -HP_INF), pp(HP_INF, -HP_INF)};\n\trep(i,0,4) h.push_back(HP(box[i], box[(i+1)%4]));\n\tsort(all(h));\n\tdeque<HP> dq;\n\tfor (HP L : h) {\n\t\twhile (sz(dq) > 1 &&\n\t\t\tL.out(hpI(dq.back(), dq[sz(dq)-2])))\n\t\t\tdq.pop_back();\n\t\twhile (sz(dq) > 1 && L.out(hpI(dq[0], dq[1])))\n\t\t\tdq.pop_front();\n\t\tif (!dq.empty() &&\n\t\t\t(L.d == dq.back().d || L.d == -dq.back().d ||\n\t\t\tcrossp(L.d, dq.back().d) == 0)) {\n\t\t\tif (dotp(L.d, dq.back().d) < 0) return {};\n\t\t\tif (L.out(dq.back().s)) dq.pop_back();\n\t\t\telse continue;\n\t\t}\n\t\tdq.push_back(L);\n\t}\n\twhile (sz(dq) > 2 &&\n\t\tdq[0].out(hpI(dq.back(), dq[sz(dq)-2])))\n\t\tdq.pop_back();\n\twhile (sz(dq) > 2 &&\n\t\tdq.back().out(hpI(dq[0], dq[1])))\n\t\tdq.pop_front();\n\tif (sz(dq) < 3) return {};\n\tvector<pp> res;\n\trep(i,0,sz(dq))\n\t\tres.push_back(hpI(dq[i], dq[(i+1)%sz(dq)]));\n\tvector<pp> out;\n\tfor (pp p : res) {\n\t\tif (out.empty() || abs(p - out.back()) > HP_EPS)\n\t\t\tout.push_back(p);\n\t}\n\tif (sz(out) >= 2 && abs(out[0]-out.back()) <= HP_EPS)\n\t\tout.pop_back();\n\tif (sz(out) < 3) return {};\n\tif (polygonArea2(out) == 0) return {};\n\treturn out;\n}"
     },
     {
       "id": "geometry/HullDiameter.h",
@@ -2822,7 +2934,7 @@
       "name": "PolygonArea.h",
       "chapter": "geometry",
       "language": "cpp",
-      "description": "Returns twice the signed area of a polygon.\nClockwise enumeration gives negative area.",
+      "description": "Returns twice the signed area of a polygon.\nClockwise enumeration gives negative area.\nUses coordinates relative to the first vertex.",
       "usage": "",
       "time": "",
       "memory": "",
@@ -2833,25 +2945,25 @@
         "geometry/Point.h"
       ],
       "includedInPdf": true,
-      "code": "double polygonArea2(const vector<pp>& v) {\n\tif (v.empty()) return 0;\n\tdouble a = crossp(v.back(), v[0]);\n\trep(i,0,sz(v)-1) a += crossp(v[i], v[i+1]);\n\treturn a;\n}"
+      "code": "double polygonArea2(const vector<pp>& v) {\n\tif (v.empty()) return 0;\n\tdouble a = 0;\n\trep(i,1,sz(v)-1) a += crossp(v[i]-v[0], v[i+1]-v[0]);\n\treturn a;\n}"
     },
     {
       "id": "geometry/PolygonCenter.h",
       "name": "PolygonCenter.h",
       "chapter": "geometry",
       "language": "cpp",
-      "description": "Returns the center of mass for a polygon.",
+      "description": "Returns the center of mass for a polygon\nwith nonzero signed area. Uses local coordinates to\navoid cancellation when far from the origin.",
       "usage": "",
       "time": "$O(n)$",
       "memory": "",
-      "status": "Tested",
+      "status": "stress-tested",
       "author": "Ulf Lundstrom",
       "source": "",
       "dependencies": [
         "geometry/Point.h"
       ],
       "includedInPdf": true,
-      "code": "pp polygonCenter(const vector<pp>& v) {\n\tpp res(0, 0); double A = 0;\n\tfor (int i = 0, j = sz(v) - 1; i < sz(v); j = i++) {\n\t\tres = res + (v[i] + v[j]) * crossp(v[j], v[i]);\n\t\tA += crossp(v[j], v[i]);\n\t}\n\treturn res / A / 3.0;\n}"
+      "code": "pp polygonCenter(const vector<pp>& v) {\n\tpp res(0, 0); double A = 0;\n\trep(i,1,sz(v)-1) {\n\t\tpp p = v[i]-v[0], q = v[i+1]-v[0];\n\t\tdouble a = crossp(p, q);\n\t\tres += (p + q) * a;\n\t\tA += a;\n\t}\n\treturn v[0] + res / A / 3.0;\n}"
     },
     {
       "id": "geometry/PolygonCut.h",
@@ -2966,16 +3078,16 @@
       "name": "sphericalDistance.h",
       "chapter": "geometry",
       "language": "cpp",
-      "description": "Returns the shortest distance on the sphere with radius \\texttt{radius} between the points\nwith azimuthal angles (longitude) \\texttt{f1} ($\\phi_1$) and \\texttt{f2} ($\\phi_2$) from x axis and zenith angles\n(latitude) \\texttt{t1} ($\\theta_1$) and \\texttt{t2} ($\\theta_2$) from z axis (0 = north pole). All angles measured\nin radians. The algorithm starts by converting the spherical coordinates to cartesian coordinates\nso if that is what you have you can use only the two last rows. \\texttt{dx*radius} is then the difference\nbetween the two points in the x direction and \\texttt{d*radius} is the total distance between the points.",
+      "description": "Returns the shortest distance on the sphere with radius \\texttt{radius} between the points\nwith azimuthal angles (longitude) \\texttt{f1} ($\\phi_1$) and \\texttt{f2} ($\\phi_2$) from x axis and zenith angles\n(latitude) \\texttt{t1} ($\\theta_1$) and \\texttt{t2} ($\\theta_2$) from z axis (0 = north pole). All angles measured\nin radians. Converts to Cartesian unit vectors and uses\n$2\\operatorname{atan2}(|b-a|,|b+a|)$, stable also near\ncoincident and antipodal points.",
       "usage": "",
       "time": "",
       "memory": "",
-      "status": "tested on kattis:airlinehub",
+      "status": "stress-tested, tested on kattis:airlinehub",
       "author": "Ulf Lundstrom",
       "source": "My geometric reasoning",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "double sphericalDistance(double f1, double t1,\n\t\tdouble f2, double t2, double radius) {\n\tdouble dx = sin(t2)*cos(f2) - sin(t1)*cos(f1);\n\tdouble dy = sin(t2)*sin(f2) - sin(t1)*sin(f1);\n\tdouble dz = cos(t2) - cos(t1);\n\tdouble d = sqrt(dx*dx + dy*dy + dz*dz);\n\treturn radius*2*asin(d/2);\n}"
+      "code": "double sphericalDistance(double f1, double t1,\n\t\tdouble f2, double t2, double radius) {\n\tarray<double,3> a = {sin(t1)*cos(f1),\n\t\tsin(t1)*sin(f1), cos(t1)};\n\tarray<double,3> b = {sin(t2)*cos(f2),\n\t\tsin(t2)*sin(f2), cos(t2)};\n\tdouble d = 0, s = 0;\n\trep(i,0,3) {\n\t\td += (b[i]-a[i])*(b[i]-a[i]);\n\t\ts += (b[i]+a[i])*(b[i]+a[i]);\n\t}\n\treturn radius*2*atan2(sqrt(d), sqrt(s));\n}"
     },
     {
       "id": "appendix/techniques.txt",
@@ -3046,6 +3158,19 @@
       "level": 2,
       "title": "I/O",
       "searchText": "I/O"
+    },
+    {
+      "type": "snippet",
+      "id": "contest/Input.h",
+      "chapter": "contest",
+      "includedInPdf": true
+    },
+    {
+      "type": "prose",
+      "id": "contest/p/1",
+      "chapter": "contest",
+      "latex": "\\myneedspace{8\\baselineskip}",
+      "searchText": "8"
     },
     {
       "type": "snippet",
@@ -3356,6 +3481,18 @@
     },
     {
       "type": "snippet",
+      "id": "data-structures/Rope.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/WaveletTree.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
       "id": "data-structures/HashMap.h",
       "chapter": "data-structures",
       "includedInPdf": true
@@ -3392,12 +3529,6 @@
     },
     {
       "type": "snippet",
-      "id": "data-structures/PersistentSegmentTree.h",
-      "chapter": "data-structures",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
       "id": "data-structures/UnionFind.h",
       "chapter": "data-structures",
       "includedInPdf": false
@@ -3422,6 +3553,12 @@
     },
     {
       "type": "snippet",
+      "id": "data-structures/PrefixSum.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
       "id": "data-structures/Matrix.h",
       "chapter": "data-structures",
       "includedInPdf": true
@@ -3429,6 +3566,12 @@
     {
       "type": "snippet",
       "id": "data-structures/LineContainer.h",
+      "chapter": "data-structures",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "data-structures/MonotonicCHT.h",
       "chapter": "data-structures",
       "includedInPdf": true
     },
@@ -4610,6 +4753,42 @@
       "searchText": "Various"
     },
     {
+      "type": "snippet",
+      "id": "various/EulerTourTree.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/SegmentTreeBeats.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/SparseSegmentTree2d.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/PersistentSegmentTree.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/MinPlusConvolution.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/LinkCutTree.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
       "type": "heading",
       "id": "various/h/intervals",
       "chapter": "various",
@@ -4642,6 +4821,12 @@
       "level": 2,
       "title": "Misc. algorithms",
       "searchText": "Misc. algorithms"
+    },
+    {
+      "type": "snippet",
+      "id": "various/BigInt.h",
+      "chapter": "various",
+      "includedInPdf": true
     },
     {
       "type": "snippet",
@@ -4678,38 +4863,6 @@
     {
       "type": "snippet",
       "id": "various/DivideAndConquerDP.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "heading",
-      "id": "various/h/extras",
-      "chapter": "various",
-      "level": 2,
-      "title": "Extras",
-      "searchText": "Extras"
-    },
-    {
-      "type": "snippet",
-      "id": "various/EulerTourTree.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/SegmentTreeBeats.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/MinPlusConvolution.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/LinkCutTree.h",
       "chapter": "various",
       "includedInPdf": true
     },

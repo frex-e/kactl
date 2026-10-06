@@ -11,7 +11,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "oxlint",
-    "test": "node scripts/test-latex.mjs"
+    "test": "node scripts/test-latex.mjs && npm run test:copy",
+    "test:copy": "make -C .. preprocess && node scripts/test-copy.mjs"
   },
   "dependencies": {
     "highlight.js": "^11.12.0",

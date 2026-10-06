@@ -13,13 +13,14 @@
 #include "../numerical/MatrixInverse-mod.h"
 
 vector<pii> generalMatching(int N, vector<pii>& ed) {
+	const ll mod = 1000000007;
 	vector<vector<ll>> mat(N, vector<ll>(N)), A;
 	for (pii pa : ed) {
 		int a = pa.first, b = pa.second, r = rand() % mod;
 		mat[a][b] = r, mat[b][a] = (mod - r) % mod;
 	}
 
-	int r = matInv(A = mat), M = 2*N - r, fi, fj;
+	int r = matInv<mod>(A = mat), M = 2*N - r, fi, fj;
 	assert(r % 2 == 0);
 
 	if (M != N) do {
@@ -31,7 +32,7 @@ vector<pii> generalMatching(int N, vector<pii>& ed) {
 				mat[i][j] = r, mat[j][i] = (mod - r) % mod;
 			}
 		}
-	} while (matInv(A = mat) != M);
+	} while (matInv<mod>(A = mat) != M);
 
 	vi has(M, 1); vector<pii> ret;
 	rep(it,0,M/2) {
@@ -42,7 +43,7 @@ vector<pii> generalMatching(int N, vector<pii>& ed) {
 		if (fj < N) ret.emplace_back(fi, fj);
 		has[fi] = has[fj] = 0;
 		rep(sw,0,2) {
-			ll a = modpow(A[fi][fj], mod-2);
+			ll a = modpow<mod>(A[fi][fj], mod-2);
 			rep(i,0,M) if (has[i] && A[i][fj]) {
 				ll b = A[i][fj] * a % mod;
 				rep(j,0,M) A[i][j] = (A[i][j] - A[fi][j] * b) % mod;

@@ -40,6 +40,69 @@ void testEmpty() {
 	assert(halfPlaneInter(h).empty());
 }
 
+void testPrecision() {
+	mt19937 rng(314159);
+	for (double side : {1e-7,1e-5,1.,1000.})
+		for (pp shift : vector<pp>{{0,0},{1e8,-1e8}})
+			for (double length : {1e-6,1.,1e6}) {
+				vector<pp> v = {shift,shift+pp(side,0),
+					shift+pp(side,side),shift+pp(0,side)};
+				vector<HP> h;
+				rep(i,0,4) {
+					pp d = (v[(i+1)%4]-v[i])/side;
+					h.emplace_back(v[i],v[i]+d*length);
+				}
+				double tol = 8*numeric_limits<double>::epsilon()
+					* max(1.,abs(shift))+1e-12*side;
+				rep(it,0,10) {
+					shuffle(all(h),rng);
+					vector<pp> res = halfPlaneInter(h);
+					assert(sz(res) == 4);
+					for (pp p : v) {
+						double best = numeric_limits<double>::infinity();
+						for (pp q : res) best = min(best,abs(p-q));
+						assert(best <= tol);
+					}
+				}
+			}
+	for (double length : {1e-6,1.,1e6}) {
+		HP h({0,0},{length,0});
+		assert(h.out({0,-1e-3}));
+		assert(!h.out({0,1e-3}));
+	}
+	rep(it,0,1000) {
+		pp rot = polar(1.,double(rng())/rng.max()*6.28);
+		pp shift = it%2 ? pp(1e8,-1e8) : pp();
+		vector<pp> v;
+		for (pp p : vector<pp>{{0,0},{1,0},{1,1},{0,1}})
+			v.push_back(p*rot+shift);
+		vector<HP> h;
+		rep(i,0,4) {
+			h.emplace_back(v[i],v[(i+1)%4]);
+			h.push_back(h.back());
+		}
+		shuffle(all(h),rng);
+		auto res = halfPlaneInter(h);
+		assert(sz(res) == 4);
+		assert(abs(polygonArea2(res)-polygonArea2(v)) < 1e-6);
+	}
+	// Near-parallel lines meet inside the bounding box.
+	vector<HP> h = {HP({0,0},{1,0}),
+		HP({0,0},{1,5e-10}),HP({0,0.05},{-1,0.05}),
+		HP({0,0},{0,-1})};
+	auto res = halfPlaneInter(h);
+	assert(sz(res) == 3);
+	assert(abs(polygonArea2(res)-5e6) < 1e-6);
+	checkPoly(h,res);
+	// Redundant parallel lines and lower-dimensional results.
+	h = {HP({0,0},{1,0}),HP({0,-1},{2,-1}),
+		HP({1,0},{1,1}),HP({1,1},{0,1}),
+		HP({0,1},{0,0})};
+	assert(abs(polygonArea2(halfPlaneInter(h))-2) < 1e-12);
+	h.push_back(HP({0,0},{-1,0}));
+	assert(halfPlaneInter(h).empty());
+}
+
 void testVsCutAndSample() {
 	rep(it,0,200) {
 		const double B = 10;
@@ -93,6 +156,7 @@ void testVsCutAndSample() {
 int main() {
 	testUnitSquare();
 	testEmpty();
+	testPrecision();
 	testVsCutAndSample();
 	cout << "Tests passed!" << endl;
 }

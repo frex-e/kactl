@@ -4,7 +4,7 @@
  * License: CC0
  * Source: based on KACTL's FFT
  * Description: \texttt{ntt(a)} computes $\hat f(k) = \sum_x a[x] g^{xk}$ for all $k$, where $g=\text{root}^{(mod-1)/N}$.
- * $N$ must be a power of 2.
+ * $N$ must be a power of 2 dividing $mod-1$.
  * Useful for convolution modulo specific nice primes of the form $2^a b+1$,
  * where the convolution result has size at most $2^a$. For arbitrary modulo, see FFTMod.
    \texttt{conv(a, b) = c}, where $c[x] = \sum a[i]b[x-i]$.
@@ -27,7 +27,7 @@ void ntt(vl &a) {
 	static vl rt(2, 1);
 	for (static int k = 2, s = 2; k < n; k *= 2, s++) {
 		rt.resize(n);
-		ll z[] = {1, modpow(root, mod >> s)};
+		ll z[] = {1, modpow<mod>(root, mod >> s)};
 		rep(i,k,2*k) rt[i] = rt[i / 2] * z[i & 1] % mod;
 	}
 	vi rev(n);
@@ -42,9 +42,9 @@ void ntt(vl &a) {
 }
 vl conv(const vl &a, const vl &b) {
 	if (a.empty() || b.empty()) return {};
-	int s = sz(a) + sz(b) - 1, B = 32 - __builtin_clz(s),
-	    n = 1 << B;
-	int inv = modpow(n, mod - 2);
+	int s = sz(a) + sz(b) - 1, n = 1;
+	while (n < s) n *= 2;
+	int inv = modpow<mod>(n, mod - 2);
 	vl L(a), R(b), out(n);
 	L.resize(n), R.resize(n);
 	ntt(L), ntt(R);
