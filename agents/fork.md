@@ -48,12 +48,16 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | File | What |
 |---|---|
 | `content/data-structures/CartesianTree.h` | linear min Cartesian tree; parent/left/right indices, leftmost tie-breaking |
+| `content/data-structures/Rope.h` | GNU rope API reference: editable sequences, shared snapshots, substring and concatenation |
+| `content/data-structures/WaveletTree.h` | static range kth, countLess, and value-range count; compressed signed int values, half-open bounds, 64-bit thresholds |
+| `content/data-structures/PrefixSum.h` | static box sums with runtime dimension count and per-axis widths; flat row-major input, half-open bounds |
 | `content/contest/Random.h` | RNG + random ints / shuffle / odd hash bases |
 | `content/contest/Output.h` | `std::format` binary printing + fixed precision |
 | `content/data-structures/UnorderedMap-codeforces.h` | web-only standard `unordered_map` with a per-run randomized SplitMix64 hash for Codeforces |
 | `content/data-structures/BinaryTrie.h` | insert/`insert<1>`/erase, count, XOR-min/max, countLG, lazy XOR, mex, each, set-union merge / `merge<1>` |
 | `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
 | `content/data-structures/LiChao.h` | min Li Chao (kept alongside `LineContainer.h`) |
+| `content/data-structures/MonotonicCHT.h` | max CHT with nondecreasing slopes and queries; linear total time, 128-bit comparisons (from cactl) |
 | `content/number-theory/LinearSieve.h` | linear sieve + least prime factor (kept alongside Eratosthenes) |
 | `content/number-theory/Mobius.h` | Möbius sieve (formulas stay in `chapter.tex`) |
 | `content/numerical/RREF.h` | rectangular reduced row echelon form |
@@ -66,10 +70,11 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/graph/Centroid.h` | centroid decomposition |
 | `content/graph/Dinic2.h` | cactl Dinic without scaling; blocking-flow DFS, dead-end pruning, flow limits, constructor/addEdge/leftOfMinCut API, correct self-loop pairs; kept alongside Dinic |
 | `content/various/EulerTourTree.h` | treap Euler tours: link/cut/connectivity, generic point set/get and lazy component update/query/size; recycled edge tokens |
-| `content/data-structures/PersistentSegmentTree.h` | persistent implicit lazy tree with point set |
+| `content/various/PersistentSegmentTree.h` | persistent implicit lazy tree with point set; moved from data structures |
 | `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/query/ans) |
 | `content/data-structures/StaticRangeQuery.h` | disjoint sparse table, any associative op |
 | `content/various/SegmentTreeBeats.h` | range chmin/chmax/add + sum/min/max (USACO Guide) |
+| `content/various/SparseSegmentTree2d.h` | online sparse 2D tree: point assignment, half-open rectangle queries, customizable commutative aggregate |
 | `content/various/LinkCutTree.h` | moved from graph; unrooted path lazy via `binop`/`rev`/`applyUpdate`/`mergeUpdate` (default add+sum) |
 | `content/data-structures/MonotonicMap.h` | prefix/suffix min/max with insertions (monotonic map) |
 | `content/graph/Blossom.h` | Gabow--Edmonds matching (ei1333 / LC), 0-indexed |
@@ -106,7 +111,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/combinatorial/chapter.tex` | 12-fold way table (balls/bins / functions $[n]\to[k]$) |
 | `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks; primitive roots |
 | `content/contest/chapter.tex` | Random + Output.h |
-| `content/various/chapter.tex` | builtins, pragmas, memory; former Extras snippets before Debugging tricks |
+| `content/various/chapter.tex` | tree snippets and min-plus convolution directly in Various; builtins, pragmas, memory |
 | `content/data-structures/chapter.tex` | trees / Li Chao / trie / persistent / dyncon / static RQ / monotonic map |
 | `content/numerical/chapter.tex` | RREF, XOR basis, QuadRoots, MatrixInverse-mod; Fourier → Convolutions |
 | `content/strings/chapter.tex` | Hashing-codeforces in the PDF (alongside `Hashing.h`) |
@@ -122,7 +127,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
 - `stress-tests/graph/Dinic2.cpp`: brute min-cut and Dinic comparisons, residual pairs and conservation, self-loops, reverse/parallel edges, flow limits, capacity edits, and 64-bit capacities
 - `stress-tests/various/LinkCutTree.cpp` covers link/cut connectivity plus path sum/add, point set, and rooted LCA
-- New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
+- New stress tests: SparseLazySegmentTree, LiChao, MonotonicCHT, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`
 
 - Geometry stress tests use complex coordinates; `ComplexGeometry`, `Angle`, and `kdTree` cover primitives, integer precision, floating hulls, cross-header use, rotations, transformations, and nearest-neighbor queries.

@@ -6,7 +6,7 @@ namespace sparse {
 #include "../../content/data-structures/SparseLazySegmentTree.h"
 }
 namespace persist {
-#include "../../content/data-structures/PersistentSegmentTree.h"
+#include "../../content/various/PersistentSegmentTree.h"
 }
 
 using persist::Node;
