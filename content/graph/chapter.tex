@@ -16,9 +16,40 @@
 	\kactlimport{MinCostMaxFlow.h}
 	\kactlimport{EdmondsKarp.h}
 	\kactlimport{Dinic.h}
+	\kactlimport{Dinic2.h}
 	\kactlimport{MinCut.h}
 	\kactlimport{GlobalMinCut.h}
 	\kactlimport{GomoryHu.h}
+	\subsection{Dinic variants and capacity edits}
+		\texttt{Dinic} uses capacity scaling; \texttt{Dinic2}
+		uses smaller edges and a blocking-flow DFS without scaling.
+		Choose by workload: \texttt{Dinic2} is often faster,
+		while scaling gives the stronger general worst-case bound.
+		\texttt{Dinic2(n)} starts a fresh graph; to reset,
+		assign \texttt{D = Dinic2(n)}. Save edge indices and
+		original capacities yourself if needed.
+
+		\noindent\textbf{Incremental flow (Dinic2).}
+		Track the total separately: \texttt{F += D.calc(s,t)}.
+		Between calls the residuals must stay nonnegative,
+		each pair must sum to its current cap plus reverse cap,
+		and flow must be conserved away from $s,t$.
+		For edge $e=\texttt{adj[a][i]}$ to $b$, let
+		$r=\texttt{adj[b][e.rev]}$ and $f=r.c-\text{rcap}$.
+		Raise its cap by $d$: \texttt{e.c += d}, then augment.
+		Lower its cap by $d$ without going below $f$:
+		\texttt{e.c -= d}, then augment.
+
+		\noindent\textbf{Lower below flow.}
+		For new cap $c'<f$, put $x=f-c'$,
+		\texttt{e.c=0; r.c-=x}.
+		Reroute with \texttt{z=x-D.calc(a,b,x)};
+		cancel the rest with \texttt{D.calc(a,s,z)} if $a\ne s$
+		and \texttt{D.calc(t,b,z)} if $b\ne t$.
+		Then \texttt{F -= z; F += D.calc(s,t)}.
+		Self-loops carry zero flow and need no rerouting.
+		Min-cut labels refer to the last exhausted $s$--$t$ call;
+		a call stopped by a flow limit does not certify a cut.
 	\subsection{Demands and lower bounds}
 		\noindent\textbf{Lower bounds.}
 		Edge $u\to v$ with capacity in $[L,R]$: force $L$

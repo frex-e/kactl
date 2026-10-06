@@ -64,6 +64,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
 | `content/graph/Centroid.h` | centroid decomposition |
+| `content/graph/Dinic2.h` | cactl Dinic without scaling; blocking-flow DFS, dead-end pruning, flow limits, constructor/addEdge/leftOfMinCut API, correct self-loop pairs; kept alongside Dinic |
 | `content/various/EulerTourTree.h` | treap Euler tours: link/cut/connectivity, generic point set/get and lazy component update/query/size; recycled edge tokens |
 | `content/data-structures/PersistentSegmentTree.h` | persistent implicit lazy tree with point set |
 | `content/data-structures/OfflineDynamicConnectivity.h` | D\&C on time + rollback DSU (toggle/query/ans) |
@@ -119,6 +120,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 - `stress-tests/data-structures/LazySegmentTree.cpp` rewritten for `LazyUpdateTree`
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
+- `stress-tests/graph/Dinic2.cpp`: brute min-cut and Dinic comparisons, residual pairs and conservation, self-loops, reverse/parallel edges, flow limits, capacity edits, and 64-bit capacities
 - `stress-tests/various/LinkCutTree.cpp` covers link/cut connectivity plus path sum/add, point set, and rooted LCA
 - New stress tests: SparseLazySegmentTree, LiChao, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
 - `stress-tests/strings/SuffixArray.cpp` now also checks rank, `getLCP`, and `cmpSubstr`
