@@ -71,6 +71,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/various/Pragmas.h` | pasteable GCC pragmas |
 | `content/geometry/HalfplaneIntersection.h` | half-plane intersection (left of $s\to e$) |
 | `content/graph/Centroid.h` | centroid decomposition |
+| `content/graph/Reroot.h` | two-pass rerooting DP; vertex/edge hooks, prefix/suffix child exclusion, and distance-sum example |
 | `content/graph/Dinic2.h` | cactl Dinic without scaling; blocking-flow DFS, dead-end pruning, flow limits, constructor/addEdge/leftOfMinCut API, correct self-loop pairs; kept alongside Dinic |
 | `content/various/EulerTourTree.h` | treap Euler tours: link/cut/connectivity, generic point set/get and lazy component update/query/size; recycled edge tokens |
 | `content/various/PersistentSegmentTree.h` | persistent implicit lazy tree with point set; moved from data structures |
@@ -132,6 +133,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 ## Tests
 
+- `stress-tests/graph/Reroot.cpp`: distance sums against BFS from every vertex; paths, stars, random trees, shuffled adjacency lists, and repeated runs with different traversal roots
 - `stress-tests/numerical/Lagrange.cpp`: exhaustive small-field polynomials, randomized Horner comparisons, signed and large indices, and sums of powers
 - `stress-tests/various/BigInt.cpp`: decimal-digit and native 128-bit oracles; parsing/formatting, modular arithmetic, small-integer multiplication/division/remainder, aliasing, carries/borrows, and long input
 - `stress-tests/various/EulerTourTree.cpp`: naive forest comparisons, treap/tour invariants, edge recycling, large paths and stars
