@@ -6,6 +6,8 @@
  * Description: Linear sieve. \texttt{lp[i]} is the least
  *  prime factor of $i$; \texttt{pr} lists primes $\le N$.
  *  Factor $i$ by repeatedly dividing out \texttt{lp[i]}.
+ *  Sieves $[2,\texttt{SIEVE\_N}]$, both endpoints included;
+ *  lp has indices $[0,\texttt{SIEVE\_N}]$.
  * Time: $O(N)$
  * Status: stress-tested
  */

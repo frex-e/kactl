@@ -3,10 +3,12 @@
  * Date: 2026-08-28
  * License: CC0
  * Source: https://github.com/caterpillow/cactl Trie.h
- * Description: Binary trie on $[0,2^B)$. Set \texttt{insert}/
+ * Description: Binary trie on $[0,2^B)$:
+ *  0 included, $2^B$ excluded. Set \texttt{insert}/
  *  \texttt{erase}, multiset \texttt{insert<1>}, XOR-min/max,
  *  count $x\oplus y<k$ (\texttt{countLG<0>}) or $>k$
  *  (\texttt{countLG<1>}), lazy XOR-all, mex (set).
+ *  Both countLG variants exclude equality to k.
  *  \texttt{count(x)} counts copies of $x$.
  *  \texttt{kth(k)}: 0-indexed kth smallest (with repeats),
  *  requires $0 \le k < \texttt{cnt}$.

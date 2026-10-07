@@ -80,8 +80,8 @@ class TestChapterParse(unittest.TestCase):
                 "combinatorial",
                 "graph",
                 "strings",
-                "various",
                 "geometry",
+                "various",
                 "appendix",
             ],
         )

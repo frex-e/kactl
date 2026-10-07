@@ -1,6 +1,6 @@
 #include "../utilities/template.h"
 
-#include "../../content/data-structures/BinaryTrie.h"
+#include "../../content/various/BinaryTrie.h"
 
 int bruteMex(const set<int>& vals, int xr) {
 	set<int> xored;

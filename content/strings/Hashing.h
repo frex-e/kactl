@@ -4,6 +4,9 @@
  * License: CC0
  * Source: own work
  * Description: Self-explanatory methods for string hashing.
+ *  \texttt{hashInterval(a,b)} hashes $[a,b)$:
+ *  a included, b excluded. \texttt{getHashes(s,len)[i]}
+ *  hashes $[i,i+len)$, excluding i+len.
  * Status: stress-tested
  */
 #pragma once

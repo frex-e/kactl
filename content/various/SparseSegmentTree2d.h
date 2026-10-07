@@ -6,7 +6,9 @@
  * Description: Online sparse 2D segment tree on
  *  $[0,n) \times [0,m)$. Point assignment with
  *  \texttt{set(x,y,v)}, rectangle query with
- *  \texttt{query(x1,x2,y1,y2)} (half-open bounds).
+ *  \texttt{query(x1,x2,y1,y2)} uses
+ *  $[x1,x2)\times[y1,y2)$: lower bounds included,
+ *  upper bounds excluded. Node bounds are half-open too.
  *  Unassigned points have value \texttt{unit}.
  *  Change \texttt{V}, \texttt{unit}, \texttt{f} for any
  *  commutative monoid. Queries allocate no nodes.

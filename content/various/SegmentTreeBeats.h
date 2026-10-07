@@ -5,7 +5,8 @@
  * Source: https://usaco.guide/adv/segtree-beats
  * Description: Segment tree beats. Range
  *  \texttt{chmin}/\texttt{chmax}/\texttt{add} and range
- *  sum/min/max. Bounds inclusive, 0-indexed.
+ *  sum/min/max. All update/query bounds $[ql,qr]$
+ *  include both endpoints; full range $[0,n-1]$.
  * Time: $O(\log^2 N)$ amortized
  * Status: stress-tested
  */

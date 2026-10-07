@@ -6,6 +6,7 @@
  * Description:\\
 \begin{minipage}{\dimexpr\linewidth-15mm\relax}
 If a unique intersection point between the line segments going from \texttt{s1} to \texttt{e1} and from \texttt{s2} to \texttt{e2} exists then it is returned.
+Both endpoints of each segment are included.
 If no intersection point exists an empty vector is returned.
 If infinitely many exist a vector with 2 elements is returned, containing the endpoints of the common line segment.
 \end{minipage}%

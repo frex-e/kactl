@@ -1,7 +1,7 @@
 #include "../utilities/template.h"
 
 #include "../../content/data-structures/LazySegmentTree.h"
-#include "../../content/data-structures/SparseLazySegmentTree.h"
+#include "../../content/various/SparseLazySegmentTree.h"
 
 static_assert(Node::id == INT_MIN);
 

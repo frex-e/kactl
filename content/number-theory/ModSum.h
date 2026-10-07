@@ -7,6 +7,7 @@
  *
  * \texttt{modsum(to, c, k, m)} = $\sum_{i=0}^{\mathrm{to}-1}{(ki+c) \% m}$.
  * \texttt{divsum} is similar but for floored division.
+ *  Both sum over $[0,to)$: 0 included, to excluded.
  * Time: $\log(m)$, with a large constant.
  * Status: Tested for all |k|,|c|,to,m <= 50, and on kattis:aladin
  */

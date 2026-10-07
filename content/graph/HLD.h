@@ -11,6 +11,13 @@
  * values are stored in the edges, as opposed to the nodes. All values
  * initialized to the segtree default. Root must be 0.
  * Path $u$--$v$ includes both endpoints (node values).
+ *  In edge mode, includes all path edges, excluding the
+ *  LCA's stored value. Subtrees include v in node mode,
+ *  exclude its parent edge in edge mode.
+ *  \texttt{process} callbacks use $[l,r)$: l included,
+ *  r excluded. Subtree positions are
+ *  $[pos[v]+\texttt{VALS\_EDGES},pos[v]+siz[v])$.
+ *  The underlying lazy tree uses inclusive $[l,r-1]$.
  * Time: O((\log N)^2)
  * Status: stress-tested against old HLD
  */

@@ -7,6 +7,10 @@
  *  Layered form (quadrangle on $C$ is sufficient):
  *  $\mathrm{dp}(t,j)=\min_{0\le k\le j}\mathrm{dp}(t-1,k-1)+C(k,j)$.
  *  See KnuthDP.h for quadrangle patterns.
+ *  solve/rec index bounds $[L,R)$ and candidate bounds
+ *  $[LO,HI)$, $[lo(i),hi(i))$ include the lower endpoint
+ *  and exclude the upper. The layered cost $C(k,j)$
+ *  covers $[k,j]$, both endpoints included.
  * Usage:
  *  Fill in the four hooks, then call solve(L, R) to fill
  *  a[L..R-1].

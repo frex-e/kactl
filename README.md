@@ -43,7 +43,7 @@ though this is usually only done before important contests, and not on the main 
 The algorithms that are not included in the pdf are left commented out in `chapter.tex`.
 
 To build the notebook, type `make kactl` (or `make fast`) on a \*nix machine -- this will update `kactl.pdf`.
-`make web-pdf` is the same two-pass PDF without `test-session.pdf`, and is what GitHub Pages uses.
+`make web-pdf` is the same three-pass PDF without `test-session.pdf`, and is what GitHub Pages uses. Full builds run `makeindex` before the final pass to populate the alphabetical index with resolved page numbers.
 Both run `make preprocess` first (listings + `snippets.json`), then copy the PDF to `web/public/kactl.pdf` for the snippets site (that copy is gitignored).
 (Windows might work as well, but is not tested.) `doc/README` has a few more notes about this.
 

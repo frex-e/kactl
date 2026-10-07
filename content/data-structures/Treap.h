@@ -4,8 +4,10 @@
  * Source: folklore
  * Description: Implicit treap on a sequence. Split/merge by
  *  index. \texttt{split(t, k)} puts the first $k$ elements
- *  on the left. Lazy range updates and queries. Half-open
- *  index ranges $[l,r)$. Change \texttt{V}, \texttt{U},
+ *  on the left: indices $[0,k)$, k excluded.
+ *  Lazy range updates and queries. Index ranges $[l,r)$
+ *  include l and exclude r, including \texttt{move}.
+ *  Change \texttt{V}, \texttt{U},
  *  \texttt{id}, \texttt{def}, \texttt{idU}, \texttt{binop},
  *  \texttt{applyUpdate}, \texttt{mergeUpdate}. Default is
  *  range add/sum.

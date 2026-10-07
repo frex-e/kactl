@@ -4,6 +4,8 @@
  * Source: http://codeforces.com/blog/entry/8219
  * Description: Interval DP
  *  $dp(i,j)=\min_{i\le k<j}(dp(i,k)+dp(k+1,j))+C(i,j)$.
+ *  dp and C use $[i,j]$, both endpoints included.
+ *  Split candidates use $[i,j)$: i included, j excluded.
  *  Any fixed offsets from $k$ work. Let $opt(i,j)$ be an
  *  optimal $k$. Need
  *  $opt(i,j-1)\le opt(i,j)\le opt(i+1,j)$.

@@ -4,8 +4,9 @@
  * License: CC0
  * Source: me
  * Description: Recursive segment tree with range updates,
- *  point set, and range queries. Bounds inclusive on both
- *  sides. Change \texttt{V}, \texttt{U}, \texttt{id},
+ *  point set, and range queries. Update/query bounds
+ *  $[ql,qr]$ include both endpoints; full range $[0,n-1]$.
+ *  Change \texttt{V}, \texttt{U}, \texttt{id},
  *  \texttt{def}, \texttt{idU}, \texttt{binop},
  *  \texttt{applyUpdate}, \texttt{mergeUpdate}. Default is
  *  range add and range max. Used by HLD.

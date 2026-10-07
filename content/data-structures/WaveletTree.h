@@ -3,11 +3,13 @@
  * Date: 2026-10-06
  * License: CC0
  * Description: Static range order statistics on an int array.
- *  Compresses values; preserves input. Indices and value
- *  ranges are half-open. kth(l,r,k) is the 0-indexed kth
+ *  Compresses values; preserves input. All queries use
+ *  indices $[l,r)$: l included, r excluded.
+ *  kth(l,r,k) is the 0-indexed kth
  *  smallest in a[l,r), including duplicates; requires
  *  $0 \le k < r-l$. countLess(l,r,x) counts values $<x$;
  *  count(l,r,lo,hi) counts $lo \le a_i < hi$.
+ *  Value range $[lo,hi)$: lo included, hi excluded.
  *  Counts allow empty ranges. Thresholds are ll so x+1LL
  *  is safe for inclusive bounds, even at \texttt{INT\_MAX}.
  * Usage:

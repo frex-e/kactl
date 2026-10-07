@@ -4,6 +4,7 @@
  * License: CC0
  * Description: Given \texttt{f} and $N$, finds the smallest fraction $p/q \in [0, 1]$
  * such that \texttt{f(p/q)} is true, and $p, q \le N$.
+ *  Both 0 and 1 are included in the search domain.
  * You may want to throw an exception from \texttt{f} if it finds an exact solution,
  * in which case $N$ can be removed.
  * Usage: fracBS([](Frac f) { return f.p>=3*f.q; }, 10); // {1,3}

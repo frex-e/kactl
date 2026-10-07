@@ -15,6 +15,10 @@
  * LCP so \texttt{getLCP(i,j)} / \texttt{cmpSubstr} are
  * $O(1)$. The input string must not contain any nul chars.
  * Bytes are ordered as unsigned; lim must exceed all bytes.
+ *  \texttt{rmq(l,r)} queries LCP indices $[l,r]$, both
+ *  endpoints included. \texttt{cmpSubstr(a,lena,b,lenb,s)}
+ *  compares $[a,a+lena)$ with $[b,b+lenb)$:
+ *  starts included, ends excluded.
  * Time: O((n + \texttt{lim}) \log n) build
  * Memory: O(n \log n + \texttt{lim})
  * Status: stress-tested

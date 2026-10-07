@@ -6,6 +6,9 @@
  * Description: A set (not multiset!) with support for finding the n'th
  * element, and finding the index of an element.
  * To get a map, change \texttt{null\_type}.
+ *  \texttt{order\_of\_key(x)} counts keys strictly below x
+ *  (x excluded). \texttt{find\_by\_order(k)} is 0-indexed;
+ *  returns end() if $k\ge\texttt{size()}$.
  * Time: O(\log N)
  */
 #pragma once

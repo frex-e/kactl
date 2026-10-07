@@ -3,6 +3,8 @@
  * License: CC0
  * Description: \texttt{z[i]} computes the length of the longest common prefix of \texttt{s[i:]} and \texttt{s},
  * except \texttt{z[0] = 0}. (abacaba -> 0010301)
+ *  Matches $[0,z[i])$ with $[i,i+z[i])$:
+ *  starts included, ends excluded.
  * Time: O(n)
  * Status: stress-tested
  */

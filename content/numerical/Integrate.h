@@ -7,6 +7,8 @@
  *  Simpson's rule. The error should be proportional to $h^4$, although in
  *  practice you will want to verify that the result is stable to desired
  *  precision when epsilon changes.
+ *  \texttt{quad(a,b,f)} integrates over $[a,b]$;
+ *  f must be defined at both endpoints (both sampled).
  * Status: mostly untested
  */
 #pragma once

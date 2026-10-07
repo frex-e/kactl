@@ -3,8 +3,13 @@
  * Date: 2009-10-30
  * License: CC0
  * Source: folklore/TopCoder
- * Description: Computes partial sums \texttt{a[0] + a[1] + ... + a[pos - 1]}, and updates single elements \texttt{a[i]},
- * taking the difference between the old and new value.
+ * Description: Point updates and prefix sums.
+ *  \texttt{query(pos)} sums $[0,pos)$: 0 included,
+ *  pos excluded. Updates add the difference between the
+ *  old and new value. With nonnegative values,
+ *  \texttt{lower\_bound(sum)} finds the first index pos
+ *  whose inclusive prefix $[0,pos]$ sums to at least sum;
+ *  returns $n$ if absent, or $-1$ if $\texttt{sum}\le0$.
  * Time: Both operations are $O(\log N)$.
  * Status: Stress-tested
  */

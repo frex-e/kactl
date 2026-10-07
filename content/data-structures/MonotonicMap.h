@@ -6,6 +6,10 @@
  *  MonotonicMap.h
  * Description: Prefix/suffix min/max queries with
  *  insertions. Useful replacement for sparse segtrees.
+ *  \texttt{query(k)} includes key k: keys $\ge k$ for
+ *  \texttt{dir=less<>}, keys $\le k$ for
+ *  \texttt{dir=greater<>}. Insert a sentinel so every
+ *  query has a matching key.
  * Time: $O(\log N)$
  * Status: stress-tested
  */

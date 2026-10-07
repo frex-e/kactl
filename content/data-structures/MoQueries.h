@@ -5,6 +5,9 @@
  * Source: https://github.com/hoke-t/tamu-kactl/blob/master/content/data-structures/MoQueries.h
  * Description: Answer interval or tree path queries by finding an approximate TSP through the queries,
  * and moving from one query to the next by adding/removing points at the ends.
+ *  \texttt{mo} queries are $[l,r)$: l included, r excluded.
+ *  \texttt{moTree} queries are vertex pairs $(u,v)$;
+ *  the path includes both endpoint vertices.
  * If values are on tree edges, change \texttt{step} to add/remove the edge $(a, c)$ and remove the initial \texttt{add} call (but keep \texttt{in}).
  * Time: O(N \sqrt Q)
  * Status: stress-tested

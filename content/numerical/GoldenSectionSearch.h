@@ -8,6 +8,8 @@
  * maximum. The maximum error in the result is \texttt{eps}. Works equally well for maximization
  * with a small change in the code. See TernarySearch.h in the Various chapter for a
  * discrete version.
+ *  Both a and b are included in the search domain;
+ *  for $a<b$, f is sampled only at interior points.
  * Usage:
 	double func(double x) { return 4+x+.3*x*x; }
 	double xmin = gss(-1000,1000,func);

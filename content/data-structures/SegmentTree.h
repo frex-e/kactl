@@ -3,7 +3,8 @@
  * Date: 2017-10-31
  * License: CC0
  * Source: folklore
- * Description: Zero-indexed max-tree. Bounds are inclusive to the left and exclusive to the right.
+ * Description: Zero-indexed max-tree. \texttt{query(b,e)}
+ *  uses $[b,e)$: b included, e excluded.
  * Can be changed by modifying \texttt{T}, \texttt{f} and \texttt{unit}.
  * Time: O(\log N)
  * Status: stress-tested

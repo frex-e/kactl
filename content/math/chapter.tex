@@ -3,6 +3,45 @@
 
 \chapter{Mathematics}
 
+\section{Mathematical constants}
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+Constant & Approximate value & C++20 name \\ \hline
+$\pi$ & $3.14159265358979323846$ & \texttt{pi} \\
+$e$ & $2.71828182845904523536$ & \texttt{e} \\
+$\tau=2\pi$ & $6.28318530717958647693$ & \texttt{2*pi} \\
+$\sqrt{2}$ & $1.41421356237309504880$ & \texttt{sqrt2} \\
+$\sqrt{3}$ & $1.73205080756887729353$ & \texttt{sqrt3} \\
+$\ln 2$ & $0.69314718055994530942$ & \texttt{ln2} \\
+$\ln 10$ & $2.30258509299404568402$ & \texttt{ln10} \\
+$\phi=\frac{1+\sqrt{5}}{2}$ & $1.61803398874989484820$ & \texttt{phi} \\
+$\gamma$ & $0.57721566490153286061$ & \texttt{egamma} \\
+\end{tabular}
+\end{center}
+
+With \texttt{\#include <numbers>}, names above are in
+\texttt{std::numbers}; e.g.\ \texttt{std::numbers::pi} is a
+\texttt{constexpr double}. For \texttt{long double}, use
+\texttt{std::numbers::pi\_v<long double>} (likewise
+\texttt{e\_v}, \texttt{ln2\_v}, etc.). For $\tau$, multiply the
+chosen $\pi$ constant by 2.
+Before C++20, use \texttt{acos(-1.0)} and \texttt{exp(1.0)}
+from \texttt{<cmath>}; use \texttt{acos(-1.0L)} and
+\texttt{exp(1.0L)} for \texttt{long double}.
+
+Angles: $180^\circ=\pi$ radians; multiply degrees by $\pi/180$
+or radians by $180/\pi$.
+Log bases: $\log_2 x=\ln x/\ln 2$,
+$\log_{10}x=\ln x/\ln 10$.
+Golden ratio: $\phi^2=\phi+1$, $1/\phi=\phi-1$ (Fibonacci
+growth and golden-section search).
+Euler--Mascheroni constant:
+$\gamma=\lim_{n\to\infty}(H_n-\ln n)$, where
+$H_n=\sum_{k=1}^n 1/k$; for large $n$,
+\[
+H_n=\ln n+\gamma+\frac{1}{2n}-\frac{1}{12n^2}+O(n^{-4}).
+\]
+
 \section{Equations}
 \[ax^2+bx+c=0 \Rightarrow x = \frac{-b\pm\sqrt{b^2-4ac}}{2a}\]
 

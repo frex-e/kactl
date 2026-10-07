@@ -3,7 +3,7 @@
 #include "../../content/data-structures/LazySegmentTree.h"
 
 namespace sparse {
-#include "../../content/data-structures/SparseLazySegmentTree.h"
+#include "../../content/various/SparseLazySegmentTree.h"
 }
 namespace persist {
 #include "../../content/various/PersistentSegmentTree.h"

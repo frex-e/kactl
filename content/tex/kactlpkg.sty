@@ -29,6 +29,7 @@
 \usepackage[parfill]{parskip}           % For compact enumerations
 \usepackage[dvipsnames]{xcolor}
 \usepackage[normalem]{ulem}
+\usepackage{makeidx}                   % Alphabetical topic and snippet index
 \usepackage[hidelinks]{hyperref}        % For clickable table of contents
 
 % Config commands
@@ -150,6 +151,47 @@
 	{1ex\@plus .2ex \@minus .3ex}
 	{1ex \@plus .2ex}
 	{\normalfont\large\bfseries}}
+
+% Sort accented topic names with their base letters, preserving their display.
+\ExplSyntaxOn
+\cs_new_protected:Npn \kactl@topicindex #1 {
+	\str_set:Nn \l_tmpa_str {#1}
+	\regex_replace_all:nnN {[ÁÀÂÄÃÅáàâäãå]} {a} \l_tmpa_str
+	\regex_replace_all:nnN {[ÉÈÊËéèêë]} {e} \l_tmpa_str
+	\regex_replace_all:nnN {[ÍÌÎÏíìîï]} {i} \l_tmpa_str
+	\regex_replace_all:nnN {[ÓÒÔÖÕŐóòôöõő]} {o} \l_tmpa_str
+	\regex_replace_all:nnN {[ÚÙÛÜŰúùûüű]} {u} \l_tmpa_str
+	\regex_replace_all:nnN {[Çç]} {c} \l_tmpa_str
+	\regex_replace_all:nnN {[Ññ]} {n} \l_tmpa_str
+	\exp_args:Nx \index {\l_tmpa_str @ \exp_not:n {#1}}
+}
+\ExplSyntaxOff
+
+% Index numbered topic headings automatically; starred headings stay out.
+\let\kactl@sect\@sect
+\def\@sect#1#2#3#4#5#6[#7]#8{%
+	\kactl@sect{#1}{#2}{#3}{#4}{#5}{#6}[#7]{#8}%
+	\kactl@topicindex{#7}%
+}
+
+% Match the notebook's three columns and include the index after the appendix.
+\newcommand{\kactl@indexheading}{{\huge\bfseries\indexname\par}\vspace{1em}}
+\renewenvironment{theindex}{%
+	\clearpage
+	\begin{multicols}{3}[\kactl@indexheading]
+	\small\parindent\z@\parskip\z@\@plus .3pt\relax
+	\let\item\@idxitem
+}{%
+	\end{multicols}
+	\clearpage
+}
+
+% Register the TOC entry even before makeindex has produced its first output.
+\newcommand{\kactlprintindex}{%
+	\clearpage\phantomsection
+	\Oldaddtoc{toc}{chapter}{\indexname}
+	\printindex
+}
 
 % Styles for local toc
 \titlecontents{localsection}[1.5em]{\small}{}
@@ -273,7 +315,7 @@
 	\par\normalfont\normalsize
 	\myneedspace{3\baselineskip}
 	\penalty-100
-	{\large #2\par}
+	{\large #2\index{#2@\texttt{#2}}\par}
 	\immediate\input{"\@builddir/listings/\@kactlchapterid/#2.tex"}
 }
 

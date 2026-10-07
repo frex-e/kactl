@@ -3,8 +3,11 @@
  * Date: 2015-03-20
  * License: CC0
  * Source: me
- * Description: Split a monotone function on \texttt{[from, to)} into a minimal set of half-open intervals on which it has the same value.
- *  Runs a callback \texttt{g} for each such interval.
+ * Description: Split a monotone function on $[from,to)$
+ *  into a minimal set of intervals of constant value.
+ *  from included, to excluded. Each callback
+ *  \texttt{g(lo,hi,val)} describes $[lo,hi)$:
+ *  lo included, hi excluded.
  * Usage: constantIntervals(0, sz(v), [\&](int x){return v[x];}, [\&](int lo, int hi, T val){...});
  * Time: O(k\log\frac{n}{k})
  * Status: tested

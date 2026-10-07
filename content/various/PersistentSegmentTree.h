@@ -6,7 +6,9 @@
  * Description: Persistent implicit segment tree with lazy
  *  range updates and point set. Update/set return a new
  *  root; old roots stay valid. No destructor (nodes are
- *  shared). Bounds inclusive. Change \texttt{V}, \texttt{U},
+ *  shared). Node bounds $[l,r]$ and update/query bounds
+ *  $[ql,qr]$ include both endpoints. For n elements use
+ *  $[0,n-1]$. Change \texttt{V}, \texttt{U},
  *  \texttt{id}, \texttt{def}, \texttt{idU}, \texttt{binop},
  *  \texttt{applyUpdate}, \texttt{mergeUpdate}. Default is
  *  range add / range max.

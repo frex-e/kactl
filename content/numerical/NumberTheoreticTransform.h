@@ -11,6 +11,7 @@
    For manual convolution: NTT the inputs, multiply
    pointwise, divide by $n$, \texttt{reverse(start+1, end)}, NTT back.
  * Inputs must be in \texttt{[0, mod)}.
+ *  0 included, mod excluded.
  * Time: O(N \log N)
  * Status: stress-tested
  */

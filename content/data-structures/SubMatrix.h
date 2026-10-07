@@ -3,7 +3,9 @@
  * Date: 2014-11-28
  * License: CC0
  * Source: Folklore
- * Description: Calculate submatrix sums quickly, given upper-left and lower-right corners (half-open).
+ * Description: Calculate submatrix sums quickly.
+ *  \texttt{sum(u,l,d,r)} sums rows $[u,d)$ and columns
+ *  $[l,r)$: upper/left included, lower/right excluded.
  * Usage:
  * SubMatrix<int> m(matrix);
  * m.sum(0, 0, 2, 2); // top left 4 elements

@@ -3,7 +3,9 @@
  * Date: 2009-08-26
  * License: CC0
  * Source: http://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
- * Description: Prime sieve for generating all primes up to a certain limit. \texttt{isprime[i]} is true iff $i$ is a prime.
+ * Description: Generates primes in $[2,lim)$:
+ *  2 included, lim excluded. \texttt{isprime[i]} is valid
+ *  for $[0,lim)$ (lim excluded) and true iff i is prime.
  * Time: \texttt{lim}=100'000'000 $\approx$ 0.8 s. Runs 30\% faster if only odd indices are stored.
  * Status: Tested
  */

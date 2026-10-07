@@ -7,13 +7,15 @@ All commands below run from the **repo root**. `make help` lists targets.
 | Target | What |
 |---|---|
 | `make preprocess` | Shared step: listings under `build/listings/`, `web/public/snippets.json`, `build/header.tmp.seed`. |
-| `make kactl` | Preprocess, `test-session.pdf`, then two-pass `pdflatex` of `content/kactl.tex`. Writes `kactl.pdf` and copies it to `web/public/kactl.pdf`. |
+| `make kactl` | Preprocess, `test-session.pdf`, then three-pass `pdflatex` of `content/kactl.tex` with `makeindex` before the last pass. Writes `kactl.pdf` and copies it to `web/public/kactl.pdf`. |
 | `make fast` | Preprocess plus a single LaTeX pass (quicker, worse refs/TOC). Same install step. |
-| `make web-pdf` | Preprocess plus two-pass PDF **without** `test-session.pdf`. This is what GitHub Pages uses. |
+| `make web-pdf` | Preprocess plus three-pass PDF **without** `test-session.pdf`. This is what GitHub Pages uses. |
 | `make showexcluded` | Headers/sources in `content/` with no `\kactlimport`. |
 | `make test-preprocess` | Unit tests for snippet stripping, chapter parsing, print-header, and stress-test selection. |
 
 `pdflatex` is invoked with **`-shell-escape`** (required: page headers shell out to `python3 -m tools.kactl print-header`). Make copies `build/header.tmp.seed` to `build/header.tmp` before each pass; print-header is the only remaining `write18`. Snippet listings are generated *before* LaTeX, not per `\kactlimport`.
+
+The full builds resolve the TOC in two passes, then run `makeindex build/kactl.idx` and a third LaTeX pass to refresh the alphabetical index with the final content page numbers. Like the TOC, the index can be stale or absent with the single-pass `make fast`; use `make kactl` or `make web-pdf` for the final PDF.
 
 TeX packages needed: `texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`, `texlive-plain-generic` (`ulem.sty`), `texlive-fonts-recommended`. Listings use Inconsolata from repo-local `texmf/` (`make` sets `TEXMFHOME`). Python 3 is required for preprocess.
 

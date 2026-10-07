@@ -5,6 +5,7 @@
  * Description: Ukkonen's algorithm for online suffix tree construction.
  *  Each node contains indices \texttt{[l, r)} into the string, and a list of child nodes.
  *  Suffixes are given by traversals of this tree, joining \texttt{[l, r)} substrings.
+ *  Each edge includes index l and excludes index r.
  *  The root is 0 (has \texttt{l = -1}, \texttt{r = 0}), non-existent children are -1.
  *  To get a complete tree, append a dummy symbol -- otherwise it may contain
  *  an incomplete path (still useful for substring matching, though).

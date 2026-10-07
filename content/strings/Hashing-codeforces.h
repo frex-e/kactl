@@ -5,6 +5,9 @@
  * Source: own work
  * Description: Various self-explanatory methods for string hashing.
  * Use on Codeforces, which lacks 64-bit support and where solutions can be hacked.
+ *  \texttt{hashInterval(a,b)} hashes $[a,b)$:
+ *  a included, b excluded. \texttt{getHashes(s,len)[i]}
+ *  hashes $[i,i+len)$, excluding i+len.
  * Status: stress-tested
  */
 #pragma once

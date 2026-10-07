@@ -4,6 +4,8 @@
  * License: CC0
  * Source: me
  * Description: Seeded RNG and drawing random integers.
+ *  \texttt{randll(l,r)} draws from $[l,r]$:
+ *  both endpoints included.
  *  For string hashing, take a random odd 61-bit base.
  * Status: untested
  */

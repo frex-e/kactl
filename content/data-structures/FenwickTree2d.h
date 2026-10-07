@@ -3,7 +3,10 @@
  * Date: 2017-05-11
  * License: CC0
  * Source: folklore
- * Description: Computes sums \texttt{a[i,j]} for all $i<I$, $j<J$, and increases single elements \texttt{a[i,j]}.
+ * Description: Point increments and 2D prefix sums.
+ *  \texttt{query(x,y)} sums points with $0\le i<x$ and
+ *  $j<y$: both upper bounds excluded, $i=0$ included.
+ *  The y coordinates may be negative.
  *  Requires that the elements to be updated are known in advance (call \texttt{fakeUpdate()} before \texttt{init()}).
  * Time: $O(\log^2 N)$. (Use persistent segment trees for $O(\log N)$.)
  * Status: stress-tested

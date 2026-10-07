@@ -35,7 +35,7 @@ Compile/test scripts prefer `g++-15` via [doc/scripts/cxx.sh](../doc/scripts/cxx
 
 **Offline dynamic connectivity.** [content/data-structures/OfflineDynamicConnectivity.h](../content/data-structures/OfflineDynamicConnectivity.h) is sequential: `toggle(u, v)` adds or deletes an undirected edge, `query()` records a component-count snapshot, `ans()` returns answers. $q$ is an upper bound on the number of `toggle`/`query` calls.
 
-**Binary trie.** [content/data-structures/BinaryTrie.h](../content/data-structures/BinaryTrie.h) is a pointer trie with set insert/erase, multiset `insert<1>`, XOR-min/max, XOR-count, lazy XOR-all, mex, `each`, and merge. `count(x)` counts copies of a value after lazy XOR-all. `countLG<0>(xr, k)` counts values with `(value ^ xr) < k`; `countLG<1>(xr, k)` counts those with `(value ^ xr) > k`. XOR queries (`minxor`/`maxxor`/`countLG`/`mex`) take `xr` (default 0). `each(f)` calls `f(x, cnt)` for each stored value. `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s) and destroys the other trie (safe to delete); `merge<1>` adds multiplicities from `insert<1>`. Values are in $[0,2^{30})$.
+**Binary trie.** [content/various/BinaryTrie.h](../content/various/BinaryTrie.h) is a pointer trie with set insert/erase, multiset `insert<1>`, XOR-min/max, XOR-count, lazy XOR-all, mex, `each`, and merge. `count(x)` counts copies of a value after lazy XOR-all. `countLG<0>(xr, k)` counts values with `(value ^ xr) < k`; `countLG<1>(xr, k)` counts those with `(value ^ xr) > k`. XOR queries (`minxor`/`maxxor`/`countLG`/`mex`) take `xr` (default 0). `each(f)` calls `f(x, cnt)` for each stored value. `merge` is set-union (so `cnt`/`mex` stay unique after overlapping `insert`s) and destroys the other trie (safe to delete); `merge<1>` adds multiplicities from `insert<1>`. Values are in $[0,2^{30})$.
 
 **Geometry.** [Point.h](../content/geometry/Point.h) defines `pp = complex<double>` and free `dotp`, `crossp`, `orient`, `perp`, `dist` helpers. All geometry snippets use `pp`; rewrite it and dependent numeric types manually when exact integer geometry is needed. Sorting/sets use `PointLess`, not an added `std` overload. `Angle` stores a complex direction plus a turn count. `Point3D` remains separate because complex numbers represent only two coordinates.
 
@@ -55,8 +55,8 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/contest/Input.h` | `scanf` type specifiers, bounded strings, whitespace, and assignment counts |
 | `content/contest/Output.h` | binary output, precision, padding/alignment with streams and `std::format`, plus `printf` type specifiers and runtime width/precision |
 | `content/data-structures/UnorderedMap-codeforces.h` | web-only standard `unordered_map` with a per-run randomized SplitMix64 hash for Codeforces |
-| `content/data-structures/BinaryTrie.h` | insert/`insert<1>`/erase, count, XOR-min/max, countLG, lazy XOR, mex, each, set-union merge / `merge<1>` |
-| `content/data-structures/SparseLazySegmentTree.h` | implicit lazy tree with point set |
+| `content/various/BinaryTrie.h` | insert/`insert<1>`/erase, count, XOR-min/max, countLG, lazy XOR, mex, each, set-union merge / `merge<1>` |
+| `content/various/SparseLazySegmentTree.h` | implicit lazy tree with point set |
 | `content/data-structures/LiChao.h` | min Li Chao (kept alongside `LineContainer.h`) |
 | `content/data-structures/MonotonicCHT.h` | max CHT with nondecreasing slopes and queries; linear total time, 128-bit comparisons (from cactl) |
 | `content/number-theory/LinearSieve.h` | linear sieve + least prime factor (kept alongside Eratosthenes) |
@@ -64,6 +64,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/numerical/RREF.h` | rectangular reduced row echelon form |
 | `content/numerical/XORBasis.h` | incremental unsigned XOR basis (kept alongside `SolveLinearBinary.h`) |
 | `content/numerical/QuadRoots.h` | stable real quadratic roots (from cactl / cp-geo) |
+| `content/numerical/Lagrange.h` | modular Lagrange evaluation from consecutive samples; template prime modulus, signed query indices |
 | `content/various/MinPlusConvolution.h` | min-plus convolution (SMAWK / border; from cactl; untested) |
 | `content/various/BigInt.h` | fixed-width unsigned base-10^9 bigint (adapted from cactl); linear decimal parsing/formatting, modular add/subtract, small-integer multiply/divide/remainder |
 | `content/various/MemoryUsage.h` | `getrusage` peak RSS (lifetime, not current) |
@@ -104,6 +105,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 | File | What |
 |---|---|
+| `content/math/chapter.tex` | mathematical constants (pi, e, tau, square roots, logs, golden ratio, Euler--Mascheroni); C++20 names and precision, angle/log conversions, harmonic estimate |
 | `content/number-theory/ModPow.h` | explicit runtime modulus or `modpow<mod>(b, e)` for a compile-time modulus (default 10^9+7); shared by NTT and modular square root without a global modulus |
 | `content/numerical/NumberTheoreticTransform.h` | shared modular exponentiation; convolution uses the smallest sufficient power-of-two transform, including at the $2^{23}$ coefficient limit |
 | `content/numerical/BerlekampMassey.h`, `MatrixInverse-mod.h` | template modulus (default 10^9+7); use shared modular exponentiation |
@@ -130,6 +132,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 
 ## Tests
 
+- `stress-tests/numerical/Lagrange.cpp`: exhaustive small-field polynomials, randomized Horner comparisons, signed and large indices, and sums of powers
 - `stress-tests/various/BigInt.cpp`: decimal-digit and native 128-bit oracles; parsing/formatting, modular arithmetic, small-integer multiplication/division/remainder, aliasing, carries/borrows, and long input
 - `stress-tests/various/EulerTourTree.cpp`: naive forest comparisons, treap/tour invariants, edge recycling, large paths and stars
 

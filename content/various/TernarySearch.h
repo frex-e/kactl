@@ -5,6 +5,7 @@
  * Source: own work
  * Description:
  * Find the smallest i in $[a,b]$ that maximizes $f(i)$, assuming that $f(a) < \dots < f(i) \ge \dots \ge f(b)$.
+ *  Both a and b are included; for an array use 0 and n-1.
  * To reverse which of the sides allows non-strict inequalities, change the \texttt{<} marked with (A) to \texttt{<=}, and reverse the loop at (B).
  * To minimize $f$, change it to \texttt{>}, also at (B).
  * Usage:

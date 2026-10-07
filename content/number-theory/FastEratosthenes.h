@@ -3,6 +3,8 @@
  * Date: 2020-04-12
  * License: CC0
  * Description: Prime sieve for generating all primes smaller than \texttt{LIM}.
+ *  Primes lie in $[2,\texttt{LIM})$:
+ *  2 included, LIM excluded.
  * Time: \texttt{LIM}=1e9 $\approx$ 1.5s
  * Status: Stress-tested
  * Details: Despite its n log log n complexity, segmented sieve is still faster

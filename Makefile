@@ -1,4 +1,5 @@
 LATEXCMD = pdflatex -shell-escape -output-directory build/
+INDEXCMD = makeindex build/kactl.idx
 export TEXINPUTS=.:content/tex/:
 export TEXMFHOME := $(CURDIR)/texmf
 export max_print_line = 1048576
@@ -40,6 +41,9 @@ kactl: test-session.pdf preprocess | build
 	$(LATEXCMD) content/kactl.tex
 	$(RESET_HEADER)
 	$(LATEXCMD) content/kactl.tex
+	$(INDEXCMD)
+	$(RESET_HEADER)
+	$(LATEXCMD) content/kactl.tex
 	$(INSTALL_PDF)
 
 web-pdf: preprocess | build
@@ -47,10 +51,13 @@ web-pdf: preprocess | build
 	$(LATEXCMD) content/kactl.tex
 	$(RESET_HEADER)
 	$(LATEXCMD) content/kactl.tex
+	$(INDEXCMD)
+	$(RESET_HEADER)
+	$(LATEXCMD) content/kactl.tex
 	$(INSTALL_PDF)
 
 clean:
-	cd build && rm -f kactl.aux kactl.log kactl.tmp kactl.toc kactl.pdf kactl.ptc
+	cd build && rm -f kactl.aux kactl.log kactl.tmp kactl.toc kactl.pdf kactl.ptc kactl.idx kactl.ind kactl.ilg
 	cd build && rm -f header.tmp header.tmp.seed header2.tmp
 	rm -rf build/listings
 

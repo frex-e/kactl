@@ -4,6 +4,7 @@
  * License: CC0
  * Source: https://vlecomte.github.io/cp-geo.pdf
  * Description: Returns true iff \texttt{p} lies on the line segment from \texttt{s} to \texttt{e}.
+ *  Both segment endpoints s and e are included.
  * Use \texttt{(segDist(s,e,p)<=epsilon)} for an epsilon check.
  * Status:
  */

@@ -3,6 +3,9 @@
  * Source: http://codeforces.com/blog/entry/12143
  * Description: For each position in a string, computes \texttt{p[0][i]} = half length of
  *  longest even palindrome around pos \texttt{i}, \texttt{p[1][i]} = longest odd (half rounded down).
+ *  Even palindrome: $[i-p[0][i],i+p[0][i])$.
+ *  Odd palindrome: $[i-p[1][i],i+p[1][i]+1)$.
+ *  Both include the left index and exclude the right.
  * Time: O(N)
  * Status: Stress-tested
  */

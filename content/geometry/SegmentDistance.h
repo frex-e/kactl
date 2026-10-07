@@ -6,6 +6,7 @@
  * Description:\\
 \begin{minipage}{\dimexpr\linewidth-15mm\relax}
 Returns the shortest distance between point \texttt{p} and the line segment from point \texttt{s} to \texttt{e}.
+Both segment endpoints s and e are included.
 \end{minipage}%
 \begin{minipage}{15mm}
 \vspace{-10mm}

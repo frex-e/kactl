@@ -4,6 +4,8 @@
  * License: CC0
  * Source: Russian page
  * Description: Pre-computation of modular inverses. Assumes \texttt{LIM} $\le$ \texttt{mod} and that \texttt{mod} is a prime.
+ *  Fills inv for $[1,\texttt{LIM})$:
+ *  1 included, LIM excluded.
  * Status: Works
  */
 #pragma once

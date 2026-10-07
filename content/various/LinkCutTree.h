@@ -5,6 +5,8 @@
  * Source: folklore
  * Description: Unrooted link-cut tree. Online link/cut.
  *  Default path add + path sum.
+ *  \texttt{query(u,v)} and \texttt{update(u,v,x)} use
+ *  the path including both endpoint vertices u and v.
  * Time: amortized $O(\log N)$
  * Status: stress-tested
  * Usage:

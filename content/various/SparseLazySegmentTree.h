@@ -4,7 +4,9 @@
  * License: CC0
  * Source: me
  * Description: Implicit segment tree with lazy range updates
- *  and point set. Creates children on demand. Bounds inclusive.
+ *  and point set. Creates children on demand.
+ *  Node bounds $[l,r]$ and update/query bounds $[ql,qr]$
+ *  include both endpoints. For n elements use $[0,n-1]$.
  *  Change \texttt{V}, \texttt{U}, \texttt{id}, \texttt{def},
  *  \texttt{idU}, \texttt{binop}, \texttt{applyUpdate},
  *  \texttt{mergeUpdate}. Default is range add / range max.

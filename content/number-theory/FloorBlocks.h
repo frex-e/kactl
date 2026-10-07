@@ -7,6 +7,7 @@
  *  $\lfloor n/i\rfloor$ is constant. Calls
  *  \texttt{f(l, r, q)} for each $1\le l\le r\le n$ with
  *  $\lfloor n/i\rfloor = q$ for all $i\in[l,r]$.
+ *  Both callback endpoints l and r are included.
  * Time: $O(\sqrt n)$
  * Status: stress-tested
  */

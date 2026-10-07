@@ -4,6 +4,8 @@
  * License: CC0
  * Description: \texttt{pi[x]} computes the length of the longest prefix of \texttt{s} that ends at \texttt{x},
  * other than \texttt{s[0...x]} itself (abacaba -> 0010123).
+ *  That prefix is $[0,pi[x])$ and matches
+ *  $[x-pi[x]+1,x+1)$: starts included, ends excluded.
  * Can be used to find all occurrences of a string.
  * Time: O(n)
  * Status: Tested on kattis:stringmatching

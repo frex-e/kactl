@@ -6,7 +6,9 @@ Source of truth for the printed notebook and the snippets site is `content/`. On
 
 Chapters live in `content/<chapter>/` with a `chapter.tex` that pulls in snippets and prose. PDF chapter order is the `\kactlchapter{...}` list in [content/kactl.tex](../content/kactl.tex) (the preprocessor reads that list; do not duplicate it elsewhere):
 
-contest, math, data-structures, numerical, number-theory, combinatorial, graph, strings, various, geometry, then appendix (on a new `multicols*` block).
+contest, math, data-structures, numerical, number-theory, combinatorial, graph, strings, geometry, various, then appendix (on a new `multicols*` block) and the alphabetical index.
+
+The PDF indexes included snippet filenames and numbered topic headings automatically. `make kactl` and `make web-pdf` run two LaTeX passes to resolve the TOC, then `makeindex` and a final LaTeX pass to print the sorted entries with linked page numbers.
 
 Team name, members, university, and contest line are also in `content/kactl.tex`. Do not put those in the README or web HTML as a second source of truth.
 
@@ -47,6 +49,7 @@ The 6-char hash is `content/contest/hash.sh`: `cpp -dD -P -fpreprocessed`, strip
 ## Style
 
 - Line width **63 characters**, **tabs** for indentation (tab = 2 spaces in the PDF). listings `basewidth` is `0.5em` (Inconsolata); do not restore the Courier `0.6em` default or long lines wrap.
+- For range APIs, state the interval using the actual parameter names in `Description`, and say which endpoints are included/excluded. Document index bounds, value bounds, and callback bounds separately when they differ; path queries should say whether endpoint vertices are included. Do not assume a notebook-wide range convention.
 - Terse contest macros from [content/contest/template.cpp](../content/contest/template.cpp): `rep`, `all`, `sz`, `pb`, `fr`, `sc`, `ll`, `pii`, `vi`. This fork’s template uses `pb` / `fr` / `sc` and does **not** use `cin.exceptions`.
 - Do not make APIs overly generic; the code is typed by hand in contest.
 - Recursive pointer structs: use a short name (`Node`, or `BinaryTrie` at the call site) and `using T = ...` for self-references. Do not invent `PersistNode`-style names to dodge test clashes — wrap colliding `#include`s in namespaces instead.

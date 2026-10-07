@@ -1,6 +1,8 @@
 \documentclass[9pt, a4paper, notitlepage]{extreport}
 \usepackage{kactlpkg}
 \kactlcontentdir{content}
+\makeindex
+\renewcommand{\indexname}{Alphabetical index}
 
 \university{Monash}{Monash University}{monash}
 \team{A Succulent Chinese Algorithm}{Indra Kusumah-Kasim, Alex Yu, and Parsa Pordastan}
@@ -26,11 +28,12 @@
 	\kactlchapter{combinatorial}
 	\kactlchapter{graph}
 	\kactlchapter{strings}
-	\kactlchapter{various}
 	\kactlchapter{geometry}
+	\kactlchapter{various}
 	\end{multicols*}
 
 	\begin{multicols*}{3}
 	\kactlchapter{appendix}
 	\end{multicols*}
+	\kactlprintindex
 \end{document}

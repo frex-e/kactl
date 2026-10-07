@@ -5,6 +5,7 @@
  * Description: GNU extension for editable sequences.
  *  Copies share storage; later edits leave copies unchanged.
  *  Indices are 0-based; erase/substr take (position, length).
+ *  They use $[pos,pos+len)$: pos included, pos+len excluded.
  *  No range aggregates or lazy reversal. Requires libstdc++.
  * Time: Index $O(\log N)$, copy $O(1)$. Edits typically
  *  $O(\log N)$ plus new data, but can take $O(N)$.

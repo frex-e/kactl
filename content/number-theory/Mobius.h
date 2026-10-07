@@ -4,6 +4,8 @@
  * License: CC0
  * Source: me
  * Description: Fills $\mu(n)$ for $n \in [0, \texttt{sz})$.
+ *  Indices $[0,\texttt{sz(mobius)})$: 0 included,
+ *  vector size excluded.
  *  See chapter text for inversion formulas.
  * Time: $O(N \log N)$
  * Status: stress-tested

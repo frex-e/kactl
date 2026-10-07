@@ -4,6 +4,8 @@
  * License: CC0
  * Source:
  * Description: Handles points in 3D space using doubles.
+ *  Angle ranges: phi in $[-\pi,\pi]$, theta in $[0,\pi]$;
+ *  both endpoints included in each range.
  * Usage:
  * Status: tested, except for phi and theta
  */

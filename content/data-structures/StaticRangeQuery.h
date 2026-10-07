@@ -6,8 +6,8 @@
  *  StaticRangeQuery.h
  * Description: Static range queries for any associative
  *  operation. Change \texttt{T}, \texttt{unit} and
- *  \texttt{f}. Default is range sum. Bounds half-open
- *  $[l, r)$ like RMQ.
+ *  \texttt{f}. Default is range sum. \texttt{query(l,r)}
+ *  uses nonempty $[l,r)$: l included, r excluded.
  * Time: $O(N\log N)$ build, $O(1)$ query
  * Status: stress-tested
  */

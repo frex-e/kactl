@@ -4,6 +4,8 @@
  * License: CC0
  * Source: Wikipedia
  * Description: Fast integration using an adaptive Simpson's rule.
+ *  \texttt{quad(a,b,f)} integrates over $[a,b]$;
+ *  f must be defined at both endpoints (both sampled).
  * Usage:
 	double sphereVolume = quad(-1, 1, [](double x) {
 	return quad(-1, 1, [\&](double y) {

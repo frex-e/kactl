@@ -4,7 +4,9 @@
  * License: CC0
  * Source: me
  * Description: Li Chao tree for lines $ax+b$ on an integer
- *  domain $[L,R)$. Queries minimum. Negate \texttt{a}, \texttt{b}
+ *  domain $[L,R)$: L included, R excluded.
+ *  Node bounds $[l,r)$ use the same convention.
+ *  Queries minimum. Negate \texttt{a}, \texttt{b}
  *  and the result for maximum. Unlike LineContainer, lines can
  *  be restricted to a subrange by inserting on a node range.
  * Time: $O(\log(R-L))$

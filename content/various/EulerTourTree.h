@@ -3,6 +3,7 @@
  * Date: 2026-09-18
  * Source: folklore
  * Description: Unrooted dynamic forest, vertices $[0,N)$.
+ *  Vertex indices include 0 and exclude N.
  *  Initially isolated with value 0. Link requires different
  *  components; cut requires an existing edge (either order).
  *  Point set/get and component update/query/size. Each tour

@@ -5,6 +5,8 @@
  * Source: Folklore
  * Description: Range Minimum Queries on an array. Returns
  * \texttt{min(V[a], V[a + 1], ... V[b - 1])} in constant time.
+ *  \texttt{query(a,b)} uses nonempty $[a,b)$:
+ *  a included, b excluded.
  * Usage:
  *  RMQ rmq(values);
  *  rmq.query(inclusive, exclusive);

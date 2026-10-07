@@ -3,6 +3,9 @@
  * Date: 2004-02-08
  * License: CC0
  * Description: Finds the real roots to a polynomial.
+ *  xmin/xmax should enclose all roots. Search sentinels
+ *  are xmin-1 and xmax+1; returned roots are not clipped
+ *  to $[xmin,xmax]$. A linear polynomial ignores bounds.
  * Usage: polyRoots({{2,-3,1}},-1e9,1e9) // solve x^2-3x+2 = 0
  * Time: O(n^2 \log(1/\epsilon))
  */

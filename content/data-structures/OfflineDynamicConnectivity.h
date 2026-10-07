@@ -7,6 +7,9 @@
  *  operation indices. \texttt{toggle} adds or deletes an
  *  undirected edge. \texttt{query} records a component-count
  *  query. \texttt{ans} returns answers in order.
+ *  \texttt{add(l,r,e)} makes e active at times $[l,r)$:
+ *  l included, r excluded. An edge is active from its
+ *  insertion toggle up to, excluding, its deletion toggle.
  *  $q$ must be at least the number of \texttt{toggle}/
  *  \texttt{query} calls.
  * Time: $O(Q\log Q\log N)$
