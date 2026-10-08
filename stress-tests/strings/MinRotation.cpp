@@ -7,8 +7,7 @@ int min_rotation2(string& v) {
 	string w = v; w.insert(w.end(), all(v));
 	int j = 0;
 	rep(i,1,n) {
-		if (vi(w.begin() + i, w.begin() + i + n) <
-			vi(w.begin() + j, w.begin() + j + n)) j = i;
+		if (w.compare(i, n, w, j, n) < 0) j = i;
 	}
 	return j;
 }
@@ -21,10 +20,14 @@ void testPerf() {
 }
 
 int main() {
+	rep(a,0,256) rep(b,0,256) {
+		string v{char(a), char(b)};
+		assert(minRotation(v) == min_rotation2(v));
+	}
 	rep(it,0,1000000) {
 		int n = rand() % 10;
 		string v;
-		rep(i,0,n) v += (char)(rand() % 3);
+		rep(i,0,n) v += (char)(rand() % (it & 1 ? 256 : 3));
 		int r = minRotation(v);
 		int r2 = min_rotation2(v);
 		assert(r == r2);

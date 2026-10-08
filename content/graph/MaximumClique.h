@@ -4,8 +4,9 @@
  * License: GPL3+
  * Source: https://en.wikipedia.org/wiki/MaxCliqueDyn_maximum_clique_algorithm, https://gitlab.com/janezkonc/mcqd/blob/master/mcqd.h
  * Description: Quickly finds a maximum clique of a graph (given as symmetric bitset
- * matrix; self-edges not allowed). Can be used to find a maximum independent
- * set by finding a clique of the complement graph.
+ * matrix; self-edges not allowed). Requires at least one
+ * vertex. Can find a maximum independent set by finding
+ * a clique of the complement graph.
  * Time: Runs in about 1s for n=155 and worst case random graphs (p=.90). Runs
  * faster for sparse graphs.
  * Status: stress-tested

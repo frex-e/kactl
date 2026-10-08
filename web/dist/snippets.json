@@ -651,16 +651,16 @@
       "name": "GoldenSectionSearch.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "Finds the argument minimizing the function $f$ in the interval $[a,b]$\nassuming $f$ is unimodal on the interval, i.e. has only one local minimum and no local\nmaximum. The maximum error in the result is \\texttt{eps}. Works equally well for maximization\nwith a small change in the code. See TernarySearch.h in the Various chapter for a\ndiscrete version.\nBoth a and b are included in the search domain;\nfor $a<b$, f is sampled only at interior points.",
+      "description": "Finds the argument minimizing the function $f$ in the interval $[a,b]$\nassuming $f$ is unimodal on the interval, i.e. has only one local minimum and no local\nmaximum. Stops at interval width \\texttt{eps}, or when\nfloating-point rounding prevents further subdivision.\nWorks equally well for maximization\nwith a small change in the code. See TernarySearch.h in the Various chapter for a\ndiscrete version.\nBoth a and b are included in the search domain;\nrounding can place samples at either endpoint.",
       "usage": "double func(double x) { return 4+x+.3*x*x; }\ndouble xmin = gss(-1000,1000,func);",
       "time": "$O(\\log((b-a) / \\epsilon))$",
       "memory": "",
-      "status": "tested",
+      "status": "stress-tested",
       "author": "Ulf Lundstrom",
       "source": "Numeriska algoritmer med matlab, Gerd Eriksson, NADA, KTH",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "double gss(double a, double b, double (*f)(double)) {\n\tdouble r = (sqrt(5)-1)/2, eps = 1e-7;\n\tdouble x1 = b - r*(b-a), x2 = a + r*(b-a);\n\tdouble f1 = f(x1), f2 = f(x2);\n\twhile (b-a > eps)\n\t\tif (f1 < f2) { //change to > to find maximum\n\t\t\tb = x2; x2 = x1; f2 = f1;\n\t\t\tx1 = b - r*(b-a); f1 = f(x1);\n\t\t} else {\n\t\t\ta = x1; x1 = x2; f1 = f2;\n\t\t\tx2 = a + r*(b-a); f2 = f(x2);\n\t\t}\n\treturn a;\n}"
+      "code": "double gss(double a, double b, double (*f)(double)) {\n\tdouble r = (sqrt(5)-1)/2, eps = 1e-7;\n\tdouble x1 = b - r*(b-a), x2 = a + r*(b-a);\n\tdouble f1 = f(x1), f2 = f(x2);\n\twhile (b-a > eps && a < x1 && x1 < x2 && x2 < b)\n\t\tif (f1 < f2) { //change to > to find maximum\n\t\t\tb = x2; x2 = x1; f2 = f1;\n\t\t\tx1 = b - r*(b-a); f1 = f(x1);\n\t\t} else {\n\t\t\ta = x1; x1 = x2; f1 = f2;\n\t\t\tx2 = a + r*(b-a); f2 = f(x2);\n\t\t}\n\treturn a;\n}"
     },
     {
       "id": "numerical/HillClimbing.h",
@@ -849,18 +849,18 @@
       "name": "PolyRoots.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "Finds the real roots to a polynomial.\nxmin/xmax should enclose all roots. Search sentinels\nare xmin-1 and xmax+1; returned roots are not clipped\nto $[xmin,xmax]$. A linear polynomial ignores bounds.",
+      "description": "Sorted distinct real roots of a nonzero\npolynomial, including repeated roots. Floating point:\nvery close roots may merge. Coefficients, bounds and\nintermediate evaluations must be finite; avoid underflow.\nxmin/xmax should enclose all roots. Search sentinels\nare xmin-1 and xmax+1; returned roots are not clipped\nto $[xmin,xmax]$. A linear polynomial ignores bounds.",
       "usage": "polyRoots({{2,-3,1}},-1e9,1e9) // solve x^2-3x+2 = 0",
-      "time": "$O(n^2 \\log(1/\\epsilon))$",
+      "time": "$O(n^3 \\log(1/\\epsilon))$",
       "memory": "",
-      "status": "",
+      "status": "stress-tested",
       "author": "Per Austrin",
       "source": "",
       "dependencies": [
         "numerical/Polynomial.h"
       ],
       "includedInPdf": true,
-      "code": "vector<double> polyRoots(Poly p, double xmin, double xmax) {\n\tif (sz(p.a) == 2) { return {-p.a[0]/p.a[1]}; }\n\tvector<double> ret;\n\tPoly der = p;\n\tder.diff();\n\tauto dr = polyRoots(der, xmin, xmax);\n\tdr.push_back(xmin-1);\n\tdr.push_back(xmax+1);\n\tsort(all(dr));\n\trep(i,0,sz(dr)-1) {\n\t\tdouble l = dr[i], h = dr[i+1];\n\t\tbool sign = p(l) > 0;\n\t\tif (sign ^ (p(h) > 0)) {\n\t\t\trep(it,0,60) { // while (h - l > 1e-8)\n\t\t\t\tdouble m = (l + h) / 2, f = p(m);\n\t\t\t\tif ((f <= 0) ^ sign) l = m;\n\t\t\t\telse h = m;\n\t\t\t}\n\t\t\tret.push_back((l + h) / 2);\n\t\t}\n\t}\n\treturn ret;\n}"
+      "code": "vector<double> polyRoots(Poly p, double xmin, double xmax) {\n\twhile (!p.a.empty() && p.a.back() == 0) p.a.pop_back();\n\tif (sz(p.a) < 2) return {};\n\tif (sz(p.a) == 2) { return {-p.a[0]/p.a[1]}; }\n\t// Compensated Horner: distinguish tiny extrema from zeros.\n\tauto eval = [&](double x) {\n\t\tdouble v = 0, err = 0, scale = 0;\n\t\tfor (int i = sz(p.a); i--;) {\n\t\t\tdouble a = p.a[i], prod = v*x, sum = prod+a;\n\t\t\tdouble z = sum-prod;\n\t\t\terr = err*x + (fma(v,x,-prod) +\n\t\t\t\t((prod-(sum-z)) + (a-z)));\n\t\t\tv = sum; scale = scale*abs(x) + abs(a);\n\t\t}\n\t\tdouble eps = numeric_limits<double>::epsilon();\n\t\tv += err;\n\t\treturn pair(v, abs(v) <=\n\t\t\t64.0 * sz(p.a) * sz(p.a) * eps * eps * scale);\n\t};\n\tvector<double> ret;\n\tPoly der = p;\n\tder.diff();\n\tauto dr = polyRoots(der, xmin, xmax);\n\tdr.push_back(xmin-1);\n\tdr.push_back(xmax+1);\n\tsort(all(dr));\n\tdr.erase(unique(all(dr)), dr.end());\n\trep(i,0,sz(dr)) {\n\t\tdouble l = dr[i];\n\t\tauto [fl, zl] = eval(l);\n\t\tif (zl) ret.push_back(l);\n\t\tif (i+1 == sz(dr)) break;\n\t\tdouble h = dr[i+1];\n\t\tauto [fh, zh] = eval(h);\n\t\tif (zl || zh || (fl > 0) == (fh > 0)) continue;\n\t\tfor (;;) {\n\t\t\tdouble m = l/2 + h/2, f = eval(m).first;\n\t\t\tif (m == l || m == h) break;\n\t\t\tif (f == 0) { l = h = m; break; }\n\t\t\tif ((f > 0) == (fl > 0)) l = m;\n\t\t\telse h = m;\n\t\t}\n\t\tret.push_back(l/2 + h/2);\n\t}\n\treturn ret;\n}"
     },
     {
       "id": "numerical/QuadRoots.h",
@@ -1362,11 +1362,11 @@
       "name": "multinomial.h",
       "chapter": "combinatorial",
       "language": "cpp",
-      "description": "Computes $\\displaystyle \\binom{k_1 + \\dots + k_n}{k_1, k_2, \\dots, k_n} = \\frac{(\\sum k_i)!}{k_1!k_2!...k_n!}$.",
+      "description": "Computes $\\displaystyle \\binom{k_1 + \\dots + k_n}{k_1, k_2, \\dots, k_n} = \\frac{(\\sum k_i)!}{k_1!k_2!...k_n!}$.\nRequires nonnegative entries. Intermediate products must\nfit in ll; can overflow even when the final result fits.",
       "usage": "",
       "time": "",
       "memory": "",
-      "status": "Tested on kattis:lexicography",
+      "status": "Tested on kattis:lexicography, stress-tested",
       "author": "Mattias de Zalenski, Fredrik Niemelä, Per Austrin, Simon Lindholm",
       "source": "Max Bennedich",
       "dependencies": [],
@@ -1740,7 +1740,7 @@
       "name": "MaximumClique.h",
       "chapter": "graph",
       "language": "cpp",
-      "description": "Quickly finds a maximum clique of a graph (given as symmetric bitset\nmatrix; self-edges not allowed). Can be used to find a maximum independent\nset by finding a clique of the complement graph.",
+      "description": "Quickly finds a maximum clique of a graph (given as symmetric bitset\nmatrix; self-edges not allowed). Requires at least one\nvertex. Can find a maximum independent set by finding\na clique of the complement graph.",
       "usage": "",
       "time": "Runs in about 1s for n=155 and worst case random graphs (p=.90). Runs\nfaster for sparse graphs.",
       "memory": "",
@@ -1902,7 +1902,7 @@
       "name": "VirtualTree.h",
       "chapter": "graph",
       "language": "cpp",
-      "description": "Given a rooted tree and a subset S of nodes, compute the minimal\nsubtree that contains all the nodes by adding all (at most $|S|-1$)\npairwise LCA's and compressing edges.\nReturns a list of \\texttt{(par, orig\\_index)} representing a tree rooted at 0.\nThe root points to itself.",
+      "description": "Given a rooted tree and a subset S of nodes, compute the minimal\nsubtree that contains all the nodes by adding all (at most $|S|-1$)\npairwise LCA's and compressing edges.\nReturns a list of \\texttt{(par, orig\\_index)} representing a tree rooted at 0.\nThe root points to itself.\nRequires a nonempty subset S.",
       "usage": "",
       "time": "$O(|S| \\log |S|)$",
       "memory": "",
@@ -1932,6 +1932,22 @@
       "code": "template<class T>\npair<T, vi> weightedMatching(vector<vector<T>> &C) {\n\tint i = sz(C), m = i ? sz(C[0]) : 0, c, s, r;\n\tvector<T> dist(m), pot(m);\n\tvi match(i), rev(m, -1), cols(m), prev(m);\n\tT d = 0, nd, cost = 0;\n\twhile (i--) {\n\t\trep(c,0,m) dist[c] = C[i][c], cols[c] = c, prev[c] = i;\n\t\tfor (s = 0;;) {\n\t\t\trep(j,s,m) {\n\t\t\t\tc = cols[j], nd = dist[c] - pot[c];\n\t\t\t\tif (j == s || d > nd) d = nd, swap(cols[s], cols[j]);\n\t\t\t}\n\t\t\tif ((r = rev[c = cols[s++]]) == -1) break;\n\t\t\trep(j,0,m) if (dist[j] > (nd = C[r][j]-C[r][c]+dist[c]))\n\t\t\t\tdist[j] = nd, prev[j] = r;\n\t\t}\n\t\tcost += dist[c];\n\t\twhile (s--) pot[cols[s]] = dist[cols[s]] - d;\n\t\tfor (; r != i; swap(c, match[r]))\n\t\t\tr = rev[c] = prev[c];\n\t}\n\treturn {cost, match};\n}"
     },
     {
+      "id": "graph/Yen.h",
+      "name": "Yen.h",
+      "chapter": "graph",
+      "language": "cpp",
+      "description": "Up to $k$ shortest simple paths from $s$ to\n$t$, sorted by cost; ties arbitrary. Returns (cost,\nvertex sequence), including both endpoints. $g[u]$\ncontains (to, weight); $n=|g|$, vertices in $[0,n)$. No\nparallel edges. Weights and all simple path costs\nmust be in $[0,2^{60})$. For undirected graphs add\nboth directions. $k=0$ or unreachable returns empty;\n$s=t$ returns only $(0,\\{s\\})$ when $k>0$.",
+      "usage": "",
+      "time": "$O(kn((m+n+k)\\log n+n\\log k))$",
+      "memory": "$O(m+kn)$",
+      "status": "stress-tested",
+      "author": "Kimiyuki Onaka (kmyk), adapted",
+      "source": "kmyk/competitive-programming-library\ngraph/yen_algorithm.hpp",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "vector<pair<ll, vi>> yen(\n\tconst vector<vector<pair<int, ll>>>& g,\n\tint s, int t, int k) {\n\tif (!k) return {};\n\tint n = sz(g);\n\tconst ll inf = 1LL << 60;\n\tusing Path = pair<ll, vi>;\n\tusing pli = pair<ll, int>;\n\tvi ban(n);\n\tset<pii> cut;\n\tmap<pii, ll> w;\n\trep(v,0,n) for (auto [u, c] : g[v]) w[{v,u}] = c;\n\tauto dij = [&](int start) -> Path {\n\t\tvector<ll> d(n, inf);\n\t\tvi pre(n, -1), p;\n\t\tpriority_queue<pli, vector<pli>, greater<pli>> q;\n\t\td[start] = 0; q.push({0,start});\n\t\twhile (!q.empty()) {\n\t\t\tauto [dv, v] = q.top(); q.pop();\n\t\t\tif (dv != d[v]) continue;\n\t\t\tif (v == t) break;\n\t\t\tfor (auto [u, c] : g[v])\n\t\t\t\tif (!ban[u] && !cut.count({v,u}) && dv+c<d[u]) {\n\t\t\t\t\td[u] = dv+c; pre[u] = v; q.push({d[u],u});\n\t\t\t\t}\n\t\t}\n\t\tif (d[t] == inf) return {inf,{}};\n\t\tfor (int v = t; v != -1; v = pre[v]) p.pb(v);\n\t\treverse(all(p));\n\t\treturn {d[t],p};\n\t};\n\tPath first = dij(s);\n\tif (first.sc.empty()) return {};\n\tvector<Path> ans{first};\n\tset<Path> cand;\n\twhile (sz(ans) < k) {\n\t\tvi p = ans.back().sc, match(sz(ans));\n\t\tiota(all(match), 0);\n\t\tfill(all(ban), 0);\n\t\tll cost = 0;\n\t\trep(i,0,sz(p)-1) {\n\t\t\tcut.clear();\n\t\t\tvi next;\n\t\t\tfor (int j : match) {\n\t\t\t\tvi& a = ans[j].sc;\n\t\t\t\tif (sz(a)>i+1 && a[i]==p[i]) {\n\t\t\t\t\tcut.insert({p[i],a[i+1]}); next.pb(j);\n\t\t\t\t}\n\t\t\t}\n\t\t\tmatch = next; // paths sharing this prefix\n\t\t\tauto [d, tail] = dij(p[i]);\n\t\t\tif (!tail.empty()) {\n\t\t\t\tvi path(p.begin(), p.begin()+i);\n\t\t\t\tpath.insert(path.end(), all(tail));\n\t\t\t\tcand.insert({cost+d,path});\n\t\t\t\tif (sz(cand) > k-sz(ans))\n\t\t\t\t\tcand.erase(prev(cand.end()));\n\t\t\t}\n\t\t\tban[p[i]] = 1; cost += w[{p[i],p[i+1]}];\n\t\t}\n\t\tif (cand.empty()) break;\n\t\tans.pb(*cand.begin()); cand.erase(cand.begin());\n\t}\n\treturn ans;\n}"
+    },
+    {
       "id": "strings/AhoCorasick.h",
       "name": "AhoCorasick.h",
       "chapter": "strings",
@@ -1952,7 +1968,7 @@
       "name": "Hashing-codeforces.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "Various self-explanatory methods for string hashing.\nUse on Codeforces, which lacks 64-bit support and where solutions can be hacked.\n\\texttt{hashInterval(a,b)} hashes $[a,b)$:\na included, b excluded. \\texttt{getHashes(s,len)[i]}\nhashes $[i,i+len)$, excluding i+len.",
+      "description": "Various self-explanatory methods for string hashing.\nCharacters are hashed as unsigned bytes, including nul.\nUse on Codeforces, which lacks 64-bit support and where solutions can be hacked.\n\\texttt{hashInterval(a,b)} hashes $[a,b)$:\na included, b excluded. \\texttt{getHashes(s,len)[i]}\nhashes $[i,i+len)$, excluding i+len.",
       "usage": "",
       "time": "",
       "memory": "",
@@ -1961,14 +1977,14 @@
       "source": "own work",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "typedef uint64_t ull;\nstatic int C; // initialized below\n\n// Arithmetic mod two primes and 2^32 simultaneously.\n// \"typedef uint64_t H;\" instead if Thue-Morse does not apply.\ntemplate<int M, class B>\nstruct A {\n\tint x; B b; A(int x=0) : x(x), b(x) {}\n\tA(int x, B b) : x(x), b(b) {}\n\tA operator+(A o){int y = x+o.x; return{y - (y>=M)*M, b+o.b};}\n\tA operator-(A o){int y = x-o.x; return{y + (y< 0)*M, b-o.b};}\n\tA operator*(A o) { return {(int)(1LL*x*o.x % M), b*o.b}; }\n\texplicit operator ull() const { return x ^ (ull) b << 21; }\n\tbool operator==(A o) const { return (ull)*this == (ull)o; }\n\tbool operator<(A o) const { return (ull)*this < (ull)o; }\n};\ntypedef A<1000000007, A<1000000009, unsigned>> H;\n\nstruct HashInterval {\n\tvector<H> ha, pw;\n\tHashInterval(string& str) : ha(sz(str)+1), pw(ha) {\n\t\tpw[0] = 1;\n\t\trep(i,0,sz(str))\n\t\t\tha[i+1] = ha[i] * C + str[i],\n\t\t\tpw[i+1] = pw[i] * C;\n\t}\n\tH hashInterval(int a, int b) { // hash [a, b)\n\t\treturn ha[b] - ha[a] * pw[b - a];\n\t}\n};\n\nvector<H> getHashes(string& str, int length) {\n\tif (sz(str) < length) return {};\n\tH h = 0, pw = 1;\n\trep(i,0,length)\n\t\th = h * C + str[i], pw = pw * C;\n\tvector<H> ret = {h};\n\trep(i,length,sz(str)) {\n\t\tret.push_back(h = h * C + str[i] - pw * str[i-length]);\n\t}\n\treturn ret;\n}\n\nH hashString(string& s){H h{}; for(char c:s) h=h*C+c;return h;}\n\nint main() {\n\ttimeval tp;\n\tgettimeofday(&tp, 0);\n\tC = (int)tp.tv_usec; // (less than modulo)\n\tassert((ull)(H(1)*2+1-3) == 0);\n\t// ...\n}"
+      "code": "typedef uint64_t ull;\nstatic int C; // initialized below\n\n// Arithmetic mod two primes and 2^32 simultaneously.\n// \"typedef uint64_t H;\" instead if Thue-Morse does not apply.\ntemplate<int M, class B>\nstruct A {\n\tint x; B b; A(int x=0) : x(x), b(x) {}\n\tA(int x, B b) : x(x), b(b) {}\n\tA operator+(A o){int y = x+o.x; return{y - (y>=M)*M, b+o.b};}\n\tA operator-(A o){int y = x-o.x; return{y + (y< 0)*M, b-o.b};}\n\tA operator*(A o) { return {(int)(1LL*x*o.x % M), b*o.b}; }\n\texplicit operator ull() const { return x ^ (ull) b << 21; }\n\tbool operator==(A o) const { return (ull)*this == (ull)o; }\n\tbool operator<(A o) const { return (ull)*this < (ull)o; }\n};\ntypedef A<1000000007, A<1000000009, unsigned>> H;\n\nstruct HashInterval {\n\tvector<H> ha, pw;\n\tHashInterval(string& str) : ha(sz(str)+1), pw(ha) {\n\t\tpw[0] = 1;\n\t\trep(i,0,sz(str))\n\t\t\tha[i+1] = ha[i] * C + (unsigned char)str[i],\n\t\t\tpw[i+1] = pw[i] * C;\n\t}\n\tH hashInterval(int a, int b) { // hash [a, b)\n\t\treturn ha[b] - ha[a] * pw[b - a];\n\t}\n};\n\nvector<H> getHashes(string& str, int length) {\n\tif (sz(str) < length) return {};\n\tH h = 0, pw = 1;\n\trep(i,0,length)\n\t\th = h * C + (unsigned char)str[i], pw = pw * C;\n\tvector<H> ret = {h};\n\trep(i,length,sz(str)) {\n\t\tret.push_back(h = h * C + (unsigned char)str[i]\n\t\t\t- pw * (unsigned char)str[i-length]);\n\t}\n\treturn ret;\n}\n\nH hashString(string& s) {\n\tH h{}; for (unsigned char c : s) h = h*C+c;\n\treturn h;\n}\n\nint main() {\n\ttimeval tp;\n\tgettimeofday(&tp, 0);\n\tC = (int)tp.tv_usec; // (less than modulo)\n\tassert((ull)(H(1)*2+1-3) == 0);\n\t// ...\n}"
     },
     {
       "id": "strings/Hashing.h",
       "name": "Hashing.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "Self-explanatory methods for string hashing.\n\\texttt{hashInterval(a,b)} hashes $[a,b)$:\na included, b excluded. \\texttt{getHashes(s,len)[i]}\nhashes $[i,i+len)$, excluding i+len.",
+      "description": "Self-explanatory methods for string hashing.\nCharacters are hashed as unsigned bytes, including nul.\n\\texttt{hashInterval(a,b)} hashes $[a,b)$:\na included, b excluded. \\texttt{getHashes(s,len)[i]}\nhashes $[i,i+len)$, excluding i+len.",
       "usage": "",
       "time": "",
       "memory": "",
@@ -1977,14 +1993,14 @@
       "source": "own work",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "// Arithmetic mod 2^64-1. 2x slower than mod 2^64 and more\n// code, but works on evil test data (e.g. Thue-Morse, where\n// ABBA... and BAAB... of length 2^10 hash the same mod 2^64).\n// \"typedef ull H;\" instead if you think test data is random,\n// or work mod 10^9+7 if the Birthday paradox is not a problem.\ntypedef uint64_t ull;\nstruct H {\n\tull x; H(ull x=0) : x(x) {}\n\tH operator+(H o) { return x + o.x + (x + o.x < x); }\n\tH operator-(H o) { return *this + ~o.x; }\n\tH operator*(H o) { auto m = (__uint128_t)x * o.x;\n\t\treturn H((ull)m) + (ull)(m >> 64); }\n\tull get() const { return x + !~x; }\n\tbool operator==(H o) const { return get() == o.get(); }\n\tbool operator<(H o) const { return get() < o.get(); }\n};\nstatic const H C = (ll)1e11+3; // (order ~ 3e9; random also ok)\n\nstruct HashInterval {\n\tvector<H> ha, pw;\n\tHashInterval(string& str) : ha(sz(str)+1), pw(ha) {\n\t\tpw[0] = 1;\n\t\trep(i,0,sz(str))\n\t\t\tha[i+1] = ha[i] * C + str[i],\n\t\t\tpw[i+1] = pw[i] * C;\n\t}\n\tH hashInterval(int a, int b) { // hash [a, b)\n\t\treturn ha[b] - ha[a] * pw[b - a];\n\t}\n};\n\nvector<H> getHashes(string& str, int length) {\n\tif (sz(str) < length) return {};\n\tH h = 0, pw = 1;\n\trep(i,0,length)\n\t\th = h * C + str[i], pw = pw * C;\n\tvector<H> ret = {h};\n\trep(i,length,sz(str)) {\n\t\tret.push_back(h = h * C + str[i] - pw * str[i-length]);\n\t}\n\treturn ret;\n}\n\nH hashString(string& s){H h{}; for(char c:s) h=h*C+c;return h;}"
+      "code": "// Arithmetic mod 2^64-1. 2x slower than mod 2^64 and more\n// code, but works on evil test data (e.g. Thue-Morse, where\n// ABBA... and BAAB... of length 2^10 hash the same mod 2^64).\n// \"typedef ull H;\" instead if you think test data is random,\n// or work mod 10^9+7 if the Birthday paradox is not a problem.\ntypedef uint64_t ull;\nstruct H {\n\tull x; H(ull x=0) : x(x) {}\n\tH operator+(H o) { return x + o.x + (x + o.x < x); }\n\tH operator-(H o) { return *this + ~o.x; }\n\tH operator*(H o) { auto m = (__uint128_t)x * o.x;\n\t\treturn H((ull)m) + (ull)(m >> 64); }\n\tull get() const { return x + !~x; }\n\tbool operator==(H o) const { return get() == o.get(); }\n\tbool operator<(H o) const { return get() < o.get(); }\n};\nstatic const H C = (ll)1e11+3; // (order ~ 3e9; random also ok)\n\nstruct HashInterval {\n\tvector<H> ha, pw;\n\tHashInterval(string& str) : ha(sz(str)+1), pw(ha) {\n\t\tpw[0] = 1;\n\t\trep(i,0,sz(str))\n\t\t\tha[i+1] = ha[i] * C + (unsigned char)str[i],\n\t\t\tpw[i+1] = pw[i] * C;\n\t}\n\tH hashInterval(int a, int b) { // hash [a, b)\n\t\treturn ha[b] - ha[a] * pw[b - a];\n\t}\n};\n\nvector<H> getHashes(string& str, int length) {\n\tif (sz(str) < length) return {};\n\tH h = 0, pw = 1;\n\trep(i,0,length)\n\t\th = h * C + (unsigned char)str[i], pw = pw * C;\n\tvector<H> ret = {h};\n\trep(i,length,sz(str)) {\n\t\tret.push_back(h = h * C + (unsigned char)str[i]\n\t\t\t- pw * (unsigned char)str[i-length]);\n\t}\n\treturn ret;\n}\n\nH hashString(string& s) {\n\tH h{}; for (unsigned char c : s) h = h*C+c;\n\treturn h;\n}"
     },
     {
       "id": "strings/KMP.h",
       "name": "KMP.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "\\texttt{pi[x]} computes the length of the longest prefix of \\texttt{s} that ends at \\texttt{x},\nother than \\texttt{s[0...x]} itself (abacaba -> 0010123).\nThat prefix is $[0,pi[x])$ and matches\n$[x-pi[x]+1,x+1)$: starts included, ends excluded.\nCan be used to find all occurrences of a string.",
+      "description": "\\texttt{pi[x]} computes the length of the longest prefix of \\texttt{s} that ends at \\texttt{x},\nother than \\texttt{s[0...x]} itself (abacaba -> 0010123).\nThat prefix is $[0,pi[x])$ and matches\n$[x-pi[x]+1,x+1)$: starts included, ends excluded.\nCan be used to find all occurrences of a string.\n\\texttt{match} requires a nonempty pattern and no nul\nbytes in either string (nul is its separator).",
       "usage": "",
       "time": "$O(n)$",
       "memory": "",
@@ -2016,7 +2032,7 @@
       "name": "MinRotation.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "Finds the lexicographically smallest rotation of a string.",
+      "description": "Finds the lexicographically smallest rotation of a string.\nBytes are ordered as unsigned, including nul bytes.",
       "usage": "rotate(v.begin(), v.begin()+minRotation(v), v.end());",
       "time": "$O(N)$",
       "memory": "",
@@ -2025,7 +2041,7 @@
       "source": "https://github.com/stjepang/snippets/blob/master/min_rotation.cpp",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "int minRotation(string s) {\n\tint a=0, N=sz(s); s += s;\n\trep(b,0,N) rep(k,0,N) {\n\t\tif (a+k == b || s[a+k] < s[b+k]) {b += max(0, k-1); break;}\n\t\tif (s[a+k] > s[b+k]) { a = b; break; }\n\t}\n\treturn a;\n}"
+      "code": "int minRotation(string s) {\n\tint a=0, N=sz(s); s += s;\n\trep(b,0,N) rep(k,0,N) {\n\t\tauto x = (unsigned char)s[a+k], y = (unsigned char)s[b+k];\n\t\tif (a+k == b || x < y) {b += max(0, k-1); break;}\n\t\tif (x > y) { a = b; break; }\n\t}\n\treturn a;\n}"
     },
     {
       "id": "strings/SuffixArray.h",
@@ -2604,7 +2620,7 @@
       "name": "PolygonUnion.h",
       "chapter": "geometry",
       "language": "cpp",
-      "description": "Calculates the area of the union of $n$ polygons (not necessarily\nconvex). The points within each polygon must be given in CCW order.\n(Epsilon checks may optionally be added to \\texttt{sideOf}/\\texttt{sgn}, but shouldn't be needed.)",
+      "description": "Calculates the union area of $n$ simple polygons (not necessarily\nconvex). The points within each polygon must be given in CCW order.\nUses a common origin to reduce area cancellation.\n(Epsilon checks may optionally be added to \\texttt{sideOf}/\\texttt{sgn}, but shouldn't be needed.)",
       "usage": "",
       "time": "$O(N^2)$, where $N$ is the total number of points",
       "memory": "",
@@ -2616,7 +2632,7 @@
         "geometry/sideOf.h"
       ],
       "includedInPdf": true,
-      "code": "double rat(pp a, pp b) {\n\treturn b.real() ? a.real()/b.real() : a.imag()/b.imag();\n}\ndouble polyUnion(vector<vector<pp>>& poly) {\n\tdouble ret = 0;\n\trep(i,0,sz(poly)) rep(v,0,sz(poly[i])) {\n\t\tpp A = poly[i][v], B = poly[i][(v + 1) % sz(poly[i])];\n\t\tvector<pair<double, int>> segs = {{0, 0}, {1, 0}};\n\t\trep(j,0,sz(poly)) if (i != j) {\n\t\t\trep(u,0,sz(poly[j])) {\n\t\t\t\tpp C = poly[j][u], D = poly[j][(u + 1) % sz(poly[j])];\n\t\t\t\tint sc = sideOf(A, B, C), sd = sideOf(A, B, D);\n\t\t\t\tif (sc != sd) {\n\t\t\t\t\tdouble sa = orient(C, D, A), sb = orient(C, D, B);\n\t\t\t\t\tif (min(sc, sd) < 0)\n\t\t\t\t\t\tsegs.emplace_back(sa / (sa - sb), sgn(sc - sd));\n\t\t\t\t} else if (!sc && !sd && j<i && sgn(dotp(B-A, D-C))>0){\n\t\t\t\t\tsegs.emplace_back(rat(C - A, B - A), 1);\n\t\t\t\t\tsegs.emplace_back(rat(D - A, B - A), -1);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tsort(all(segs));\n\t\tfor (auto& s : segs) s.first = min(max(s.first, 0.0), 1.0);\n\t\tdouble sum = 0;\n\t\tint cnt = segs[0].second;\n\t\trep(j,1,sz(segs)) {\n\t\t\tif (!cnt) sum += segs[j].first - segs[j - 1].first;\n\t\t\tcnt += segs[j].second;\n\t\t}\n\t\tret += crossp(A, B) * sum;\n\t}\n\treturn ret / 2;\n}"
+      "code": "double rat(pp a, pp b) {\n\treturn b.real() ? a.real()/b.real() : a.imag()/b.imag();\n}\ndouble polyUnion(vector<vector<pp>>& poly) {\n\tdouble ret = 0;\n\tpp origin;\n\tfor (auto& p : poly) if (!p.empty()) {\n\t\torigin = p[0]; break;\n\t}\n\trep(i,0,sz(poly)) rep(v,0,sz(poly[i])) {\n\t\tpp A = poly[i][v], B = poly[i][(v + 1) % sz(poly[i])];\n\t\tvector<pair<double, int>> segs = {{0, 0}, {1, 0}};\n\t\trep(j,0,sz(poly)) if (i != j) {\n\t\t\trep(u,0,sz(poly[j])) {\n\t\t\t\tpp C = poly[j][u], D = poly[j][(u + 1) % sz(poly[j])];\n\t\t\t\tint sc = sideOf(A, B, C), sd = sideOf(A, B, D);\n\t\t\t\tif (sc != sd) {\n\t\t\t\t\tdouble sa = orient(C, D, A), sb = orient(C, D, B);\n\t\t\t\t\tif (min(sc, sd) < 0)\n\t\t\t\t\t\tsegs.emplace_back(sa / (sa - sb), sgn(sc - sd));\n\t\t\t\t} else if (!sc && !sd && j<i && sgn(dotp(B-A, D-C))>0){\n\t\t\t\t\tsegs.emplace_back(rat(C - A, B - A), 1);\n\t\t\t\t\tsegs.emplace_back(rat(D - A, B - A), -1);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tsort(all(segs));\n\t\tfor (auto& s : segs) s.first = min(max(s.first, 0.0), 1.0);\n\t\tdouble sum = 0;\n\t\tint cnt = segs[0].second;\n\t\trep(j,1,sz(segs)) {\n\t\t\tif (!cnt) sum += segs[j].first - segs[j - 1].first;\n\t\t\tcnt += segs[j].second;\n\t\t}\n\t\tret += crossp(A-origin, B-origin) * sum;\n\t}\n\treturn ret / 2;\n}"
     },
     {
       "id": "geometry/PolyhedronVolume.h",
@@ -2726,7 +2742,7 @@
       "name": "BinaryTrie.h",
       "chapter": "various",
       "language": "cpp",
-      "description": "Binary trie on $[0,2^B)$:\n0 included, $2^B$ excluded. Set \\texttt{insert}/\n\\texttt{erase}, multiset \\texttt{insert<1>}, XOR-min/max,\ncount $x\\oplus y<k$ (\\texttt{countLG<0>}) or $>k$\n(\\texttt{countLG<1>}), lazy XOR-all, mex (set).\nBoth countLG variants exclude equality to k.\n\\texttt{count(x)} counts copies of $x$.\n\\texttt{kth(k)}: 0-indexed kth smallest (with repeats),\nrequires $0 \\le k < \\texttt{cnt}$.\nXOR queries take $xr$ (default 0). \\texttt{cnt} is the\nsize. \\texttt{each}($f$) calls $f(x,\\texttt{cnt})$. \\texttt{merge}\nis set-union (destroys $o$; safe to delete);\n\\texttt{merge<1>} adds counts. mex needs unique values.",
+      "description": "Binary trie on $[0,2^B)$:\n0 included, $2^B$ excluded. Set \\texttt{insert}/\n\\texttt{erase}, multiset \\texttt{insert<1>}, XOR-min/max,\ncount $x\\oplus y<k$ (\\texttt{countLG<0>}) or $>k$\n(\\texttt{countLG<1>}), lazy XOR-all, mex (set).\nBoth countLG variants exclude equality to k.\nRequires $0\\le xr,k<2^B$ for countLG. For $k=2^B$,\nthe less-than count is cnt and greater-than count is 0.\n\\texttt{count(x)} counts copies of $x$.\n\\texttt{kth(k)}: 0-indexed kth smallest (with repeats),\nrequires $0 \\le k < \\texttt{cnt}$.\nXOR queries take $xr$ (default 0). \\texttt{cnt} is the\nsize. \\texttt{each}($f$) calls $f(x,\\texttt{cnt})$. \\texttt{merge}\nis set-union (destroys $o$; safe to delete);\n\\texttt{merge<1>} adds counts. mex needs unique values.\nmex requires a missing value in $[0,2^B)$. If the set\ncontains all $2^B$ values, return $2^B$ separately;\nthe routine below would return $2^B-1$.",
       "usage": "",
       "time": "$O(B)$ per op",
       "memory": "",
@@ -2822,16 +2838,16 @@
       "name": "FastInput.h",
       "chapter": "various",
       "language": "cpp",
-      "description": "Read an integer from stdin. Usage requires your program to pipe in\ninput from file.",
+      "description": "Read an integer from stdin. Usage requires your program to pipe in\ninput from file. Supports the full signed int range.",
       "usage": "./a.out < input.txt",
       "time": "About 5x as fast as cin/scanf.",
       "memory": "",
-      "status": "tested on SPOJ INTEST, unit tested",
+      "status": "tested on SPOJ INTEST, stress-tested",
       "author": "chilli",
       "source": "Own work",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "inline char gc() { // like getchar()\n\tstatic char buf[1 << 16];\n\tstatic size_t bc, be;\n\tif (bc >= be) {\n\t\tbuf[0] = 0, bc = 0;\n\t\tbe = fread(buf, 1, sizeof(buf), stdin);\n\t}\n\treturn buf[bc++]; // returns 0 on EOF\n}\n\nint readInt() {\n\tint a, c;\n\twhile ((a = gc()) < 40);\n\tif (a == '-') return -readInt();\n\twhile ((c = gc()) >= 48) a = a * 10 + c - 480;\n\treturn a - 48;\n}"
+      "code": "inline char gc() { // like getchar()\n\tstatic char buf[1 << 16];\n\tstatic size_t bc, be;\n\tif (bc >= be) {\n\t\tbuf[0] = 0, bc = 0;\n\t\tbe = fread(buf, 1, sizeof(buf), stdin);\n\t}\n\treturn buf[bc++]; // returns 0 on EOF\n}\n\nint readInt() {\n\tll a = 0;\n\tint c;\n\twhile ((c = gc()) < 40);\n\tbool neg = c == '-';\n\tif (neg) c = gc();\n\tdo { a = a * 10 + c - '0'; } while ((c = gc()) >= 48);\n\treturn int(neg ? -a : a);\n}"
     },
     {
       "id": "various/FastKnapsack.h",
@@ -3039,7 +3055,7 @@
       "source": "https://software.intel.com/sites/landingpage/IntrinsicsGuide/",
       "dependencies": [],
       "includedInPdf": false,
-      "code": "#pragma GCC target (\"avx2\") // or sse4.1\n#include \"immintrin.h\"\n\ntypedef __m256i mi;\n#define L(x) _mm256_loadu_si256((mi*)&(x))\n\n// High-level/specific methods:\n// load(u)?_si256, store(u)?_si256, setzero_si256, _mm_malloc\n// blendv_(epi8|ps|pd) (z?y:x), movemask_epi8 (hibits of bytes)\n// i32gather_epi32(addr, x, 4): map addr[] over 32-b parts of x\n// sad_epu8: sum of absolute differences of u8, outputs 4xi64\n// maddubs_epi16: dot product of unsigned i7's, outputs 16xi15\n// madd_epi16: dot product of signed i16's, outputs 8xi32\n// extractf128_si256(, i) (256->128), cvtsi128_si32 (128->lo32)\n// permute2f128_si256(x,x,1) swaps 128-bit lanes\n// shuffle_epi32(x, 3*64+2*16+1*4+0) == x for each lane\n// shuffle_epi8(x, y) takes a vector instead of an imm\n\n// Methods that work with most data types (append e.g. _epi32):\n// set1, blend (i8?x:y), add, adds (sat.), mullo, sub, and/or,\n// andnot, abs, min, max, sign(1,x), cmp(gt|eq), unpack(lo|hi)\n\nint sumi32(mi m) { union {int v[8]; mi m;} u; u.m = m;\n\tint ret = 0; rep(i,0,8) ret += u.v[i]; return ret; }\nmi zero() { return _mm256_setzero_si256(); }\nmi one() { return _mm256_set1_epi32(-1); }\nbool all_zero(mi m) { return _mm256_testz_si256(m, m); }\nbool all_one(mi m) { return _mm256_testc_si256(m, one()); }\n\nll example_filteredDotProduct(int n, short* a, short* b) {\n\tint i = 0; ll r = 0;\n\tmi zero = _mm256_setzero_si256(), acc = zero;\n\twhile (i + 16 <= n) {\n\t\tmi va = L(a[i]), vb = L(b[i]); i += 16;\n\t\tva = _mm256_and_si256(_mm256_cmpgt_epi16(vb, va), va);\n\t\tmi vp = _mm256_madd_epi16(va, vb);\n\t\tacc = _mm256_add_epi64(_mm256_unpacklo_epi32(vp, zero),\n\t\t\t_mm256_add_epi64(acc, _mm256_unpackhi_epi32(vp, zero)));\n\t}\n\tunion {ll v[4]; mi m;} u; u.m = acc; rep(i,0,4) r += u.v[i];\n\tfor (;i<n;++i) if (a[i] < b[i]) r += a[i]*b[i]; // <- equiv\n\treturn r;\n}"
+      "code": "#pragma GCC target (\"avx2\") // or sse4.1\n#include \"immintrin.h\"\n\ntypedef __m256i mi;\n#define L(x) _mm256_loadu_si256((mi*)&(x))\n\n// High-level/specific methods:\n// load(u)?_si256, store(u)?_si256, setzero_si256, _mm_malloc\n// blendv_(epi8|ps|pd) (z?y:x), movemask_epi8 (hibits of bytes)\n// i32gather_epi32(addr, x, 4): map addr[] over 32-b parts of x\n// sad_epu8: sum of absolute differences of u8, outputs 4xi64\n// maddubs_epi16: dot product of unsigned i7's, outputs 16xi15\n// madd_epi16: dot product of signed i16's, outputs 8xi32\n// extractf128_si256(, i) (256->128), cvtsi128_si32 (128->lo32)\n// permute2f128_si256(x,x,1) swaps 128-bit lanes\n// shuffle_epi32(x, 3*64+2*16+1*4+0) == x for each lane\n// shuffle_epi8(x, y) takes a vector instead of an imm\n\n// Methods that work with most data types (append e.g. _epi32):\n// set1, blend (i8?x:y), add, adds (sat.), mullo, sub, and/or,\n// andnot, abs, min, max, sign(1,x), cmp(gt|eq), unpack(lo|hi)\n\nint sumi32(mi m) { union {int v[8]; mi m;} u; u.m = m;\n\tint ret = 0; rep(i,0,8) ret += u.v[i]; return ret; }\nmi zero() { return _mm256_setzero_si256(); }\nmi one() { return _mm256_set1_epi32(-1); }\nbool all_zero(mi m) { return _mm256_testz_si256(m, m); }\nbool all_one(mi m) { return _mm256_testc_si256(m, one()); }\n\nll example_filteredDotProduct(int n, short* a, short* b) {\n\tint i = 0; ll r = 0;\n\tmi acc = _mm256_setzero_si256();\n\twhile (i + 16 <= n) {\n\t\tmi va = L(a[i]), vb = L(b[i]); i += 16;\n\t\tva = _mm256_and_si256(_mm256_cmpgt_epi16(vb, va), va);\n\t\tmi vp = _mm256_madd_epi16(va, vb);\n\t\tmi sign = _mm256_srai_epi32(vp, 31);\n\t\tacc = _mm256_add_epi64(_mm256_unpacklo_epi32(vp, sign),\n\t\t\t_mm256_add_epi64(acc, _mm256_unpackhi_epi32(vp, sign)));\n\t}\n\tunion {ll v[4]; mi m;} u; u.m = acc; rep(i,0,4) r += u.v[i];\n\tfor (;i<n;++i) if (a[i] < b[i]) r += a[i]*b[i]; // <- equiv\n\treturn r;\n}"
     },
     {
       "id": "various/SmallPtr.h",
@@ -3496,8 +3512,8 @@
       "type": "prose",
       "id": "math/p/17",
       "chapter": "math",
-      "latex": "Most real random values with mean $\\mu$ and variance $\\sigma^2$ are well described by $\\mathcal{N}(\\mu,\\sigma^2),\\,\\sigma>0$. \\[ f(x) = \\frac{1}{\\sqrt{2\\pi\\sigma^2}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}} \\] If $X_1 \\sim \\mathcal{N}(\\mu_1,\\sigma_1^2)$ and $X_2 \\sim \\mathcal{N}(\\mu_2,\\sigma_2^2)$ then \\[ aX_1 + bX_2 + c \\sim \\mathcal{N}(\\mu_1+\\mu_2+c,a^2\\sigma_1^2+b^2\\sigma_2^2) \\]",
-      "searchText": "Most real random values with mean and variance ^2 are well described by N ( , ^2),, >0 . f(x) = 1 2 ^2 e^ - (x- )^2 2 ^2 If X_1 N ( _1, _1^2) and X_2 N ( _2, _2^2) then aX_1 + bX_2 + c N ( _1+ _2+c,a^2 _1^2+b^2 _2^2)"
+      "latex": "Most real random values with mean $\\mu$ and variance $\\sigma^2$ are well described by $\\mathcal{N}(\\mu,\\sigma^2),\\,\\sigma>0$. \\[ f(x) = \\frac{1}{\\sqrt{2\\pi\\sigma^2}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}} \\] If independent $X_1 \\sim \\mathcal{N}(\\mu_1,\\sigma_1^2)$ and $X_2 \\sim \\mathcal{N}(\\mu_2,\\sigma_2^2)$ then \\[ aX_1 + bX_2 + c \\sim \\mathcal{N}(a\\mu_1+b\\mu_2+c,a^2\\sigma_1^2+b^2\\sigma_2^2) \\]",
+      "searchText": "Most real random values with mean and variance ^2 are well described by N ( , ^2),, >0 . f(x) = 1 2 ^2 e^ - (x- )^2 2 ^2 If independent X_1 N ( _1, _1^2) and X_2 N ( _2, _2^2) then aX_1 + bX_2 + c N (a _1+b _2+c,a^2 _1^2+b^2 _2^2)"
     },
     {
       "type": "heading",
@@ -3511,8 +3527,8 @@
       "type": "prose",
       "id": "math/p/18",
       "chapter": "math",
-      "latex": "A \\emph{Markov chain} is a discrete random process with the property that the next state depends only on the current state. Let $X_1,X_2,\\ldots$ be a sequence of random variables generated by the Markov process. Then there is a transition matrix $\\mathbf{P} = (p_{ij})$, with $p_{ij} = \\Pr(X_n = i | X_{n-1} = j)$, and $\\mathbf{p}^{(n)} = \\mathbf P^n \\mathbf p^{(0)}$ is the probability distribution for $X_n$ (i.e., $p^{(n)}_i = \\Pr(X_n = i)$), where $\\mathbf{p}^{(0)}$ is the initial distribution.\n\n$\\mathbf{\\pi}$ is a stationary distribution if $\\mathbf{\\pi} = \\mathbf{\\pi P}$. If the Markov chain is \\emph{irreducible} (it is possible to get to any state from any state), then $\\pi_i = \\frac{1}{\\mathbb{E}(T_i)}$ where $\\mathbb{E}(T_i)$  is the expected time between two visits in state $i$. $\\pi_j/\\pi_i$ is the expected number of visits in state $j$ between two visits in state $i$.\n\nFor a connected, undirected and non-bipartite graph, where the transition probability is uniform among all neighbors, $\\pi_i$ is proportional to node $i$'s degree.\n\nA Markov chain is \\emph{ergodic} if the asymptotic distribution is independent of the initial distribution. A finite Markov chain is ergodic iff it is irreducible and \\emph{aperiodic} (i.e., the gcd of cycle lengths is 1). $\\lim_{k\\rightarrow\\infty}\\mathbf{P}^k = \\mathbf{1}\\pi$.\n\nA Markov chain is an A-chain if the states can be partitioned into two sets $\\mathbf{A}$ and $\\mathbf{G}$, such that all states in $\\mathbf{A}$ are absorbing ($p_{ii}=1$), and all states in $\\mathbf{G}$ leads to an absorbing state in $\\mathbf{A}$. The probability for absorption in state $i\\in\\mathbf{A}$, when the initial state is $j$, is $a_{ij} = p_{ij}+\\sum_{k\\in\\mathbf{G}} a_{ik}p_{kj}$. The expected time until absorption, when the initial state is $i$, is $t_i = 1+\\sum_{k\\in\\mathbf{G}}p_{ki}t_k$.",
-      "searchText": "A Markov chain is a discrete random process with the property that the next state depends only on the current state. Let X_1,X_2, be a sequence of random variables generated by the Markov process. Then there is a transition matrix P = (p_ ij ) , with p_ ij = (X_n = i | X_ n-1 = j) , and p ^ (n) = P^n p^ (0) is the probability distribution for X_n (i.e., p^ (n) _i = (X_n = i) ), where p ^ (0) is the initial distribution. is a stationary distribution if = P . If the Markov chain is irreducible (it is possible to get to any state from any state), then _i = 1 E (T_i) where E (T_i) is the expected time between two visits in state i . _j/ _i is the expected number of visits in state j between two visits in state i . For a connected, undirected and non-bipartite graph, where the transition probability is uniform among all neighbors, _i is proportional to node i 's degree. A Markov chain is ergodic if the asymptotic distribution is independent of the initial distribution. A finite Markov chain is ergodic iff it is irreducible and aperiodic (i.e., the gcd of cycle lengths is 1). _ k P ^k = 1 . A Markov chain is an A-chain if the states can be partitioned into two sets A and G , such that all states in A are absorbing ( p_ ii =1 ), and all states in G leads to an absorbing state in A . The probability for absorption in state i A , when the initial state is j , is a_ ij = p_ ij + _ k G a_ ik p_ kj . The expected time until absorption, when the initial state is i , is t_i = 1+ _ k G p_ ki t_k ."
+      "latex": "A \\emph{Markov chain} is a discrete random process with the property that the next state depends only on the current state. Let $X_1,X_2,\\ldots$ be a sequence of random variables generated by the Markov process. Then there is a transition matrix $\\mathbf{P} = (p_{ij})$, with $p_{ij} = \\Pr(X_n = i | X_{n-1} = j)$, and $\\mathbf{p}^{(n)} = \\mathbf P^n \\mathbf p^{(0)}$ is the probability distribution for $X_n$ (i.e., $p^{(n)}_i = \\Pr(X_n = i)$), where $\\mathbf{p}^{(0)}$ is the initial distribution.\n\n$\\mathbf{\\pi}$ is a stationary column distribution if $\\mathbf{\\pi} = \\mathbf{P\\pi}$. If the Markov chain is \\emph{irreducible} (it is possible to get to any state from any state), then $\\pi_i = \\frac{1}{\\mathbb{E}(T_i)}$ where $\\mathbb{E}(T_i)$  is the expected time between two visits in state $i$. $\\pi_j/\\pi_i$ is the expected number of visits in state $j$ between two visits in state $i$.\n\nFor a connected, undirected and non-bipartite graph, where the transition probability is uniform among all neighbors, $\\pi_i$ is proportional to node $i$'s degree.\n\nA finite irreducible chain converges independently of the initial distribution iff it is \\emph{aperiodic} (the gcd of return times is 1). More generally, this convergence holds iff there is exactly one closed communicating class and it is aperiodic; other states may be transient. $\\lim_{k\\rightarrow\\infty}\\mathbf{P}^k = \\mathbf{\\pi}\\mathbf{1}^{T}$.\n\nA Markov chain is an A-chain if the states can be partitioned into two sets $\\mathbf{A}$ and $\\mathbf{G}$, such that all states in $\\mathbf{A}$ are absorbing ($p_{ii}=1$), and all states in $\\mathbf{G}$ leads to an absorbing state in $\\mathbf{A}$. The probability for absorption in state $i\\in\\mathbf{A}$, when the initial state is $j$, is $a_{ij} = p_{ij}+\\sum_{k\\in\\mathbf{G}} a_{ik}p_{kj}$. The expected time until absorption, when the initial state is $i$, is $t_i = 1+\\sum_{k\\in\\mathbf{G}}p_{ki}t_k$.",
+      "searchText": "A Markov chain is a discrete random process with the property that the next state depends only on the current state. Let X_1,X_2, be a sequence of random variables generated by the Markov process. Then there is a transition matrix P = (p_ ij ) , with p_ ij = (X_n = i | X_ n-1 = j) , and p ^ (n) = P^n p^ (0) is the probability distribution for X_n (i.e., p^ (n) _i = (X_n = i) ), where p ^ (0) is the initial distribution. is a stationary column distribution if = P . If the Markov chain is irreducible (it is possible to get to any state from any state), then _i = 1 E (T_i) where E (T_i) is the expected time between two visits in state i . _j/ _i is the expected number of visits in state j between two visits in state i . For a connected, undirected and non-bipartite graph, where the transition probability is uniform among all neighbors, _i is proportional to node i 's degree. A finite irreducible chain converges independently of the initial distribution iff it is aperiodic (the gcd of return times is 1). More generally, this convergence holds iff there is exactly one closed communicating class and it is aperiodic; other states may be transient. _ k P ^k = 1 ^ T . A Markov chain is an A-chain if the states can be partitioned into two sets A and G , such that all states in A are absorbing ( p_ ii =1 ), and all states in G leads to an absorbing state in A . The probability for absorption in state i A , when the initial state is j , is a_ ij = p_ ij + _ k G a_ ik p_ kj . The expected time until absorption, when the initial state is i , is t_i = 1+ _ k G p_ ki t_k ."
     },
     {
       "type": "heading",
@@ -4257,8 +4273,8 @@
       "type": "prose",
       "id": "combinatorial/p/7",
       "chapter": "combinatorial",
-      "latex": "EGF of Bernoulli numbers is $B(t)=\\frac{t}{e^t-1}$ (FFT-able). $B[0,\\ldots] = [1, -\\frac{1}{2}, \\frac{1}{6}, 0, -\\frac{1}{30}, 0, \\frac{1}{42}, \\ldots]$\n\nSums of powers: \\small \\[ \\sum_{i=1}^n n^m = \\frac{1}{m+1} \\sum_{k=0}^m \\binom{m+1}{k} B_k \\cdot (n+1)^{m+1-k} \\] \\normalsize\n\nEuler-Maclaurin formula for infinite sums: \\small \\[ \\sum_{i=m}^{\\infty} f(i) = \\int_m^\\infty f(x) dx - \\sum_{k=1}^\\infty \\frac{B_k}{k!}f^{(k-1)}(m) \\] \\[ \\approx \\int_{m}^\\infty f(x)dx + \\frac{f(m)}{2} - \\frac{f'(m)}{12} + \\frac{f'''(m)}{720} + O(f^{(5)}(m)) \\] \\normalsize",
-      "searchText": "EGF of Bernoulli numbers is B(t)= t e^t-1 (FFT-able). B[0, ] = [1, - 1 2 , 1 6 , 0, - 1 30 , 0, 1 42 , ] Sums of powers: _ i=1 ^n n^m = 1 m+1 _ k=0 ^m m+1 k B_k (n+1)^ m+1-k Euler-Maclaurin formula for infinite sums: _ i=m ^ f(i) = _m^ f(x) dx - _ k=1 ^ B_k k! f^ (k-1) (m) _ m ^ f(x)dx + f(m) 2 - f'(m) 12 + f'''(m) 720 + O(f^ (5) (m))"
+      "latex": "EGF of Bernoulli numbers is $B(t)=\\frac{t}{e^t-1}$ (FFT-able). $B[0,\\ldots] = [1, -\\frac{1}{2}, \\frac{1}{6}, 0, -\\frac{1}{30}, 0, \\frac{1}{42}, \\ldots]$\n\nSums of powers ($m\\ge 1$; for $m=0$ the sum is $n$): \\small \\[ \\sum_{i=1}^n i^m = \\frac{1}{m+1} \\sum_{k=0}^m \\binom{m+1}{k} B_k \\cdot (n+1)^{m+1-k} \\] \\normalsize\n\nEuler-Maclaurin formula for infinite sums: \\small \\[ \\sum_{i=m}^{\\infty} f(i) = \\int_m^\\infty f(x) dx - \\sum_{k=1}^\\infty \\frac{B_k}{k!}f^{(k-1)}(m) \\] \\[ \\approx \\int_{m}^\\infty f(x)dx + \\frac{f(m)}{2} - \\frac{f'(m)}{12} + \\frac{f'''(m)}{720} + O(f^{(5)}(m)) \\] \\normalsize",
+      "searchText": "EGF of Bernoulli numbers is B(t)= t e^t-1 (FFT-able). B[0, ] = [1, - 1 2 , 1 6 , 0, - 1 30 , 0, 1 42 , ] Sums of powers ( m 1 ; for m=0 the sum is n ): _ i=1 ^n i^m = 1 m+1 _ k=0 ^m m+1 k B_k (n+1)^ m+1-k Euler-Maclaurin formula for infinite sums: _ i=m ^ f(i) = _m^ f(x) dx - _ k=1 ^ B_k k! f^ (k-1) (m) _ m ^ f(x)dx + f(m) 2 - f'(m) 12 + f'''(m) 720 + O(f^ (5) (m))"
     },
     {
       "type": "heading",
@@ -4272,8 +4288,8 @@
       "type": "prose",
       "id": "combinatorial/p/8",
       "chapter": "combinatorial",
-      "latex": "Number of permutations on $n$ items with $k$ cycles. \\begin{align*} &c(n,k) = c(n-1,k-1) + (n-1) c(n-1,k),\\ c(0,0) = 1 \\\\ &\\textstyle \\sum_{k=0}^n c(n,k)x^k = x(x+1) \\dots (x+n-1) \\end{align*} $c(8,k) = 8, 0, 5040, 13068, 13132, 6769, 1960, 322, 28, 1$ \\\\ $c(n,2) = 0, 0, 1, 3, 11, 50, 274, 1764, 13068, 109584, \\dots$",
-      "searchText": "Number of permutations on n items with k cycles. c(n,k) = c(n-1,k-1) + (n-1) c(n-1,k), c(0,0) = 1 \\ _ k=0 ^n c(n,k)x^k = x(x+1) (x+n-1) c(8,k) = 8, 0, 5040, 13068, 13132, 6769, 1960, 322, 28, 1 \\ c(n,2) = 0, 0, 1, 3, 11, 50, 274, 1764, 13068, 109584,"
+      "latex": "Number of permutations on $n$ items with $k$ cycles. \\begin{align*} &c(n,k) = c(n-1,k-1) + (n-1) c(n-1,k),\\ c(0,0) = 1 \\\\ &\\textstyle \\sum_{k=0}^n c(n,k)x^k = x(x+1) \\dots (x+n-1) \\end{align*} $c(8,k) = 0, 5040, 13068, 13132, 6769, 1960, 322, 28, 1$ \\\\ $c(n,2) = 0, 0, 1, 3, 11, 50, 274, 1764, 13068, 109584, \\dots$",
+      "searchText": "Number of permutations on n items with k cycles. c(n,k) = c(n-1,k-1) + (n-1) c(n-1,k), c(0,0) = 1 \\ _ k=0 ^n c(n,k)x^k = x(x+1) (x+n-1) c(8,k) = 0, 5040, 13068, 13132, 6769, 1960, 322, 28, 1 \\ c(n,2) = 0, 0, 1, 3, 11, 50, 274, 1764, 13068, 109584,"
     },
     {
       "type": "heading",
@@ -4410,6 +4426,12 @@
     },
     {
       "type": "snippet",
+      "id": "graph/Yen.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
       "id": "graph/TopoSort.h",
       "chapter": "graph",
       "includedInPdf": true
@@ -4512,8 +4534,8 @@
       "type": "prose",
       "id": "graph/p/4",
       "chapter": "graph",
-      "latex": "\\noindent\\textbf{Kőnig.} A vertex cover meets every edge. On a bipartite graph, max matching = min vertex cover; the complement of a min cover is a max independent set. Hall: a matching saturates $L$ iff $|N(S)|\\ge|S|$ for every $S\\subseteq L$. \\texttt{cover} (Matching): from unmatched left vertices follow unmatched $L\\to R$ and matched $R\\to L$; the cover is unvisited left plus visited right. NP-hard on general graphs.\n\n\\noindent\\textbf{Path cover.} Min vertex-disjoint path cover of a DAG: split each $v$ into $v_L$ (left) and $v_R$ (right); each edge $u\\to v$ becomes $u_L\\to v_R$. Size $= n$ minus max matching. A match $u\\mapsto v$ means $u$ is followed by $v$ on a path. NP-hard on general digraphs.\n\n\\noindent\\textbf{Dilworth.} In a poset, min chain cover = max antichain. Build the comparability DAG ($u\\to v$ iff $u<v$) and take a min path cover. Max antichain = $\\{x:$ neither copy of $x$ is in the Kőnig cover$\\}$. Mirsky (dual): min antichain cover = max chain; partition by longest-path height. On a sequence, min decreasing-subsequence cover = LIS.",
-      "searchText": "Kőnig. A vertex cover meets every edge. On a bipartite graph, max matching = min vertex cover; the complement of a min cover is a max independent set. Hall: a matching saturates L iff |N(S)| |S| for every S L . cover (Matching): from unmatched left vertices follow unmatched L R and matched R L ; the cover is unvisited left plus visited right. NP-hard on general graphs. Path cover. Min vertex-disjoint path cover of a DAG: split each v into v_L (left) and v_R (right); each edge u v becomes u_L v_R . Size = n minus max matching. A match u v means u is followed by v on a path. NP-hard on general digraphs. Dilworth. In a poset, min chain cover = max antichain. Build the comparability DAG ( u v iff u<v ) and take a min path cover. Max antichain = x: neither copy of x is in the Kőnig cover . Mirsky (dual): min antichain cover = max chain; partition by longest-path height. On a sequence, min decreasing-subsequence cover = LIS."
+      "latex": "\\noindent\\textbf{Kőnig.} A vertex cover meets every edge. On a bipartite graph, max matching = min vertex cover; the complement of a min cover is a max independent set. Hall: a matching saturates $L$ iff $|N(S)|\\ge|S|$ for every $S\\subseteq L$. \\texttt{cover} (Matching): from unmatched left vertices follow unmatched $L\\to R$ and matched $R\\to L$; the cover is unvisited left plus visited right. NP-hard on general graphs.\n\n\\noindent\\textbf{Path cover.} Min vertex-disjoint path cover of a DAG: split each $v$ into $v_L$ (left) and $v_R$ (right); each edge $u\\to v$ becomes $u_L\\to v_R$. Size $= n$ minus max matching. A match $u\\mapsto v$ means $u$ is followed by $v$ on a path. NP-hard on general digraphs.\n\n\\noindent\\textbf{Dilworth.} In a poset, min chain cover = max antichain. Build the comparability DAG ($u\\to v$ iff $u<v$) and take a min path cover. Max antichain = $\\{x:$ neither copy of $x$ is in the Kőnig cover$\\}$. Mirsky (dual): min antichain cover = max chain; partition by longest-path height. On a sequence, min non-increasing-subsequence cover = strictly increasing LIS; min strictly decreasing subsequence cover = longest non-decreasing subsequence (LNDS). Equality may share a subsequence only in the first version: $[1,1]$ needs one non-increasing subsequence, but two strictly decreasing ones.",
+      "searchText": "Kőnig. A vertex cover meets every edge. On a bipartite graph, max matching = min vertex cover; the complement of a min cover is a max independent set. Hall: a matching saturates L iff |N(S)| |S| for every S L . cover (Matching): from unmatched left vertices follow unmatched L R and matched R L ; the cover is unvisited left plus visited right. NP-hard on general graphs. Path cover. Min vertex-disjoint path cover of a DAG: split each v into v_L (left) and v_R (right); each edge u v becomes u_L v_R . Size = n minus max matching. A match u v means u is followed by v on a path. NP-hard on general digraphs. Dilworth. In a poset, min chain cover = max antichain. Build the comparability DAG ( u v iff u<v ) and take a min path cover. Max antichain = x: neither copy of x is in the Kőnig cover . Mirsky (dual): min antichain cover = max chain; partition by longest-path height. On a sequence, min non-increasing-subsequence cover = strictly increasing LIS; min strictly decreasing subsequence cover = longest non-decreasing subsequence (LNDS). Equality may share a subsequence only in the first version: [1,1] needs one non-increasing subsequence, but two strictly decreasing ones."
     },
     {
       "type": "heading",

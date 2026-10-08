@@ -4,6 +4,7 @@
  * License: CC0
  * Source: own work
  * Description: Various self-explanatory methods for string hashing.
+ * Characters are hashed as unsigned bytes, including nul.
  * Use on Codeforces, which lacks 64-bit support and where solutions can be hacked.
  *  \texttt{hashInterval(a,b)} hashes $[a,b)$:
  *  a included, b excluded. \texttt{getHashes(s,len)[i]}
@@ -35,7 +36,7 @@ struct HashInterval {
 	HashInterval(string& str) : ha(sz(str)+1), pw(ha) {
 		pw[0] = 1;
 		rep(i,0,sz(str))
-			ha[i+1] = ha[i] * C + str[i],
+			ha[i+1] = ha[i] * C + (unsigned char)str[i],
 			pw[i+1] = pw[i] * C;
 	}
 	H hashInterval(int a, int b) { // hash [a, b)
@@ -47,15 +48,19 @@ vector<H> getHashes(string& str, int length) {
 	if (sz(str) < length) return {};
 	H h = 0, pw = 1;
 	rep(i,0,length)
-		h = h * C + str[i], pw = pw * C;
+		h = h * C + (unsigned char)str[i], pw = pw * C;
 	vector<H> ret = {h};
 	rep(i,length,sz(str)) {
-		ret.push_back(h = h * C + str[i] - pw * str[i-length]);
+		ret.push_back(h = h * C + (unsigned char)str[i]
+			- pw * (unsigned char)str[i-length]);
 	}
 	return ret;
 }
 
-H hashString(string& s){H h{}; for(char c:s) h=h*C+c;return h;}
+H hashString(string& s) {
+	H h{}; for (unsigned char c : s) h = h*C+c;
+	return h;
+}
 
 #include <sys/time.h>
 int main() {

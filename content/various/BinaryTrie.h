@@ -9,6 +9,8 @@
  *  count $x\oplus y<k$ (\texttt{countLG<0>}) or $>k$
  *  (\texttt{countLG<1>}), lazy XOR-all, mex (set).
  *  Both countLG variants exclude equality to k.
+ *  Requires $0\le xr,k<2^B$ for countLG. For $k=2^B$,
+ *  the less-than count is cnt and greater-than count is 0.
  *  \texttt{count(x)} counts copies of $x$.
  *  \texttt{kth(k)}: 0-indexed kth smallest (with repeats),
  *  requires $0 \le k < \texttt{cnt}$.
@@ -16,6 +18,9 @@
  *  size. \texttt{each}($f$) calls $f(x,\texttt{cnt})$. \texttt{merge}
  *  is set-union (destroys $o$; safe to delete);
  *  \texttt{merge<1>} adds counts. mex needs unique values.
+ *  mex requires a missing value in $[0,2^B)$. If the set
+ *  contains all $2^B$ values, return $2^B$ separately;
+ *  the routine below would return $2^B-1$.
  * Time: $O(B)$ per op
  * Status: stress-tested
  */

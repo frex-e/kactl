@@ -84,6 +84,7 @@ When porting an upstream patch, rebase it onto these APIs rather than overwritin
 | `content/graph/Blossom.h` | Gabow--Edmonds matching (ei1333 / LC), 0-indexed |
 | `content/graph/DominatorTree.h` | Lengauer--Tarjan dominator tree (from cactl / Benq); runtime $n$, ctor takes adj+root |
 | `content/graph/SteinerTree.h` | Dreyfus--Wagner Steiner tree; Library Checker `correct.cpp` rewrite; cost + edge indices |
+| `content/graph/Yen.h` | k shortest simple paths; compact kmyk adaptation for directed/undirected graphs without parallel edges; costs + vertex sequences |
 | `content/number-theory/FloorBlocks.h` | $\lfloor n/i\rfloor$ blocks |
 | `content/number-theory/PrimitiveRoot.h` | order of $a$ mod prime $p$, plus smallest primitive root |
 
@@ -116,7 +117,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/graph/HLD.h` | uses `LazyUpdateTree`; converts half-open HLD ranges to inclusive `[l, r-1]` |
 | `content/various/KnuthDP.h` | quadrangle notes (verified patterns) + `knuthDP` implementation |
 | `content/various/DivideAndConquerDP.h` | callable `partitionDP(N, K, C)` for exactly K nonempty segments with half-open costs; rolling layers and initialization included |
-| `content/graph/chapter.tex` | Johnson’s notes; Dinic; centroid; demands / lower bounds; blossom; dominator tree; Steiner tree; Kőnig / path cover / Dilworth |
+| `content/graph/chapter.tex` | Johnson’s notes; Yen; Dinic; centroid; demands / lower bounds; blossom; dominator tree; Steiner tree; Kőnig / path cover / Dilworth |
 | `content/combinatorial/chapter.tex` | 12-fold way table (balls/bins / functions $[n]\to[k]$) |
 | `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks; primitive roots |
 | `content/contest/chapter.tex` | Random + Input.h + Output.h |
@@ -129,10 +130,27 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/geometry/PolygonArea.h`, `PolygonCenter.h` | local coordinates avoid cancellation after large translations |
 | `content/geometry/HalfplaneIntersection.h` | unit directions, local line intersections, distance tolerance; retains small polygons and near-parallel boundaries |
 | `content/geometry/sphericalDistance.h` | chord/sum `atan2` formula preserves accuracy near coincident and antipodal points |
+| `content/numerical/PolyRoots.h` | distinct repeated roots, compensated Horner evaluation, constant/trailing-zero handling, and bisection to floating-point precision |
+| `content/numerical/GoldenSectionSearch.h` | stops when rounding prevents further subdivision; documents the precision limit |
+| `content/various/FastInput.h` | widened parsing accumulator and sign handling cover the full signed int range |
+| `content/combinatorial/multinomial.h` | documents that intermediate products must fit in ll, even when the final result fits |
+| `content/geometry/PolygonUnion.h` | common origin avoids translation-induced cancellation in union areas |
+| `content/strings/MinRotation.h` | unsigned byte comparisons, matching standard string lexicographic order |
+| `content/strings/Hashing.h`, `Hashing-codeforces.h` | hash unsigned bytes consistently in whole-string, interval, and rolling-window APIs, including nul and bytes above 127 |
+| `content/various/SIMD.h` | sign-extends signed pair sums in the filtered dot-product example |
+| `content/math/chapter.tex`, `content/combinatorial/chapter.tex` | corrected normal means/independence, column-stochastic Markov formulas and convergence, power sums, and Stirling table |
 | geometry figure captions | same glued 15mm minipages as upstream (with their `\vspace`); text width is `\linewidth-15mm` instead of `75mm` so they fit the printable-margin columns |
 
 ## Tests
 
+- `stress-tests/various/FastInput.cpp`: tests the actual header, signed int extremes, buffer boundaries, and randomized integers
+- `stress-tests/combinatorial/multinomial.cpp`: Pascal-triangle and factorial oracles within the documented intermediate-product bound
+- `stress-tests/numerical/GoldenSectionSearch.cpp`: minima at endpoints/interior, translated intervals, and rounding-induced stagnation
+- `stress-tests/numerical/PolyRoots.cpp`: repeated roots of both signs, irrational/dyadic roots, small positive minima, coefficient scaling, wide bounds, and randomized factored polynomials
+- `stress-tests/geometry/PolygonUnion.cpp`: translated rectangles and multi-polygon unions; random polygons are checked for simplicity before comparison
+- `stress-tests/strings/MinRotation.cpp`: all two-byte strings and randomized byte sequences, against unsigned string comparison
+- `stress-tests/strings/Hashing.cpp`, `Hashing-codeforces.cpp`: all two-byte strings, single-byte encoding, and randomized byte sequences; compare whole-string, interval, and rolling-window hashes
+- `stress-tests/various/SIMD.cpp`: signed extremes, vector/scalar boundaries, and random filtered dot products; skips non-x86/AVX2 hosts
 - `stress-tests/graph/Reroot.cpp`: distance sums against BFS from every vertex; paths, stars, random trees, shuffled adjacency lists, and repeated runs with different traversal roots
 - `stress-tests/numerical/Lagrange.cpp`: exhaustive small-field polynomials, randomized Horner comparisons, signed and large indices, and sums of powers
 - `stress-tests/various/BigInt.cpp`: decimal-digit and native 128-bit oracles; parsing/formatting, modular arithmetic, small-integer multiplication/division/remainder, aliasing, carries/borrows, and long input
@@ -142,7 +160,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 - `stress-tests/graph/HLD.cpp` no longer calls `tree->set` (defaults are 0)
 - `stress-tests/graph/Dinic2.cpp`: brute min-cut and Dinic comparisons, residual pairs and conservation, self-loops, reverse/parallel edges, flow limits, capacity edits, and 64-bit capacities
 - `stress-tests/various/LinkCutTree.cpp` covers link/cut connectivity plus path sum/add, point set, and rooted LCA
-- New stress tests: SparseLazySegmentTree, LiChao, MonotonicCHT, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot
+- New stress tests: SparseLazySegmentTree, LiChao, MonotonicCHT, BinaryTrie, KnuthDP, XORBasis, RREF, QuadRoots, LinearSieve, Mobius, HalfplaneIntersection, Centroid, PersistentSegmentTree, FloorBlocks, OfflineDynamicConnectivity, StaticRangeQuery, MonotonicMap, Blossom, SegmentTreeBeats, DominatorTree, SteinerTree, PrimitiveRoot, Yen
 - `stress-tests/strings/SuffixArray.cpp` also checks rank, `getLCP`, and `cmpSubstr`, including nonzero bytes through 255 and bounded substring comparisons
 
 - Geometry stress tests use complex coordinates; `ComplexGeometry`, `Angle`, and `kdTree` cover primitives, integer precision, floating hulls, cross-header use, rotations, transformations, and nearest-neighbor queries.

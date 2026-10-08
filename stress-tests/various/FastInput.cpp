@@ -1,33 +1,13 @@
 #include "../utilities/template.h"
 #include <unistd.h>
+#include "../../content/various/FastInput.h"
 
-// Same as FastInput.h but within a struct, to be able to reset bc/be from outside.
-struct GC {
-	char buf[1 << 16];
-	size_t bc = 0, be = 0;
-	char operator()() {
-		if (bc >= be) {
-			buf[0] = 0, bc = 0;
-			be = fread(buf, 1, sizeof(buf), stdin);
-		}
-		return buf[bc++]; // returns 0 on EOF
-	}
-} gc;
-int readInt() {
-	int a, c;
-	while ((a = gc()) < 40);
-	if (a == '-') return -readInt();
-	while ((c = gc()) >= 48) a = a * 10 + c - 480;
-	return a - 48;
-}
-
-constexpr int BUF_SIZE = sizeof(gc.buf);
+constexpr int BUF_SIZE = 1 << 16;
 
 string tempdirname;
 string tempfilename;
 
 void test(const string& s, vi ints = {}) {
-	gc.bc = gc.be = 0;
 	ofstream fout(tempfilename);
 	fout << s;
 	fout.close();
@@ -48,6 +28,8 @@ void test(const string& s, vi ints = {}) {
 			}
 			assert(x == y);
 		}
+		// Drain trailing whitespace before reopening stdin.
+		while (gc());
 	}
 }
 
@@ -83,6 +65,21 @@ int main() {
 	test("1 -2 ", {1, -2});
 	test("  -34   56   ", {-34, 56});
 	test(" \t\r\n5 -2 ", {5});
+	test("2147483647 -2147483648", {INT_MAX, INT_MIN});
+	test("2147483646 -2147483647 0 -0 00012",
+		{INT_MAX-1, INT_MIN+1, 0, 0, 12});
+	test(string(BUF_SIZE-1, ' ') + "-2147483648", {INT_MIN});
+	test(string(BUF_SIZE-5, ' ') + "2147483647", {INT_MAX});
+	mt19937 rng(20261008);
+	uniform_int_distribution<int> value(INT_MIN, INT_MAX);
+	vi ints;
+	s.clear();
+	rep(i,0,20000) {
+		int x = value(rng);
+		ints.push_back(x);
+		s += to_string(x) + (i % 2 ? "\n" : " \t");
+	}
+	test(s, ints);
 
 	unlink(tempfilename.c_str());
 	rmdir(tempdirname.c_str());

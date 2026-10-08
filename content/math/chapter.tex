@@ -186,8 +186,8 @@ The time between events in a Poisson process is $\textrm{Exp}(\lambda),\,\lambda
 \subsubsection{Normal distribution}
 Most real random values with mean $\mu$ and variance $\sigma^2$ are well described by $\mathcal{N}(\mu,\sigma^2),\,\sigma>0$.
 \[ f(x) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}} \]
-If $X_1 \sim \mathcal{N}(\mu_1,\sigma_1^2)$ and $X_2 \sim \mathcal{N}(\mu_2,\sigma_2^2)$ then
-\[ aX_1 + bX_2 + c \sim \mathcal{N}(\mu_1+\mu_2+c,a^2\sigma_1^2+b^2\sigma_2^2) \]
+If independent $X_1 \sim \mathcal{N}(\mu_1,\sigma_1^2)$ and $X_2 \sim \mathcal{N}(\mu_2,\sigma_2^2)$ then
+\[ aX_1 + bX_2 + c \sim \mathcal{N}(a\mu_1+b\mu_2+c,a^2\sigma_1^2+b^2\sigma_2^2) \]
 
 \section{Markov chains}
 A \emph{Markov chain} is a discrete random process with the property that the next state depends only on the current state.
@@ -197,7 +197,7 @@ and $\mathbf{p}^{(n)} = \mathbf P^n \mathbf p^{(0)}$ is the probability distribu
 where $\mathbf{p}^{(0)}$ is the initial distribution.
 
 % \subsubsection{Stationary distribution}
-$\mathbf{\pi}$ is a stationary distribution if $\mathbf{\pi} = \mathbf{\pi P}$.
+$\mathbf{\pi}$ is a stationary column distribution if $\mathbf{\pi} = \mathbf{P\pi}$.
 If the Markov chain is \emph{irreducible} (it is possible to get to any state from any state),
 then $\pi_i = \frac{1}{\mathbb{E}(T_i)}$ where $\mathbb{E}(T_i)$  is the expected time between two visits in state $i$.
 $\pi_j/\pi_i$ is the expected number of visits in state $j$ between two visits in state $i$.
@@ -205,9 +205,9 @@ $\pi_j/\pi_i$ is the expected number of visits in state $j$ between two visits i
 For a connected, undirected and non-bipartite graph, where the transition probability is uniform among all neighbors, $\pi_i$ is proportional to node $i$'s degree.
 
 % \subsubsection{Ergodicity}
-A Markov chain is \emph{ergodic} if the asymptotic distribution is independent of the initial distribution.
-A finite Markov chain is ergodic iff it is irreducible and \emph{aperiodic} (i.e., the gcd of cycle lengths is 1).
-$\lim_{k\rightarrow\infty}\mathbf{P}^k = \mathbf{1}\pi$.
+A finite irreducible chain converges independently of the initial distribution iff it is \emph{aperiodic} (the gcd of return times is 1).
+More generally, this convergence holds iff there is exactly one closed communicating class and it is aperiodic; other states may be transient.
+$\lim_{k\rightarrow\infty}\mathbf{P}^k = \mathbf{\pi}\mathbf{1}^{T}$.
 
 % \subsubsection{Absorption}
 A Markov chain is an A-chain if the states can be partitioned into two sets $\mathbf{A}$ and $\mathbf{G}$, such that all states in $\mathbf{A}$ are absorbing ($p_{ii}=1$), and all states in $\mathbf{G}$ leads to an absorbing state in $\mathbf{A}$.

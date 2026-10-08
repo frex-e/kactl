@@ -3,8 +3,9 @@
  * Date: 2019-10-29
  * License: Unknown
  * Source: https://codeforces.com/gym/101673/submission/50481926
- * Description: Calculates the area of the union of $n$ polygons (not necessarily
+ * Description: Calculates the union area of $n$ simple polygons (not necessarily
  * convex). The points within each polygon must be given in CCW order.
+ * Uses a common origin to reduce area cancellation.
  * (Epsilon checks may optionally be added to \texttt{sideOf}/\texttt{sgn}, but shouldn't be needed.)
  * Time: $O(N^2)$, where $N$ is the total number of points
  * Status: stress-tested, Submitted on ECNA 2017 Problem A
@@ -19,6 +20,10 @@ double rat(pp a, pp b) {
 }
 double polyUnion(vector<vector<pp>>& poly) {
 	double ret = 0;
+	pp origin;
+	for (auto& p : poly) if (!p.empty()) {
+		origin = p[0]; break;
+	}
 	rep(i,0,sz(poly)) rep(v,0,sz(poly[i])) {
 		pp A = poly[i][v], B = poly[i][(v + 1) % sz(poly[i])];
 		vector<pair<double, int>> segs = {{0, 0}, {1, 0}};
@@ -44,7 +49,7 @@ double polyUnion(vector<vector<pp>>& poly) {
 			if (!cnt) sum += segs[j].first - segs[j - 1].first;
 			cnt += segs[j].second;
 		}
-		ret += crossp(A, B) * sum;
+		ret += crossp(A-origin, B-origin) * sum;
 	}
 	return ret / 2;
 }

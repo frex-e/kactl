@@ -15,6 +15,7 @@ typedef vector<int> vi;
 #include "../../content/geometry/sideOf.h"
 #include "../../content/geometry/PolygonArea.h"
 #include "../../content/geometry/PolygonUnion.h"
+#include "../../content/geometry/SegmentIntersection.h"
 #include "../utilities/genPolygon.h"
 #include "../utilities/random.h"
 
@@ -168,6 +169,20 @@ pp rndUlp(int lim, long long ulps = 5) { return pp(randNearIntUlps(lim, ulps), r
 
 pp rndEps(int lim, double eps) { return pp(randNearIntEps(lim, eps), randNearIntEps(lim, eps)); }
 
+bool simple(const vector<pp>& p) {
+	int n = sz(p);
+	if (n < 3 || polygonArea2(p) == 0) return false;
+	set<pp, PointLess> unique(all(p));
+	if (sz(unique) != n) return false;
+	rep(i,0,n) rep(j,i+1,n) {
+		auto inter = segInter(p[i],p[(i+1)%n],
+			p[j],p[(j+1)%n]);
+		bool adjacent = j == i+1 || (i == 0 && j == n-1);
+		if (sz(inter) != (adjacent ? 1 : 0)) return false;
+	}
+	return true;
+}
+
 void testRandom(int n, int numPts = 10, int lim = 5, bool brute = false) {
 	vector<vector<pp>> polygons;
 	for (int i = 0; i < n; i++) {
@@ -176,12 +191,40 @@ void testRandom(int n, int numPts = 10, int lim = 5, bool brute = false) {
 		for (int j = 0; j < k; j++) {
 			pts.push_back(randPt(lim)); // rndEps(lim, 1e-10));
 		}
-		polygons.push_back(genPolygon(pts));
+		auto p = genPolygon(pts);
+		// genPolygon can produce self-intersections or repeated
+		// vertices. For those inputs, sort around the centroid
+		// instead; this yields a simple star-shaped polygon.
+		if (!simple(p)) {
+			sort(all(pts), PointLess{});
+			pts.erase(unique(all(pts)), pts.end());
+			pp sum;
+			for (pp v : pts) sum += v;
+			int cnt = sz(pts);
+			pts.erase(remove_if(all(pts), [&](pp v) {
+				return v*double(cnt) == sum;
+			}), pts.end());
+			sort(all(pts), [&](pp a, pp b) {
+				pp u = a*double(cnt)-sum, v = b*double(cnt)-sum;
+				return make_pair(arg(u),norm(u)) <
+					make_pair(arg(v),norm(v));
+			});
+			p = pts;
+			if (!simple(p)) { --i; continue; }
+		}
+		assert(simple(p));
+		polygons.push_back(p);
 		if (polygonArea2(polygons.back()) < 0) {
 			reverse(all(polygons.back()));
 		}
 	}
 	auto val1 = polyUnion(polygons);
+	// Translation must not change areas, including exposed
+	// fractions of edges shared by different polygons.
+	auto shifted = polygons;
+	for (auto& p : shifted) for (auto& v : p)
+		v += pp(1000001753., 1000006543.);
+	assert(abs(polyUnion(shifted) - val1) < 1e-7);
 	vector<vector<blackhorse::pt>> polygons2;
 	for (auto i : polygons) {
 		vector<blackhorse::pt> t;
@@ -199,6 +242,8 @@ void testRandom(int n, int numPts = 10, int lim = 5, bool brute = false) {
 	auto val3 = blackhorse::polygon_union(polygons2.data(), sz(polygons2));
 	auto val4 = lovelive::polygon_union(polygons3.data(), sz(polygons3));
 	if (abs(val1 - val3) > 1e-8 || abs(val1 - val4) > 1e-8) {
+		cerr << "Areas: " << val1 << ' ' << val3 << ' '
+			<< val4 << endl;
 		rep(i, 0, n) {
 			for (auto &x : polygons[i]) {
 				cout << x << ' ';
@@ -210,6 +255,25 @@ void testRandom(int n, int numPts = 10, int lim = 5, bool brute = false) {
 }
 
 int main() {
+	vector<vector<pp>> empty{{}};
+	assert(polyUnion(empty) == 0);
+	vector<vector<pp>> rect{{
+		{1000001753.,1000006543.}, {1000001760.,1000006543.},
+		{1000001760.,1000006552.}, {1000001753.,1000006552.}}};
+	assert(polyUnion(rect) == 63);
+	auto saved = rect;
+	assert(polyUnion(rect) == 63 && rect == saved);
+	// Overlap, containment, duplicate and disjoint rectangles.
+	vector<vector<pp>> boxes{
+		{{0,0},{7,0},{7,9},{0,9}},
+		{{3,2},{10,2},{10,5},{3,5}},
+		{{1,1},{2,1},{2,2},{1,2}},
+		{{0,0},{7,0},{7,9},{0,9}},
+		{{20,0},{22,0},{22,3},{20,3}}};
+	assert(polyUnion(boxes) == 78);
+	for (auto& p : boxes) for (auto& v : p)
+		v += pp(1000001753., 1000006543.);
+	assert(polyUnion(boxes) == 78);
 	// int s = (int)time(0);
 	int s = 1;
 	// cout << "seed " << s << endl;

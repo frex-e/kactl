@@ -7,6 +7,7 @@
  * pairwise LCA's and compressing edges.
  * Returns a list of \texttt{(par, orig\_index)} representing a tree rooted at 0.
  * The root points to itself.
+ * Requires a nonempty subset S.
  * Time: $O(|S| \log |S|)$
  * Status: Tested at CodeForces
  */

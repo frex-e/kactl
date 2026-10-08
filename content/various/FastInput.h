@@ -3,10 +3,10 @@
  * License: CC0
  * Source: Own work
  * Description: Read an integer from stdin. Usage requires your program to pipe in
- * input from file.
+ * input from file. Supports the full signed int range.
  * Usage: ./a.out < input.txt
  * Time: About 5x as fast as cin/scanf.
- * Status: tested on SPOJ INTEST, unit tested
+ * Status: tested on SPOJ INTEST, stress-tested
  */
 #pragma once
 
@@ -21,9 +21,11 @@ inline char gc() { // like getchar()
 }
 
 int readInt() {
-	int a, c;
-	while ((a = gc()) < 40);
-	if (a == '-') return -readInt();
-	while ((c = gc()) >= 48) a = a * 10 + c - 480;
-	return a - 48;
+	ll a = 0;
+	int c;
+	while ((c = gc()) < 40);
+	bool neg = c == '-';
+	if (neg) c = gc();
+	do { a = a * 10 + c - '0'; } while ((c = gc()) >= 48);
+	return int(neg ? -a : a);
 }

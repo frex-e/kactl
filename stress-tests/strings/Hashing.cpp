@@ -3,8 +3,31 @@
 #include "../../content/strings/Hashing.h"
 
 #include <sys/time.h>
+void checkBytes(string s) {
+	HashInterval hi(s);
+	rep(len,0,sz(s)+1) {
+		auto hashes = getHashes(s, len);
+		assert(sz(hashes) == sz(s)-len+1);
+		rep(i,0,sz(hashes)) {
+			string sub = s.substr(i, len);
+			assert(hashes[i] == hashString(sub));
+			assert(hashes[i] == hi.hashInterval(i, i+len));
+		}
+	}
+}
 int main() {
 	assert((H(1)*2+1-3).get() == 0);
+	rep(i,0,256) {
+		string s(1, (char)i);
+		assert(hashString(s).get() == (ull)i);
+		rep(j,0,256) checkBytes(s + (char)j);
+	}
+	mt19937 rng(123456);
+	rep(it,0,1000) {
+		string s(rng()%33, '\0');
+		for (char& c : s) c = (char)(rng()%256);
+		checkBytes(s);
+	}
 
 	rep(it,0,10000) {
 		int n = rand() % 10;

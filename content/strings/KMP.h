@@ -7,6 +7,8 @@
  *  That prefix is $[0,pi[x])$ and matches
  *  $[x-pi[x]+1,x+1)$: starts included, ends excluded.
  * Can be used to find all occurrences of a string.
+ * \texttt{match} requires a nonempty pattern and no nul
+ * bytes in either string (nul is its separator).
  * Time: O(n)
  * Status: Tested on kattis:stringmatching
  */
