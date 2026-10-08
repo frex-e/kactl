@@ -31,6 +31,10 @@ prefer those instead of duplicating them.
 - The C++ compiler is auto-detected by `doc/scripts/cxx.sh` (prefers `g++-15/14/13`, falls
   back to `g++`; rejects Apple clang). Override with `CXX=...` if needed. Build uses
   `-std=c++20`.
+- On Apple Silicon macOS, `ModMulLL` and `MillerRabin` stress tests fail and `Factor`
+  can hang: native `long double` lacks the x87 precision these snippets assume.
+  See [Apple Silicon test notes](agents/verify.md#apple-silicon-macos) before
+  interpreting local failures; validate their full range on x86-64 Linux/GCC.
 - `make kactl` (and `make web-pdf`) rewrite the committed `kactl.pdf` and copy it to
   `web/public/kactl.pdf` for the snippets site. The repo-root PDF showing as dirty is
   expected — do **not** commit that churn unless you intend to update the shipped PDF.

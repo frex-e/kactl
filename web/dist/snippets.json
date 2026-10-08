@@ -33,12 +33,12 @@
       "title": "Strings"
     },
     {
-      "id": "various",
-      "title": "Various"
-    },
-    {
       "id": "geometry",
       "title": "Geometry"
+    },
+    {
+      "id": "various",
+      "title": "Various"
     },
     {
       "id": "appendix",
@@ -131,7 +131,7 @@
       "name": "Random.h",
       "chapter": "contest",
       "language": "cpp",
-      "description": "Seeded RNG and drawing random integers.\nFor string hashing, take a random odd 61-bit base.",
+      "description": "Seeded RNG and drawing random integers.\n\\texttt{randll(l,r)} draws from $[l,r]$:\nboth endpoints included.\nFor string hashing, take a random odd 61-bit base.",
       "usage": "",
       "time": "",
       "memory": "",
@@ -175,22 +175,6 @@
       "code": "Pre-submit:\nWrite a few simple test cases if sample is not enough.\nAre time limits close? If so, generate max cases.\nIs the memory usage fine?\nCould anything overflow?\nMake sure to submit the right file.\n\nWrong answer:\nPrint your solution! Print debug output, as well.\nAre you clearing all data structures between test cases?\nCan your algorithm handle the whole range of input?\nRead the full problem statement again.\nDo you handle all corner cases correctly?\nHave you understood the problem correctly?\nAny uninitialized variables?\nAny overflows?\nConfusing N and M, i and j, etc.?\nAre you sure your algorithm works?\nWhat special cases have you not thought of?\nAre you sure the STL functions you use work as you think?\nAdd some assertions, maybe resubmit.\nCreate some testcases to run your algorithm on.\nGo through the algorithm for a simple case.\nGo through this list again.\nExplain your algorithm to a teammate.\nAsk the teammate to look at your code.\nGo for a small walk, e.g. to the toilet.\nIs your output format correct? (including whitespace)\nRewrite your solution from the start or let a teammate do it.\n\nRuntime error:\nHave you tested all corner cases locally?\nAny uninitialized variables?\nAre you reading or writing outside the range of any vector?\nAny assertions that might fail?\nAny possible division by 0? (mod 0 for example)\nAny possible infinite recursion?\nInvalidated pointers or iterators?\nAre you using too much memory?\nDebug with resubmits (e.g. remapped signals, see Various).\n\nTime limit exceeded:\nDo you have any possible infinite loops?\nWhat is the complexity of your algorithm?\nAre you copying a lot of unnecessary data? (References)\nHow big is the input and output? (consider scanf)\nAvoid vector, map. (use arrays/unordered_map)\nWhat do your teammates think about your algorithm?\n\nMemory limit exceeded:\nWhat is the max amount of memory your algorithm should need?\nAre you clearing all data structures between test cases?"
     },
     {
-      "id": "data-structures/BinaryTrie.h",
-      "name": "BinaryTrie.h",
-      "chapter": "data-structures",
-      "language": "cpp",
-      "description": "Binary trie on $[0,2^B)$. Set \\texttt{insert}/\n\\texttt{erase}, multiset \\texttt{insert<1>}, XOR-min/max,\ncount $x\\oplus y<k$ (\\texttt{countLG<0>}) or $>k$\n(\\texttt{countLG<1>}), lazy XOR-all, mex (set).\n\\texttt{count(x)} counts copies of $x$.\n\\texttt{kth(k)}: 0-indexed kth smallest (with repeats),\nrequires $0 \\le k < \\texttt{cnt}$.\nXOR queries take $xr$ (default 0). \\texttt{cnt} is the\nsize. \\texttt{each}($f$) calls $f(x,\\texttt{cnt})$. \\texttt{merge}\nis set-union (destroys $o$; safe to delete);\n\\texttt{merge<1>} adds counts. mex needs unique values.",
-      "usage": "",
-      "time": "$O(B)$ per op",
-      "memory": "",
-      "status": "stress-tested",
-      "author": "caterpillow, me",
-      "source": "https://github.com/caterpillow/cactl Trie.h",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "// Only implement required functions\nstruct BinaryTrie {\n\tusing T = BinaryTrie;\n\tstatic const int B = 30;\n\tint cnt = 0, lazy = 0;\n\tT *c[2] = {};\n\tT*& ch(int b) {\n\t\treturn c[b] ? c[b] : c[b] = new T();\n\t}\n\tint cc(int b) { return c[b] ? c[b]->cnt : 0; }\n\tvoid push(int i) {\n\t\tif (!lazy) return;\n\t\tif (i && (lazy >> (i - 1) & 1)) swap(c[0], c[1]);\n\t\trep(b,0,2) if (c[b]) c[b]->lazy ^= lazy;\n\t\tlazy = 0;\n\t}\n\tvoid xorAll(int x) { lazy ^= x; }\n\ttemplate<int ms = 0>\n\tint insert(int x, int i = B) {\n\t\tpush(i);\n\t\tif (!i) return !ms && cnt ? 0 : (++cnt, 1);\n\t\tint b = x >> --i & 1;\n\t\tint add = ch(b)->insert<ms>(x, i);\n\t\treturn cnt += add, add;\n\t}\n\tint erase(int x, int i = B) {\n\t\tif (!cnt) return 0;\n\t\tpush(i);\n\t\tint sub = 1;\n\t\tif (i) {\n\t\t\tint b = x >> --i & 1;\n\t\t\tsub = c[b] ? c[b]->erase(x, i) : 0;\n\t\t}\n\t\treturn cnt -= sub, sub;\n\t}\n\tint count(int x, int i = B) {\n\t\tif (!i || !cnt) return cnt;\n\t\tpush(i);\n\t\tint b = x >> --i & 1;\n\t\treturn c[b] ? c[b]->count(x, i) : 0;\n\t}\n\tint kth(int k, int i = B) {\n\t\tassert(0 <= k && k < cnt);\n\t\tif (!i) return 0;\n\t\tpush(i);\n\t\tint n = cc(0), b = k >= n;\n\t\treturn c[b]->kth(k - (b ? n : 0), i - 1)\n\t\t\t| (b << (i - 1));\n\t}\n\tint minxor(int xr = 0, int i = B) {\n\t\tif (!i || !cnt) return 0;\n\t\tpush(i);\n\t\tint b = xr >> --i & 1;\n\t\treturn cc(b) ? c[b]->minxor(xr, i) :\n\t\t\tc[!b]->minxor(xr, i) | 1 << i;\n\t}\n\tint maxxor(int xr = 0, int i = B) {\n\t\tif (!i || !cnt) return 0;\n\t\tpush(i);\n\t\tint b = (xr >> --i & 1) ^ 1;\n\t\treturn cc(b) ? c[b]->maxxor(xr, i) | 1 << i :\n\t\t\tc[!b]->maxxor(xr, i);\n\t}\n\ttemplate<int sgn = 0>\n\tint countLG(int xr = 0, int k = 0, int i = B) {\n\t\tif (!i || !cnt) return 0;\n\t\tpush(i);\n\t\tint b = (xr ^ k) >> --i & 1;\n\t\treturn ((k >> i & 1) ^ sgn ? cc(!b) : 0) +\n\t\t\t(c[b] ? c[b]->countLG<sgn>(xr, k, i) : 0);\n\t}\n\tint mex(int xr = 0, int i = B) { // unique values\n\t\tif (!i) return 0;\n\t\tpush(i);\n\t\tint b = xr >> --i & 1;\n\t\tif (cc(b) == 1 << i)\n\t\t\treturn (c[!b] ? c[!b]->mex(xr, i) : 0) | 1 << i;\n\t\treturn c[b] ? c[b]->mex(xr, i) : 0;\n\t}\n\ttemplate<class F>\n\tvoid each(F f, int i = B, int x = 0) {\n\t\tif (!cnt) return;\n\t\tpush(i);\n\t\tif (!i) f(x, cnt);\n\t\telse rep(b,0,2) if (c[b])\n\t\t\tc[b]->each(f, i - 1, x | (b << (i - 1)));\n\t}\n\ttemplate<int ms = 0>\n\tvoid merge(T& o, int i = B) { // o safe to delete\n\t\tif (!o.cnt) return;\n\t\tpush(i); o.push(i);\n\t\tif (i) rep(b,0,2) {\n\t\t\tif (!c[b]) swap(c[b], o.c[b]);\n\t\t\telse if (o.c[b]) c[b]->merge<ms>(*o.c[b], i - 1);\n\t\t}\n\t\tcnt = i ? cc(0) + cc(1) : (ms ? cnt + o.cnt : 1);\n\t\to.cnt = 0;\n\t}\n\t~BinaryTrie() { delete c[0]; delete c[1]; }\n};"
-    },
-    {
       "id": "data-structures/CartesianTree.h",
       "name": "CartesianTree.h",
       "chapter": "data-structures",
@@ -211,7 +195,7 @@
       "name": "FenwickTree.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Computes partial sums \\texttt{a[0] + a[1] + ... + a[pos - 1]}, and updates single elements \\texttt{a[i]},\ntaking the difference between the old and new value.",
+      "description": "Point updates and prefix sums.\n\\texttt{query(pos)} sums $[0,pos)$: 0 included,\npos excluded. Updates add the difference between the\nold and new value. With nonnegative values,\n\\texttt{lower\\_bound(sum)} finds the first index pos\nwhose inclusive prefix $[0,pos]$ sums to at least sum;\nreturns $n$ if absent, or $-1$ if $\\texttt{sum}\\le0$.",
       "usage": "",
       "time": "Both operations are $O(\\log N)$.",
       "memory": "",
@@ -227,7 +211,7 @@
       "name": "FenwickTree2d.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Computes sums \\texttt{a[i,j]} for all $i<I$, $j<J$, and increases single elements \\texttt{a[i,j]}.\nRequires that the elements to be updated are known in advance (call \\texttt{fakeUpdate()} before \\texttt{init()}).",
+      "description": "Point increments and 2D prefix sums.\n\\texttt{query(x,y)} sums points with $0\\le i<x$ and\n$j<y$: both upper bounds excluded, $i=0$ included.\nThe y coordinates may be negative.\nRequires that the elements to be updated are known in advance (call \\texttt{fakeUpdate()} before \\texttt{init()}).",
       "usage": "",
       "time": "$O(\\log^2 N)$. (Use persistent segment trees for $O(\\log N)$.)",
       "memory": "",
@@ -261,7 +245,7 @@
       "name": "LazySegmentTree.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Recursive segment tree with range updates,\npoint set, and range queries. Bounds inclusive on both\nsides. Change \\texttt{V}, \\texttt{U}, \\texttt{id},\n\\texttt{def}, \\texttt{idU}, \\texttt{binop},\n\\texttt{applyUpdate}, \\texttt{mergeUpdate}. Default is\nrange add and range max. Used by HLD.",
+      "description": "Recursive segment tree with range updates,\npoint set, and range queries. Update/query bounds\n$[ql,qr]$ include both endpoints; full range $[0,n-1]$.\nChange \\texttt{V}, \\texttt{U}, \\texttt{id},\n\\texttt{def}, \\texttt{idU}, \\texttt{binop},\n\\texttt{applyUpdate}, \\texttt{mergeUpdate}. Default is\nrange add and range max. Used by HLD.",
       "usage": "",
       "time": "$O(\\log N)$",
       "memory": "",
@@ -277,7 +261,7 @@
       "name": "LiChao.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Li Chao tree for lines $ax+b$ on an integer\ndomain $[L,R)$. Queries minimum. Negate \\texttt{a}, \\texttt{b}\nand the result for maximum. Unlike LineContainer, lines can\nbe restricted to a subrange by inserting on a node range.",
+      "description": "Li Chao tree for lines $ax+b$ on an integer\ndomain $[L,R)$: L included, R excluded.\nNode bounds $[l,r)$ use the same convention.\nQueries minimum. Negate \\texttt{a}, \\texttt{b}\nand the result for maximum. Unlike LineContainer, lines can\nbe restricted to a subrange by inserting on a node range.",
       "usage": "",
       "time": "$O(\\log(R-L))$",
       "memory": "",
@@ -341,7 +325,7 @@
       "name": "MonotonicMap.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Prefix/suffix min/max queries with\ninsertions. Useful replacement for sparse segtrees.",
+      "description": "Prefix/suffix min/max queries with\ninsertions. Useful replacement for sparse segtrees.\n\\texttt{query(k)} includes key k: keys $\\ge k$ for\n\\texttt{dir=less<>}, keys $\\le k$ for\n\\texttt{dir=greater<>}. Insert a sentinel so every\nquery has a matching key.",
       "usage": "",
       "time": "$O(\\log N)$",
       "memory": "",
@@ -357,7 +341,7 @@
       "name": "MoQueries.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Answer interval or tree path queries by finding an approximate TSP through the queries,\nand moving from one query to the next by adding/removing points at the ends.\nIf values are on tree edges, change \\texttt{step} to add/remove the edge $(a, c)$ and remove the initial \\texttt{add} call (but keep \\texttt{in}).",
+      "description": "Answer interval or tree path queries by finding an approximate TSP through the queries,\nand moving from one query to the next by adding/removing points at the ends.\n\\texttt{mo} queries are $[l,r)$: l included, r excluded.\n\\texttt{moTree} queries are vertex pairs $(u,v)$;\nthe path includes both endpoint vertices.\nIf values are on tree edges, change \\texttt{step} to add/remove the edge $(a, c)$ and remove the initial \\texttt{add} call (but keep \\texttt{in}).",
       "usage": "",
       "time": "$O(N \\sqrt Q)$",
       "memory": "",
@@ -373,7 +357,7 @@
       "name": "OfflineDynamicConnectivity.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Offline dynamic connectivity. Times are\noperation indices. \\texttt{toggle} adds or deletes an\nundirected edge. \\texttt{query} records a component-count\nquery. \\texttt{ans} returns answers in order.\n$q$ must be at least the number of \\texttt{toggle}/\n\\texttt{query} calls.",
+      "description": "Offline dynamic connectivity. Times are\noperation indices. \\texttt{toggle} adds or deletes an\nundirected edge. \\texttt{query} records a component-count\nquery. \\texttt{ans} returns answers in order.\n\\texttt{add(l,r,e)} makes e active at times $[l,r)$:\nl included, r excluded. An edge is active from its\ninsertion toggle up to, excluding, its deletion toggle.\n$q$ must be at least the number of \\texttt{toggle}/\n\\texttt{query} calls.",
       "usage": "",
       "time": "$O(Q\\log Q\\log N)$",
       "memory": "",
@@ -391,7 +375,7 @@
       "name": "OrderStatisticTree.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "A set (not multiset!) with support for finding the n'th\nelement, and finding the index of an element.\nTo get a map, change \\texttt{null\\_type}.",
+      "description": "A set (not multiset!) with support for finding the n'th\nelement, and finding the index of an element.\nTo get a map, change \\texttt{null\\_type}.\n\\texttt{order\\_of\\_key(x)} counts keys strictly below x\n(x excluded). \\texttt{find\\_by\\_order(k)} is 0-indexed;\nreturns end() if $k\\ge\\texttt{size()}$.",
       "usage": "",
       "time": "$O(\\log N)$",
       "memory": "",
@@ -407,8 +391,8 @@
       "name": "PrefixSum.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Static sums in any number of dimensions.\nGive each dimension's width and flat row-major values\n(last coordinate varies fastest). Queries use half-open\nboxes $[l_i,r_i)$; empty widths and boxes are allowed.\nRequires at least one dimension and valid bounds.",
-      "usage": "PrefixSum<ll> p({2, 3}, {1, 2, 3, 4, 5, 6});\np.sum({0, 1}, {2, 3}); // 2 + 3 + 5 + 6 = 16",
+      "description": "Static sums in any number of dimensions.\nConstruct with each dimension's width and flat row-major\nvalues (last coordinate varies fastest). T is the sum type.\n\\texttt{sum(l, r)} sums cells in\n$[l_0,r_0) \\times [l_1,r_1) \\times \\cdots \\times\n[l_{d-1},r_{d-1})$. Each lower bound is included and each\nupper bound is excluded. Both vectors have $d$ coordinates,\nwith $0 \\le l_i \\le r_i \\le w_i$. Empty boxes return zero.\nRequires at least one dimension, nonnegative widths, and\nexactly $\\prod_i w_i$ values. All suffix products must fit\nin int; T must hold all intermediate sums.",
+      "usage": "// Matrix {{1, 2, 3}, {4, 5, 6}}, flattened by row:\nPrefixSum<ll> p({2, 3}, {1, 2, 3, 4, 5, 6});\np.sum({0, 1}, {2, 3}); // 2 + 3 + 5 + 6 = 16",
       "time": "$O(dN)$ build, $O(2^d)$ query, where\n$N=\\prod_i w_i$ and $d$ is the number of dimensions.",
       "memory": "$O(N)$ prefix table.",
       "status": "stress-tested",
@@ -416,14 +400,14 @@
       "source": "",
       "dependencies": [],
       "includedInPdf": true,
-      "code": "template<class T>\nstruct PrefixSum {\n\tvi n;\n\tvector<size_t> stride;\n\tvector<T> p;\n\tPrefixSum(vi widths, vector<T> values)\n\t\t: n(widths), stride(sz(n) + 1, 1), p(move(values)) {\n\t\tassert(!n.empty());\n\t\tfor (int d = sz(n); d--;) {\n\t\t\tassert(n[d] >= 0);\n\t\t\tstride[d] = stride[d+1] * (size_t)n[d];\n\t\t}\n\t\tassert(p.size() == stride[0]);\n\t\trep(d,0,sz(n)) for (size_t i = 0; i < p.size(); ++i)\n\t\t\tif (i / stride[d+1] % (size_t)n[d])\n\t\t\t\tp[i] += p[i - stride[d+1]];\n\t}\n\tT sum(const vi& l, const vi& r) const {\n\t\tassert(sz(l) == sz(n) && sz(r) == sz(n));\n\t\tbool empty = false;\n\t\trep(d,0,sz(n)) {\n\t\t\tassert(0 <= l[d] && l[d] <= r[d] && r[d] <= n[d]);\n\t\t\tempty |= l[d] == r[d];\n\t\t}\n\t\treturn empty ? T{} : query(l, r, 0, 0);\n\t}\n\tT query(const vi& l, const vi& r, int d, size_t i) const {\n\t\tif (d == sz(n)) return p[i];\n\t\tsize_t s = stride[d+1];\n\t\tT ans = query(l, r, d+1, i + (size_t)(r[d]-1)*s);\n\t\tif (l[d])\n\t\t\tans -= query(l, r, d+1, i + (size_t)(l[d]-1)*s);\n\t\treturn ans;\n\t}\n};"
+      "code": "template<class T>\nstruct PrefixSum {\n\tvi n, stride;\n\tvector<T> p;\n\tPrefixSum(vi widths, vector<T> values)\n\t\t: n(widths), stride(sz(n) + 1, 1), p(move(values)) {\n\t\tfor (int d = sz(n); d--;)\n\t\t\tstride[d] = stride[d+1] * n[d];\n\t\trep(d,0,sz(n)) rep(i,0,sz(p))\n\t\t\tif (i / stride[d+1] % n[d])\n\t\t\t\tp[i] += p[i - stride[d+1]];\n\t}\n\tT sum(const vi& l, const vi& r) const {\n\t\trep(d,0,sz(n)) if (l[d] == r[d]) return T{};\n\t\treturn query(l, r, 0, 0);\n\t}\n\tT query(const vi& l, const vi& r, int d, int i) const {\n\t\tif (d == sz(n)) return p[i];\n\t\tint s = stride[d+1];\n\t\tT ans = query(l, r, d+1, i + (r[d]-1)*s);\n\t\tif (l[d])\n\t\t\tans -= query(l, r, d+1, i + (l[d]-1)*s);\n\t\treturn ans;\n\t}\n};"
     },
     {
       "id": "data-structures/RMQ.h",
       "name": "RMQ.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Range Minimum Queries on an array. Returns\n\\texttt{min(V[a], V[a + 1], ... V[b - 1])} in constant time.",
+      "description": "Range Minimum Queries on an array. Returns\n\\texttt{min(V[a], V[a + 1], ... V[b - 1])} in constant time.\n\\texttt{query(a,b)} uses nonempty $[a,b)$:\na included, b excluded.",
       "usage": "RMQ rmq(values);\nrmq.query(inclusive, exclusive);",
       "time": "$O(|V| \\log |V| + Q)$",
       "memory": "",
@@ -439,7 +423,7 @@
       "name": "Rope.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "GNU extension for editable sequences.\nCopies share storage; later edits leave copies unchanged.\nIndices are 0-based; erase/substr take (position, length).\nNo range aggregates or lazy reversal. Requires libstdc++.",
+      "description": "GNU extension for editable sequences.\nCopies share storage; later edits leave copies unchanged.\nIndices are 0-based; erase/substr take (position, length).\nThey use $[pos,pos+len)$: pos included, pos+len excluded.\nNo range aggregates or lazy reversal. Requires libstdc++.",
       "usage": "",
       "time": "Index $O(\\log N)$, copy $O(1)$. Edits typically\n$O(\\log N)$ plus new data, but can take $O(N)$.",
       "memory": "",
@@ -455,7 +439,7 @@
       "name": "SegmentTree.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Zero-indexed max-tree. Bounds are inclusive to the left and exclusive to the right.\nCan be changed by modifying \\texttt{T}, \\texttt{f} and \\texttt{unit}.",
+      "description": "Zero-indexed max-tree. \\texttt{query(b,e)}\nuses $[b,e)$: b included, e excluded.\nCan be changed by modifying \\texttt{T}, \\texttt{f} and \\texttt{unit}.",
       "usage": "",
       "time": "$O(\\log N)$",
       "memory": "",
@@ -467,27 +451,11 @@
       "code": "struct Tree {\n\ttypedef int T;\n\tstatic constexpr T unit = INT_MIN;\n\tT f(T a, T b) { return max(a, b); } // (any associative fn)\n\tvector<T> s; int n;\n\tTree(int n = 0, T def = unit) : s(2*n, def), n(n) {}\n\tvoid update(int pos, T val) {\n\t\tfor (s[pos += n] = val; pos /= 2;)\n\t\t\ts[pos] = f(s[pos * 2], s[pos * 2 + 1]);\n\t}\n\tT query(int b, int e) { // query [b, e)\n\t\tT ra = unit, rb = unit;\n\t\tfor (b += n, e += n; b < e; b /= 2, e /= 2) {\n\t\t\tif (b % 2) ra = f(ra, s[b++]);\n\t\t\tif (e % 2) rb = f(s[--e], rb);\n\t\t}\n\t\treturn f(ra, rb);\n\t}\n};"
     },
     {
-      "id": "data-structures/SparseLazySegmentTree.h",
-      "name": "SparseLazySegmentTree.h",
-      "chapter": "data-structures",
-      "language": "cpp",
-      "description": "Implicit segment tree with lazy range updates\nand point set. Creates children on demand. Bounds inclusive.\nChange \\texttt{V}, \\texttt{U}, \\texttt{id}, \\texttt{def},\n\\texttt{idU}, \\texttt{binop}, \\texttt{applyUpdate},\n\\texttt{mergeUpdate}. Default is range add / range max.",
-      "usage": "",
-      "time": "$O(\\log R)$",
-      "memory": "",
-      "status": "stress-tested",
-      "author": "me",
-      "source": "me",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "struct Node {\n\tusing V = int;\n\tusing U = int;\n\tusing T = Node;\n\tstatic constexpr V id = INT_MIN;\n\tstatic constexpr V def = 0;\n\tstatic constexpr U idU = 0;\n\tV binop(V a, V b) { return max(a, b); }\n\tV applyUpdate(U u, V v) { return v + u; }\n\tU mergeUpdate(U oldU, U nw) { return oldU + nw; }\n\tT *lt = 0, *rt = 0;\n\tV val = def;\n\tU lazy = idU;\n\tvoid updateNode(int, int, U u) {\n\t\tlazy = mergeUpdate(lazy, u);\n\t\tval = applyUpdate(u, val);\n\t}\n\tvoid push(int l, int r) {\n\t\tif (!lt) {\n\t\t\tlt = new T();\n\t\t\trt = new T();\n\t\t}\n\t\tint mid = l + (r - l) / 2;\n\t\tlt->updateNode(l, mid, lazy);\n\t\trt->updateNode(mid + 1, r, lazy);\n\t\tlazy = idU;\n\t}\n\tvoid update(int l, int r, int ql, int qr, U u) {\n\t\tif (qr < l || r < ql) return;\n\t\tif (ql <= l && r <= qr) {\n\t\t\tupdateNode(l, r, u);\n\t\t\treturn;\n\t\t}\n\t\tpush(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tlt->update(l, mid, ql, qr, u);\n\t\trt->update(mid + 1, r, ql, qr, u);\n\t\tval = binop(lt->val, rt->val);\n\t}\n\tvoid set(int l, int r, int i, V v) {\n\t\tif (i < l || r < i) return;\n\t\tif (l == r) { val = v; lazy = idU; return; }\n\t\tpush(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tif (i <= mid) lt->set(l, mid, i, v);\n\t\telse rt->set(mid + 1, r, i, v);\n\t\tval = binop(lt->val, rt->val);\n\t}\n\tV query(int l, int r, int ql, int qr) {\n\t\tif (qr < l || r < ql) return id;\n\t\tif (ql <= l && r <= qr) return val;\n\t\tpush(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\treturn binop(lt->query(l, mid, ql, qr),\n\t\t\trt->query(mid + 1, r, ql, qr));\n\t}\n\t~Node() { delete lt; delete rt; }\n};"
-    },
-    {
       "id": "data-structures/StaticRangeQuery.h",
       "name": "StaticRangeQuery.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Static range queries for any associative\noperation. Change \\texttt{T}, \\texttt{unit} and\n\\texttt{f}. Default is range sum. Bounds half-open\n$[l, r)$ like RMQ.",
+      "description": "Static range queries for any associative\noperation. Change \\texttt{T}, \\texttt{unit} and\n\\texttt{f}. Default is range sum. \\texttt{query(l,r)}\nuses nonempty $[l,r)$: l included, r excluded.",
       "usage": "",
       "time": "$O(N\\log N)$ build, $O(1)$ query",
       "memory": "",
@@ -503,7 +471,7 @@
       "name": "SubMatrix.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Calculate submatrix sums quickly, given upper-left and lower-right corners (half-open).",
+      "description": "Calculate submatrix sums quickly.\n\\texttt{sum(u,l,d,r)} sums rows $[u,d)$ and columns\n$[l,r)$: upper/left included, lower/right excluded.",
       "usage": "SubMatrix<int> m(matrix);\nm.sum(0, 0, 2, 2); // top left 4 elements",
       "time": "$O(N^2 + Q)$",
       "memory": "",
@@ -519,7 +487,7 @@
       "name": "Treap.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Implicit treap on a sequence. Split/merge by\nindex. \\texttt{split(t, k)} puts the first $k$ elements\non the left. Lazy range updates and queries. Half-open\nindex ranges $[l,r)$. Change \\texttt{V}, \\texttt{U},\n\\texttt{id}, \\texttt{def}, \\texttt{idU}, \\texttt{binop},\n\\texttt{applyUpdate}, \\texttt{mergeUpdate}. Default is\nrange add/sum.",
+      "description": "Implicit treap on a sequence. Split/merge by\nindex. \\texttt{split(t, k)} puts the first $k$ elements\non the left: indices $[0,k)$, k excluded.\nLazy range updates and queries. Index ranges $[l,r)$\ninclude l and exclude r, including \\texttt{move}.\nChange \\texttt{V}, \\texttt{U},\n\\texttt{id}, \\texttt{def}, \\texttt{idU}, \\texttt{binop},\n\\texttt{applyUpdate}, \\texttt{mergeUpdate}. Default is\nrange add/sum.",
       "usage": "",
       "time": "$O(\\log N)$",
       "memory": "",
@@ -583,7 +551,7 @@
       "name": "WaveletTree.h",
       "chapter": "data-structures",
       "language": "cpp",
-      "description": "Static range order statistics on an int array.\nCompresses values; preserves input. Indices and value\nranges are half-open. kth(l,r,k) is the 0-indexed kth\nsmallest in a[l,r), including duplicates; requires\n$0 \\le k < r-l$. countLess(l,r,x) counts values $<x$;\ncount(l,r,lo,hi) counts $lo \\le a_i < hi$.\nCounts allow empty ranges. Thresholds are ll so x+1LL\nis safe for inclusive bounds, even at \\texttt{INT\\_MAX}.",
+      "description": "Static range order statistics on an int array.\nCompresses values; preserves input. All queries use\nindices $[l,r)$: l included, r excluded.\nkth(l,r,k) is the 0-indexed kth\nsmallest in a[l,r), including duplicates; requires\n$0 \\le k < r-l$. countLess(l,r,x) counts values $<x$;\ncount(l,r,lo,hi) counts $lo \\le a_i < hi$.\nValue range $[lo,hi)$: lo included, hi excluded.\nCounts allow empty ranges. Thresholds are ll so x+1LL\nis safe for inclusive bounds, even at \\texttt{INT\\_MAX}.",
       "usage": "WaveletTree w({5, 1, 5, -2, 7});\nw.kth(1, 5, 1); // 1: sorted subarray is -2,1,5,7\nw.count(0, 5, 5, 6); // 2 copies of 5\nw.kth(l, r, (r-l-1)/2); // lower median (l < r)\nint k = w.countLess(l, r, x);\nif (k < r-l) w.kth(l, r, k); // smallest >= x",
       "time": "$O(N\\log N)$ build, $O(\\log(\\sigma+1))$ query.",
       "memory": "$O(N\\log(\\sigma+1))$, $\\sigma$ distinct values.",
@@ -649,7 +617,7 @@
       "name": "FastFourierTransformMod.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "Higher precision FFT, can be used for convolutions modulo arbitrary integers\nas long as $N\\log_2N\\cdot \\text{mod} < 8.6 \\cdot 10^{14}$ (in practice $10^{16}$ or higher).\nInputs must be in $[0, \\text{mod})$.",
+      "description": "Higher precision FFT, can be used for convolutions modulo arbitrary integers\nas long as $N\\log_2N\\cdot \\text{mod} < 8.6 \\cdot 10^{14}$ (in practice $10^{16}$ or higher).\nInputs must be in $[0, \\text{mod})$.\n0 included, mod excluded.",
       "usage": "",
       "time": "$O(N \\log N)$, where $N = |A|+|B|$ (twice as slow as NTT or FFT)",
       "memory": "",
@@ -683,7 +651,7 @@
       "name": "GoldenSectionSearch.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "Finds the argument minimizing the function $f$ in the interval $[a,b]$\nassuming $f$ is unimodal on the interval, i.e. has only one local minimum and no local\nmaximum. The maximum error in the result is \\texttt{eps}. Works equally well for maximization\nwith a small change in the code. See TernarySearch.h in the Various chapter for a\ndiscrete version.",
+      "description": "Finds the argument minimizing the function $f$ in the interval $[a,b]$\nassuming $f$ is unimodal on the interval, i.e. has only one local minimum and no local\nmaximum. The maximum error in the result is \\texttt{eps}. Works equally well for maximization\nwith a small change in the code. See TernarySearch.h in the Various chapter for a\ndiscrete version.\nBoth a and b are included in the search domain;\nfor $a<b$, f is sampled only at interior points.",
       "usage": "double func(double x) { return 4+x+.3*x*x; }\ndouble xmin = gss(-1000,1000,func);",
       "time": "$O(\\log((b-a) / \\epsilon))$",
       "memory": "",
@@ -731,7 +699,7 @@
       "name": "Integrate.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "Simple integration of a function over an interval using\nSimpson's rule. The error should be proportional to $h^4$, although in\npractice you will want to verify that the result is stable to desired\nprecision when epsilon changes.",
+      "description": "Simple integration of a function over an interval using\nSimpson's rule. The error should be proportional to $h^4$, although in\npractice you will want to verify that the result is stable to desired\nprecision when epsilon changes.\n\\texttt{quad(a,b,f)} integrates over $[a,b]$;\nf must be defined at both endpoints (both sampled).",
       "usage": "",
       "time": "",
       "memory": "",
@@ -747,7 +715,7 @@
       "name": "IntegrateAdaptive.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "Fast integration using an adaptive Simpson's rule.",
+      "description": "Fast integration using an adaptive Simpson's rule.\n\\texttt{quad(a,b,f)} integrates over $[a,b]$;\nf must be defined at both endpoints (both sampled).",
       "usage": "double sphereVolume = quad(-1, 1, [](double x) {\nreturn quad(-1, 1, [\\&](double y) {\nreturn quad(-1, 1, [\\&](double z) {\nreturn x*x + y*y + z*z < 1; });});});",
       "time": "",
       "memory": "",
@@ -757,6 +725,24 @@
       "dependencies": [],
       "includedInPdf": true,
       "code": "typedef double d;\n#define S(a,b) (f(a) + 4*f((a+b) / 2) + f(b)) * (b-a) / 6\n\ntemplate <class F>\nd rec(F& f, d a, d b, d eps, d S) {\n\td c = (a + b) / 2;\n\td S1 = S(a, c), S2 = S(c, b), T = S1 + S2;\n\tif (abs(T - S) <= 15 * eps || b - a < 1e-10)\n\t\treturn T + (T - S) / 15;\n\treturn rec(f, a, c, eps / 2, S1) + rec(f, c, b, eps / 2, S2);\n}\ntemplate<class F>\nd quad(d a, d b, F f, d eps = 1e-8) {\n\treturn rec(f, a, b, eps, S(a, b));\n}"
+    },
+    {
+      "id": "numerical/Lagrange.h",
+      "name": "Lagrange.h",
+      "chapter": "numerical",
+      "language": "cpp",
+      "description": "Evaluates $P(x)$ modulo a prime from samples\n$\\texttt{y[i]} = P(i)$, $i=0,\\dots,n-1$, where\n$\\deg P < n \\le \\texttt{mod}$ and $n > 0$.\nRequires $0 \\le \\texttt{y[i]} < \\texttt{mod}$ and\nproducts to fit in \\texttt{ll}. Handles any signed\n\\texttt{x}. Template modulus defaults to $10^9+7$.\nUseful for polynomial counting and sums of powers:\n$\\sum_{i=1}^x i^k$ has degree $k+1$ if\n$k+1 < \\texttt{mod}$, so use $k+2$ samples.\nProve a degree bound first.",
+      "usage": "lagrange({0, 1, 4}, 10) // 100\nlagrange<998244353>(y, x)",
+      "time": "$O(n + \\log \\texttt{mod})$",
+      "memory": "$O(n)$",
+      "status": "stress-tested",
+      "author": "OpenAI",
+      "source": "folklore",
+      "dependencies": [
+        "number-theory/ModPow.h"
+      ],
+      "includedInPdf": true,
+      "code": "template<ll mod = 1000000007>\nll lagrange(const vector<ll>& y, ll x) {\n\tint n = sz(y);\n\tassert(0 < n && n <= mod);\n\tx %= mod;\n\tif (x < 0) x += mod;\n\tif (x < n) return y[x];\n\tvector<ll> pre(n+1, 1), suf(pre), ifac(n);\n\tll fac = 1, ans = 0;\n\trep(i,0,n) {\n\t\tpre[i+1] = pre[i] * (x-i) % mod;\n\t\tif (i) fac = fac * i % mod;\n\t}\n\tifac[n-1] = modpow<mod>(fac, mod-2);\n\tfor (int i = n-1; i > 0; --i)\n\t\tifac[i-1] = ifac[i] * i % mod;\n\tfor (int i = n-1; i >= 0; --i)\n\t\tsuf[i] = suf[i+1] * (x-i) % mod;\n\trep(i,0,n) {\n\t\tll t = y[i] * pre[i] % mod * suf[i+1] % mod;\n\t\tt = t * ifac[i] % mod * ifac[n-1-i] % mod;\n\t\tif ((n-1-i) & 1) t = (mod-t) % mod;\n\t\tans = (ans+t) % mod;\n\t}\n\treturn ans;\n}"
     },
     {
       "id": "numerical/LinearRecurrence.h",
@@ -813,7 +799,7 @@
       "name": "NumberTheoreticTransform.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "\\texttt{ntt(a)} computes $\\hat f(k) = \\sum_x a[x] g^{xk}$ for all $k$, where $g=\\text{root}^{(mod-1)/N}$.\n$N$ must be a power of 2 dividing $mod-1$.\nUseful for convolution modulo specific nice primes of the form $2^a b+1$,\nwhere the convolution result has size at most $2^a$. For arbitrary modulo, see FFTMod.\n\\texttt{conv(a, b) = c}, where $c[x] = \\sum a[i]b[x-i]$.\nFor manual convolution: NTT the inputs, multiply\npointwise, divide by $n$, \\texttt{reverse(start+1, end)}, NTT back.\nInputs must be in \\texttt{[0, mod)}.",
+      "description": "\\texttt{ntt(a)} computes $\\hat f(k) = \\sum_x a[x] g^{xk}$ for all $k$, where $g=\\text{root}^{(mod-1)/N}$.\n$N$ must be a power of 2 dividing $mod-1$.\nUseful for convolution modulo specific nice primes of the form $2^a b+1$,\nwhere the convolution result has size at most $2^a$. For arbitrary modulo, see FFTMod.\n\\texttt{conv(a, b) = c}, where $c[x] = \\sum a[i]b[x-i]$.\nFor manual convolution: NTT the inputs, multiply\npointwise, divide by $n$, \\texttt{reverse(start+1, end)}, NTT back.\nInputs must be in \\texttt{[0, mod)}.\n0 included, mod excluded.",
       "usage": "",
       "time": "$O(N \\log N)$",
       "memory": "",
@@ -863,7 +849,7 @@
       "name": "PolyRoots.h",
       "chapter": "numerical",
       "language": "cpp",
-      "description": "Finds the real roots to a polynomial.",
+      "description": "Finds the real roots to a polynomial.\nxmin/xmax should enclose all roots. Search sentinels\nare xmin-1 and xmax+1; returned roots are not clipped\nto $[xmin,xmax]$. A linear polynomial ignores bounds.",
       "usage": "polyRoots({{2,-3,1}},-1e9,1e9) // solve x^2-3x+2 = 0",
       "time": "$O(n^2 \\log(1/\\epsilon))$",
       "memory": "",
@@ -1045,7 +1031,7 @@
       "name": "Eratosthenes.h",
       "chapter": "number-theory",
       "language": "cpp",
-      "description": "Prime sieve for generating all primes up to a certain limit. \\texttt{isprime[i]} is true iff $i$ is a prime.",
+      "description": "Generates primes in $[2,lim)$:\n2 included, lim excluded. \\texttt{isprime[i]} is valid\nfor $[0,lim)$ (lim excluded) and true iff i is prime.",
       "usage": "",
       "time": "\\texttt{lim}=100'000'000 $\\approx$ 0.8 s. Runs 30\\% faster if only odd indices are stored.",
       "memory": "",
@@ -1112,7 +1098,7 @@
       "name": "FastEratosthenes.h",
       "chapter": "number-theory",
       "language": "cpp",
-      "description": "Prime sieve for generating all primes smaller than \\texttt{LIM}.",
+      "description": "Prime sieve for generating all primes smaller than \\texttt{LIM}.\nPrimes lie in $[2,\\texttt{LIM})$:\n2 included, LIM excluded.",
       "usage": "",
       "time": "\\texttt{LIM}=1e9 $\\approx$ 1.5s",
       "memory": "",
@@ -1128,7 +1114,7 @@
       "name": "FloorBlocks.h",
       "chapter": "number-theory",
       "language": "cpp",
-      "description": "Enumerates the $O(\\sqrt n)$ blocks where\n$\\lfloor n/i\\rfloor$ is constant. Calls\n\\texttt{f(l, r, q)} for each $1\\le l\\le r\\le n$ with\n$\\lfloor n/i\\rfloor = q$ for all $i\\in[l,r]$.",
+      "description": "Enumerates the $O(\\sqrt n)$ blocks where\n$\\lfloor n/i\\rfloor$ is constant. Calls\n\\texttt{f(l, r, q)} for each $1\\le l\\le r\\le n$ with\n$\\lfloor n/i\\rfloor = q$ for all $i\\in[l,r]$.\nBoth callback endpoints l and r are included.",
       "usage": "",
       "time": "$O(\\sqrt n)$",
       "memory": "",
@@ -1144,7 +1130,7 @@
       "name": "FracBinarySearch.h",
       "chapter": "number-theory",
       "language": "cpp",
-      "description": "Given \\texttt{f} and $N$, finds the smallest fraction $p/q \\in [0, 1]$\nsuch that \\texttt{f(p/q)} is true, and $p, q \\le N$.\nYou may want to throw an exception from \\texttt{f} if it finds an exact solution,\nin which case $N$ can be removed.",
+      "description": "Given \\texttt{f} and $N$, finds the smallest fraction $p/q \\in [0, 1]$\nsuch that \\texttt{f(p/q)} is true, and $p, q \\le N$.\nBoth 0 and 1 are included in the search domain.\nYou may want to throw an exception from \\texttt{f} if it finds an exact solution,\nin which case $N$ can be removed.",
       "usage": "fracBS([](Frac f) { return f.p>=3*f.q; }, 10); // {1,3}",
       "time": "$O(\\log(N))$",
       "memory": "",
@@ -1160,7 +1146,7 @@
       "name": "LinearSieve.h",
       "chapter": "number-theory",
       "language": "cpp",
-      "description": "Linear sieve. \\texttt{lp[i]} is the least\nprime factor of $i$; \\texttt{pr} lists primes $\\le N$.\nFactor $i$ by repeatedly dividing out \\texttt{lp[i]}.",
+      "description": "Linear sieve. \\texttt{lp[i]} is the least\nprime factor of $i$; \\texttt{pr} lists primes $\\le N$.\nFactor $i$ by repeatedly dividing out \\texttt{lp[i]}.\nSieves $[2,\\texttt{SIEVE\\_N}]$, both endpoints included;\nlp has indices $[0,\\texttt{SIEVE\\_N}]$.",
       "usage": "",
       "time": "$O(N)$",
       "memory": "",
@@ -1194,7 +1180,7 @@
       "name": "Mobius.h",
       "chapter": "number-theory",
       "language": "cpp",
-      "description": "Fills $\\mu(n)$ for $n \\in [0, \\texttt{sz})$.\nSee chapter text for inversion formulas.",
+      "description": "Fills $\\mu(n)$ for $n \\in [0, \\texttt{sz})$.\nIndices $[0,\\texttt{sz(mobius)})$: 0 included,\nvector size excluded.\nSee chapter text for inversion formulas.",
       "usage": "",
       "time": "$O(N \\log N)$",
       "memory": "",
@@ -1210,7 +1196,7 @@
       "name": "ModInverse.h",
       "chapter": "number-theory",
       "language": "cpp",
-      "description": "Pre-computation of modular inverses. Assumes \\texttt{LIM} $\\le$ \\texttt{mod} and that \\texttt{mod} is a prime.",
+      "description": "Pre-computation of modular inverses. Assumes \\texttt{LIM} $\\le$ \\texttt{mod} and that \\texttt{mod} is a prime.\nFills inv for $[1,\\texttt{LIM})$:\n1 included, LIM excluded.",
       "usage": "",
       "time": "",
       "memory": "",
@@ -1292,7 +1278,7 @@
       "name": "ModSum.h",
       "chapter": "number-theory",
       "language": "cpp",
-      "description": "Sums of mod'ed arithmetic progressions.\n\n\\texttt{modsum(to, c, k, m)} = $\\sum_{i=0}^{\\mathrm{to}-1}{(ki+c) \\% m}$.\n\\texttt{divsum} is similar but for floored division.",
+      "description": "Sums of mod'ed arithmetic progressions.\n\n\\texttt{modsum(to, c, k, m)} = $\\sum_{i=0}^{\\mathrm{to}-1}{(ki+c) \\% m}$.\n\\texttt{divsum} is similar but for floored division.\nBoth sum over $[0,to)$: 0 included, to excluded.",
       "usage": "",
       "time": "$\\log(m)$, with a large constant.",
       "memory": "",
@@ -1686,7 +1672,7 @@
       "name": "HLD.h",
       "chapter": "graph",
       "language": "cpp",
-      "description": "Decomposes a tree into vertex disjoint heavy paths and light\nedges such that the path from any leaf to the root contains at most log(n)\nlight edges. Code does additive modifications and max queries, but can\nsupport commutative segtree modifications/queries on paths and subtrees.\nTakes as input the full adjacency list. \\texttt{VALS\\_EDGES} being true means that\nvalues are stored in the edges, as opposed to the nodes. All values\ninitialized to the segtree default. Root must be 0.\nPath $u$--$v$ includes both endpoints (node values).",
+      "description": "Decomposes a tree into vertex disjoint heavy paths and light\nedges such that the path from any leaf to the root contains at most log(n)\nlight edges. Code does additive modifications and max queries, but can\nsupport commutative segtree modifications/queries on paths and subtrees.\nTakes as input the full adjacency list. \\texttt{VALS\\_EDGES} being true means that\nvalues are stored in the edges, as opposed to the nodes. All values\ninitialized to the segtree default. Root must be 0.\nPath $u$--$v$ includes both endpoints (node values).\nIn edge mode, includes all path edges, excluding the\nLCA's stored value. Subtrees include v in node mode,\nexclude its parent edge in edge mode.\n\\texttt{process} callbacks use $[l,r)$: l included,\nr excluded. Subtree positions are\n$[pos[v]+\\texttt{VALS\\_EDGES},pos[v]+siz[v])$.\nThe underlying lazy tree uses inclusive $[l,r-1]$.",
       "usage": "",
       "time": "$O((\\log N)^2)$",
       "memory": "",
@@ -1848,6 +1834,22 @@
       "code": "struct PushRelabel {\n\tstruct Edge {\n\t\tint dest, back;\n\t\tll f, c;\n\t};\n\tvector<vector<Edge>> g;\n\tvector<ll> ec;\n\tvector<Edge*> cur;\n\tvector<vi> hs; vi H;\n\tPushRelabel(int n) : g(n), ec(n), cur(n), hs(2*n), H(n) {}\n\n\tvoid addEdge(int s, int t, ll cap, ll rcap=0) {\n\t\tif (s == t) return;\n\t\tg[s].push_back({t, sz(g[t]), 0, cap});\n\t\tg[t].push_back({s, sz(g[s])-1, 0, rcap});\n\t}\n\n\tvoid addFlow(Edge& e, ll f) {\n\t\tEdge &back = g[e.dest][e.back];\n\t\tif (!ec[e.dest] && f) hs[H[e.dest]].push_back(e.dest);\n\t\te.f += f; e.c -= f; ec[e.dest] += f;\n\t\tback.f -= f; back.c += f; ec[back.dest] -= f;\n\t}\n\tll calc(int s, int t) {\n\t\tint v = sz(g); H[s] = v; ec[t] = 1;\n\t\tvi co(2*v); co[0] = v-1;\n\t\trep(i,0,v) cur[i] = g[i].data();\n\t\tfor (Edge& e : g[s]) addFlow(e, e.c);\n\n\t\tfor (int hi = 0;;) {\n\t\t\twhile (hs[hi].empty()) if (!hi--) return -ec[s];\n\t\t\tint u = hs[hi].back(); hs[hi].pop_back();\n\t\t\twhile (ec[u] > 0)  // discharge u\n\t\t\t\tif (cur[u] == g[u].data() + sz(g[u])) {\n\t\t\t\t\tH[u] = 1e9;\n\t\t\t\t\tfor (Edge& e : g[u]) if (e.c && H[u] > H[e.dest]+1)\n\t\t\t\t\t\tH[u] = H[e.dest]+1, cur[u] = &e;\n\t\t\t\t\tif (++co[H[u]], !--co[hi] && hi < v)\n\t\t\t\t\t\trep(i,0,v) if (hi < H[i] && H[i] < v)\n\t\t\t\t\t\t\t--co[H[i]], H[i] = v + 1;\n\t\t\t\t\thi = H[u];\n\t\t\t\t} else if (cur[u]->c && H[u] == H[cur[u]->dest]+1)\n\t\t\t\t\taddFlow(*cur[u], min(ec[u], cur[u]->c));\n\t\t\t\telse ++cur[u];\n\t\t}\n\t}\n\tbool leftOfMinCut(int a) { return H[a] >= sz(g); }\n};"
     },
     {
+      "id": "graph/Reroot.h",
+      "name": "Reroot.h",
+      "chapter": "graph",
+      "language": "cpp",
+      "description": "DP for every root of an undirected tree\non vertices $0$ through $N-1$. Modify T and the hooks.\nmerge is associative with identity id; preserves\nadjacency order. vertex(a,v) includes v as the root\nabove the merged branches a. edge(a,from,to) turns\nthe component rooted at from into a branch of to,\naccounting for the edge but excluding to itself.\nPrefix/suffix merges exclude each child's branch.",
+      "usage": "Reroot dp(g); dp.run(root); root may be any vertex.\nAs written, ans[v].sum is the sum of distances from v.\nT = (count, distance sum). vertex adds v at distance\nzero; edge measures the same vertices from to, so\nevery distance increases by one: sum += cnt.\nFor leaf u next to v: vertex(id,u) = (1,0),\nedge((1,0),u,v) = (1,1), vertex((1,1),v) = (2,1).",
+      "time": "$O(N)$ with constant-size T and $O(1)$ hooks.",
+      "memory": "$O(N)$; recursion depth can be $N$.",
+      "status": "stress-tested",
+      "author": "me",
+      "source": "folklore",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct Reroot {\n\tstruct T { ll cnt, sum; };\n\tT id{0, 0};\n\tvector<vi> g;\n\tvector<T> down, ans;\n\tReroot(vector<vi> g)\n\t\t: g(g), down(sz(g)), ans(sz(g)) {}\n\n\t// Modify these hooks for the problem:\n\tT merge(T a, T b) {\n\t\treturn {a.cnt + b.cnt, a.sum + b.sum};\n\t}\n\t// Include v above the branches a, at distance zero.\n\tT vertex(T a, int v) { ++a.cnt; return a; }\n\t// Measure from's component from to; to stays excluded.\n\tT edge(T a, int from, int to) {\n\t\ta.sum += a.cnt;\n\t\treturn a;\n\t}\n\n\tvoid dfs1(int v, int p) {\n\t\tT cur = id;\n\t\tfor (int u : g[v]) if (u != p) {\n\t\t\tdfs1(u, v);\n\t\t\tcur = merge(cur, edge(down[u], u, v));\n\t\t}\n\t\tdown[v] = vertex(cur, v);\n\t}\n\tvoid dfs2(int v, int p, T up) {\n\t\tint m = sz(g[v]);\n\t\tvector<T> val(m), pre(m + 1, id);\n\t\trep(i, 0, m) {\n\t\t\tint u = g[v][i];\n\t\t\tval[i] = u == p ? up : edge(down[u], u, v);\n\t\t\tpre[i + 1] = merge(pre[i], val[i]);\n\t\t}\n\t\tans[v] = vertex(pre[m], v);\n\t\tT suf = id;\n\t\tfor (int i = m; i--;) {\n\t\t\tint u = g[v][i];\n\t\t\tif (u != p) {\n\t\t\t\tT cur = vertex(merge(pre[i], suf), v);\n\t\t\t\tdfs2(u, v, edge(cur, v, u));\n\t\t\t}\n\t\t\tsuf = merge(val[i], suf);\n\t\t}\n\t}\n\tvoid run(int root = 0) {\n\t\tif (g.empty()) return;\n\t\tdfs1(root, -1);\n\t\tdfs2(root, -1, id);\n\t}\n};"
+    },
+    {
       "id": "graph/SCC.h",
       "name": "SCC.h",
       "chapter": "graph",
@@ -1950,7 +1952,7 @@
       "name": "Hashing-codeforces.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "Various self-explanatory methods for string hashing.\nUse on Codeforces, which lacks 64-bit support and where solutions can be hacked.",
+      "description": "Various self-explanatory methods for string hashing.\nUse on Codeforces, which lacks 64-bit support and where solutions can be hacked.\n\\texttt{hashInterval(a,b)} hashes $[a,b)$:\na included, b excluded. \\texttt{getHashes(s,len)[i]}\nhashes $[i,i+len)$, excluding i+len.",
       "usage": "",
       "time": "",
       "memory": "",
@@ -1966,7 +1968,7 @@
       "name": "Hashing.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "Self-explanatory methods for string hashing.",
+      "description": "Self-explanatory methods for string hashing.\n\\texttt{hashInterval(a,b)} hashes $[a,b)$:\na included, b excluded. \\texttt{getHashes(s,len)[i]}\nhashes $[i,i+len)$, excluding i+len.",
       "usage": "",
       "time": "",
       "memory": "",
@@ -1982,7 +1984,7 @@
       "name": "KMP.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "\\texttt{pi[x]} computes the length of the longest prefix of \\texttt{s} that ends at \\texttt{x},\nother than \\texttt{s[0...x]} itself (abacaba -> 0010123).\nCan be used to find all occurrences of a string.",
+      "description": "\\texttt{pi[x]} computes the length of the longest prefix of \\texttt{s} that ends at \\texttt{x},\nother than \\texttt{s[0...x]} itself (abacaba -> 0010123).\nThat prefix is $[0,pi[x])$ and matches\n$[x-pi[x]+1,x+1)$: starts included, ends excluded.\nCan be used to find all occurrences of a string.",
       "usage": "",
       "time": "$O(n)$",
       "memory": "",
@@ -1998,7 +2000,7 @@
       "name": "Manacher.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "For each position in a string, computes \\texttt{p[0][i]} = half length of\nlongest even palindrome around pos \\texttt{i}, \\texttt{p[1][i]} = longest odd (half rounded down).",
+      "description": "For each position in a string, computes \\texttt{p[0][i]} = half length of\nlongest even palindrome around pos \\texttt{i}, \\texttt{p[1][i]} = longest odd (half rounded down).\nEven palindrome: $[i-p[0][i],i+p[0][i])$.\nOdd palindrome: $[i-p[1][i],i+p[1][i]+1)$.\nBoth include the left index and exclude the right.",
       "usage": "",
       "time": "$O(N)$",
       "memory": "",
@@ -2030,7 +2032,7 @@
       "name": "SuffixArray.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "Builds suffix array for a string.\n\\texttt{sa[i]} is the starting index of the suffix which\nis $i$'th in the sorted suffix array.\nThe returned vector is of size $n+1$, and \\texttt{sa[0] = n}.\nThe \\texttt{lcp} array contains longest common prefixes for\nneighbouring strings in the suffix array:\n\\texttt{lcp[i] = lcp(sa[i], sa[i-1])}, \\texttt{lcp[0] = 0}.\nAlso stores \\texttt{rank} (inverse SA) and an RMQ table on\nLCP so \\texttt{getLCP(i,j)} / \\texttt{cmpSubstr} are\n$O(1)$. The input string must not contain any nul chars.\nBytes are ordered as unsigned; lim must exceed all bytes.",
+      "description": "Builds suffix array for a string.\n\\texttt{sa[i]} is the starting index of the suffix which\nis $i$'th in the sorted suffix array.\nThe returned vector is of size $n+1$, and \\texttt{sa[0] = n}.\nThe \\texttt{lcp} array contains longest common prefixes for\nneighbouring strings in the suffix array:\n\\texttt{lcp[i] = lcp(sa[i], sa[i-1])}, \\texttt{lcp[0] = 0}.\nAlso stores \\texttt{rank} (inverse SA) and an RMQ table on\nLCP so \\texttt{getLCP(i,j)} / \\texttt{cmpSubstr} are\n$O(1)$. The input string must not contain any nul chars.\nBytes are ordered as unsigned; lim must exceed all bytes.\n\\texttt{rmq(l,r)} queries LCP indices $[l,r]$, both\nendpoints included. \\texttt{cmpSubstr(a,lena,b,lenb,s)}\ncompares $[a,a+lena)$ with $[b,b+lenb)$:\nstarts included, ends excluded.",
       "usage": "",
       "time": "$O((n + \\texttt{lim}) \\log n)$ build",
       "memory": "$O(n \\log n + \\texttt{lim})$",
@@ -2046,7 +2048,7 @@
       "name": "SuffixTree.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "Ukkonen's algorithm for online suffix tree construction.\nEach node contains indices \\texttt{[l, r)} into the string, and a list of child nodes.\nSuffixes are given by traversals of this tree, joining \\texttt{[l, r)} substrings.\nThe root is 0 (has \\texttt{l = -1}, \\texttt{r = 0}), non-existent children are -1.\nTo get a complete tree, append a dummy symbol -- otherwise it may contain\nan incomplete path (still useful for substring matching, though).",
+      "description": "Ukkonen's algorithm for online suffix tree construction.\nEach node contains indices \\texttt{[l, r)} into the string, and a list of child nodes.\nSuffixes are given by traversals of this tree, joining \\texttt{[l, r)} substrings.\nEach edge includes index l and excludes index r.\nThe root is 0 (has \\texttt{l = -1}, \\texttt{r = 0}), non-existent children are -1.\nTo get a complete tree, append a dummy symbol -- otherwise it may contain\nan incomplete path (still useful for substring matching, though).",
       "usage": "",
       "time": "$O(26N)$",
       "memory": "",
@@ -2062,7 +2064,7 @@
       "name": "Zfunc.h",
       "chapter": "strings",
       "language": "cpp",
-      "description": "\\texttt{z[i]} computes the length of the longest common prefix of \\texttt{s[i:]} and \\texttt{s},\nexcept \\texttt{z[0] = 0}. (abacaba -> 0010301)",
+      "description": "\\texttt{z[i]} computes the length of the longest common prefix of \\texttt{s[i:]} and \\texttt{s},\nexcept \\texttt{z[0] = 0}. (abacaba -> 0010301)\nMatches $[0,z[i])$ with $[i,i+z[i])$:\nstarts included, ends excluded.",
       "usage": "",
       "time": "$O(n)$",
       "memory": "",
@@ -2072,392 +2074,6 @@
       "dependencies": [],
       "includedInPdf": true,
       "code": "vi Z(const string& S) {\n\tvi z(sz(S));\n\tint l = -1, r = -1;\n\trep(i,1,sz(S)) {\n\t\tz[i] = i >= r ? 0 : min(r - i, z[i - l]);\n\t\twhile (i + z[i] < sz(S) && S[i + z[i]] == S[z[i]])\n\t\t\tz[i]++;\n\t\tif (i + z[i] > r)\n\t\t\tl = i, r = i + z[i];\n\t}\n\treturn z;\n}"
-    },
-    {
-      "id": "various/BigInt.h",
-      "name": "BigInt.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Unsigned integer with $N>0$ base-$10^9$\nlimbs, most significant first (up to $9N$ digits).\nArithmetic and parsing wrap modulo $10^{9N}$.\nString input must be nonempty decimal digits; output\nhas no leading zeros. Multiply/divide by an unsigned\n32-bit integer; division requires a nonzero divisor.\n\\texttt{div(b)} divides in place and returns the remainder.",
-      "usage": "Big<4> x(\"12345678901234567890\"); x.toString();",
-      "time": "$O(N)$ arithmetic, $O(N+D)$ string conversion\nfor $D$ decimal digits.",
-      "memory": "",
-      "status": "stress-tested",
-      "author": "caterpillow, Claude, adapted locally",
-      "source": "https://github.com/caterpillow/cactl",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "using ull = unsigned long long;\ntemplate<int N> struct Big : array<unsigned, N> {\n\tstatic_assert(N > 0);\n\tstatic constexpr unsigned base = 1000000000;\n\tBig(ull x = 0) : array<unsigned, N>{} {\n\t\tfor (int i = N; i-- && x; x /= base)\n\t\t\t(*this)[i] = unsigned(x % base);\n\t}\n\texplicit Big(string_view s) : Big() {\n\t\tassert(!s.empty());\n\t\tfor (char c : s) assert('0' <= c && c <= '9');\n\t\tint end = sz(s);\n\t\tfor (int i = N; i-- && end > 0;) {\n\t\t\tint start = max(0, end-9);\n\t\t\tunsigned x = 0;\n\t\t\trep(j,start,end) x = x*10 + unsigned(s[j]-'0');\n\t\t\t(*this)[i] = x, end = start;\n\t\t}\n\t}\n\tstring toString() const {\n\t\tint i = 0;\n\t\twhile (i < N-1 && !(*this)[i]) i++;\n\t\tstring s = to_string((*this)[i]);\n\t\twhile (++i < N) {\n\t\t\tstring t = to_string((*this)[i]);\n\t\t\ts += string(9-sz(t), '0') + t;\n\t\t}\n\t\treturn s;\n\t}\n\tBig& operator+=(const Big& b) {\n\t\tunsigned carry = 0;\n\t\tfor (int i = N; i--;) {\n\t\t\tunsigned t = (*this)[i] + b[i] + carry;\n\t\t\t(*this)[i] = t % base, carry = t / base;\n\t\t}\n\t\treturn *this;\n\t}\n\tBig operator-() const {\n\t\tBig r = *this;\n\t\tfor (unsigned& x : r) x = base-1-x;\n\t\treturn r += 1;\n\t}\n\tBig& operator-=(const Big& b) { return *this += -b; }\n\tfriend Big operator+(Big a, const Big& b) { return a += b; }\n\tfriend Big operator-(Big a, const Big& b) { return a -= b; }\n\tBig& operator*=(unsigned b) {\n\t\tull carry = 0;\n\t\tfor (int i = N; i--;) {\n\t\t\tull t = ull((*this)[i]) * b + carry;\n\t\t\t(*this)[i] = unsigned(t % base), carry = t / base;\n\t\t}\n\t\treturn *this;\n\t}\n\tunsigned div(unsigned b) {\n\t\tassert(b);\n\t\tull rem = 0;\n\t\trep(i,0,N) {\n\t\t\tull t = rem * base + (*this)[i];\n\t\t\t(*this)[i] = unsigned(t / b), rem = t % b;\n\t\t}\n\t\treturn unsigned(rem);\n\t}\n\tBig& operator/=(unsigned b) { div(b); return *this; }\n\tfriend Big operator*(Big a, unsigned b) { return a *= b; }\n\tfriend Big operator*(unsigned b, Big a) { return a *= b; }\n\tfriend Big operator/(Big a, unsigned b) { return a /= b; }\n\tfriend unsigned operator%(Big a, unsigned b) {\n\t\treturn a.div(b);\n\t}\n};"
-    },
-    {
-      "id": "various/BumpAllocator.h",
-      "name": "BumpAllocator.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "When you need to dynamically allocate many objects and don't care about freeing them.\n\\texttt{new X} otherwise has an overhead of something like 0.05us + 16 bytes per allocation.",
-      "usage": "",
-      "time": "",
-      "memory": "",
-      "status": "tested",
-      "author": "Simon Lindholm",
-      "source": "me",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "// Either globally or in a single class:\nstatic char buf[450 << 20];\nvoid* operator new(size_t s) {\n\tstatic size_t i = sizeof buf;\n\tassert(s < i);\n\treturn (void*)&buf[i -= s];\n}\nvoid operator delete(void*) {}"
-    },
-    {
-      "id": "various/BumpAllocatorSTL.h",
-      "name": "BumpAllocatorSTL.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "BumpAllocator for STL containers.",
-      "usage": "vector<vector<int, small<int>>> ed(N);",
-      "time": "",
-      "memory": "",
-      "status": "tested",
-      "author": "Simon Lindholm",
-      "source": "me",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "char buf[450 << 20] alignas(16);\nsize_t buf_ind = sizeof buf;\n\ntemplate<class T> struct small {\n\ttypedef T value_type;\n\tsmall() {}\n\ttemplate<class U> small(const U&) {}\n\tT* allocate(size_t n) {\n\t\tbuf_ind -= n * sizeof(T);\n\t\tbuf_ind &= 0 - alignof(T);\n\t\treturn (T*)(buf + buf_ind);\n\t}\n\tvoid deallocate(T*, size_t) {}\n};"
-    },
-    {
-      "id": "various/ConstantIntervals.h",
-      "name": "ConstantIntervals.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Split a monotone function on \\texttt{[from, to)} into a minimal set of half-open intervals on which it has the same value.\nRuns a callback \\texttt{g} for each such interval.",
-      "usage": "constantIntervals(0, sz(v), [\\&](int x){return v[x];}, [\\&](int lo, int hi, T val){...});",
-      "time": "$O(k\\log\\frac{n}{k})$",
-      "memory": "",
-      "status": "tested",
-      "author": "Simon Lindholm",
-      "source": "me",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "template<class F, class G, class T>\nvoid rec(int from, int to, F& f, G& g, int& i, T& p, T q) {\n\tif (p == q) return;\n\tif (from == to) {\n\t\tg(i, to, p);\n\t\ti = to; p = q;\n\t} else {\n\t\tint mid = (from + to) >> 1;\n\t\trec(from, mid, f, g, i, p, f(mid));\n\t\trec(mid+1, to, f, g, i, p, q);\n\t}\n}\ntemplate<class F, class G>\nvoid constantIntervals(int from, int to, F f, G g) {\n\tif (to <= from) return;\n\tint i = from; auto p = f(i), q = f(to-1);\n\trec(from, to-1, f, g, i, p, q);\n\tg(i, to, q);\n}"
-    },
-    {
-      "id": "various/DivideAndConquerDP.h",
-      "name": "DivideAndConquerDP.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Given \\texttt{a[i]} $=\\min_{\\texttt{lo(i)} \\le k < \\texttt{hi(i)}}(\\texttt{f(i, k)})$ where the (minimal)\noptimal $k$ increases with $i$, computes \\texttt{a[i]} for \\texttt{i = L..R-1}.\nLayered form (quadrangle on $C$ is sufficient):\n$\\mathrm{dp}(t,j)=\\min_{0\\le k\\le j}\\mathrm{dp}(t-1,k-1)+C(k,j)$.\nSee KnuthDP.h for quadrangle patterns.",
-      "usage": "Fill in the four hooks, then call solve(L, R) to fill\na[L..R-1].\nlo(i), hi(i): allowed k is the half-open range [lo(i), hi(i)).\nf(i, k): cost of choosing k at index i.\nstore(i, k, v): save a[i] = v (argmin k).\nrec(L, R, LO, HI) solves i in [L, R), knowing the\noptimal k lies in [LO, HI).\nsolve(L, R) = rec(L, R, -inf, +inf).\nFor the layered DP above: lo(j)=0, hi(j)=j+1,\nf(j,k)=(k ? dpbefore[k-1] : 0)+C(k,j),\nstore into dpafter[j], then swap layers.",
-      "time": "$O((N + (hi-lo)) \\log N)$",
-      "memory": "",
-      "status": "tested on http://codeforces.com/contest/321/problem/E",
-      "author": "Simon Lindholm",
-      "source": "Codeforces",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "struct DP { // Modify at will:\n\tint lo(int ind) { return 0; }\n\tint hi(int ind) { return ind; }\n\tll f(int ind, int k) { return dp[ind][k]; }\n\tvoid store(int ind, int k, ll v) { res[ind] = pii(k, v); }\n\n\tvoid rec(int L, int R, int LO, int HI) {\n\t\tif (L >= R) return;\n\t\tint mid = (L + R) >> 1;\n\t\tpair<ll, int> best(LLONG_MAX, LO);\n\t\trep(k, max(LO,lo(mid)), min(HI,hi(mid)))\n\t\t\tbest = min(best, make_pair(f(mid, k), k));\n\t\tstore(mid, best.second, best.first);\n\t\trec(L, mid, LO, best.second+1);\n\t\trec(mid+1, R, best.second, HI);\n\t}\n\tvoid solve(int L, int R) { rec(L, R, INT_MIN, INT_MAX); }\n};"
-    },
-    {
-      "id": "various/EulerTourTree.h",
-      "name": "EulerTourTree.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Unrooted dynamic forest, vertices $[0,N)$.\nInitially isolated with value 0. Link requires different\ncomponents; cut requires an existing edge (either order).\nPoint set/get and component update/query/size. Each tour\nstores one token per vertex and two zero-valued tokens per\nedge.\nOnly vertex tokens contribute to sums. No path queries.\nEdge tokens are recycled. Change \\texttt{V}, \\texttt{U},\n\\texttt{id}, \\texttt{def}, \\texttt{idU}, \\texttt{binop},\n\\texttt{applyUpdate}, \\texttt{mergeUpdate}. Default is\ncomponent add/sum. \\texttt{binop} must be commutative and\nedge tokens must stay neutral. For a rooted subtree, cut\nits parent edge, operate on its component, then link back.",
-      "usage": "",
-      "time": "Expected $O(\\log N)$ per operation.",
-      "memory": "$O(N)$",
-      "status": "stress-tested",
-      "author": "OpenAI",
-      "source": "folklore",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "struct EulerTourTree {\n\tusing V = ll;\n\tusing U = ll;\n\tstatic constexpr V id = 0;\n\tstatic constexpr V def = 0;\n\tstatic constexpr U idU = 0;\n\tV binop(V a, V b) { return a + b; }\n\tV applyUpdate(U u, V v, int len) { return v + u * len; }\n\tU mergeUpdate(U oldU, U nw) { return oldU + nw; }\n\tstruct Node {\n\t\tint l = 0, r = 0, p = 0, c = 1;\n\t\tint own = 0, cnt = 0; // Vertex token / vertex count.\n\t\tunsigned y = 0;\n\t\tV val = id, agg = id;\n\t\tU lazy = idU;\n\t};\n\tvector<Node> t;\n\tvi spare;\n\tmap<pii, pii> edges;\n\tmt19937 rng{712367};\n\tEulerTourTree(int n) : t(n + 1) {\n\t\tt.reserve(3*n + 1); spare.reserve(2*n);\n\t\tt[0].c = 0;\n\t\trep(i,1,n+1) {\n\t\t\tt[i].y = (unsigned)rng();\n\t\t\tt[i].own = t[i].cnt = 1;\n\t\t\tt[i].val = t[i].agg = def;\n\t\t}\n\t}\n\tvoid apply(int x, U u) {\n\t\tif (!x) return;\n\t\tt[x].val = applyUpdate(u, t[x].val, t[x].own);\n\t\tt[x].agg = applyUpdate(u, t[x].agg, t[x].cnt);\n\t\tt[x].lazy = mergeUpdate(t[x].lazy, u);\n\t}\n\tvoid push(int x) {\n\t\tif (t[x].lazy == idU) return;\n\t\tapply(t[x].l, t[x].lazy);\n\t\tapply(t[x].r, t[x].lazy);\n\t\tt[x].lazy = idU;\n\t}\n\tvoid pull(int x) {\n\t\tint l = t[x].l, r = t[x].r;\n\t\tt[x].c = 1 + t[l].c + t[r].c;\n\t\tt[x].cnt = t[x].own + t[l].cnt + t[r].cnt;\n\t\tt[x].agg = binop(binop(t[l].agg, t[x].val),\n\t\t\tt[r].agg);\n\t\tif (l) t[l].p = x;\n\t\tif (r) t[r].p = x;\n\t}\n\tint root(int x) {\n\t\twhile (t[x].p) x = t[x].p;\n\t\treturn x;\n\t}\n\tint rank(int x) {\n\t\tint k = t[t[x].l].c;\n\t\tfor (int p; (p = t[x].p); x = p)\n\t\t\tif (t[p].r == x) k += t[t[p].l].c + 1;\n\t\treturn k;\n\t}\n\tint merge(int a, int b) {\n\t\tif (!a || !b) {\n\t\t\tint x = a + b;\n\t\t\tif (x) t[x].p = 0;\n\t\t\treturn x;\n\t\t}\n\t\tif (t[a].y < t[b].y) {\n\t\t\tpush(b);\n\t\t\tt[b].l = merge(a, t[b].l);\n\t\t\tpull(b); t[b].p = 0; return b;\n\t\t}\n\t\tpush(a);\n\t\tt[a].r = merge(t[a].r, b);\n\t\tpull(a); t[a].p = 0; return a;\n\t}\n\tpii split(int x, int k) { // First k tokens go left.\n\t\tif (!x) return {0, 0};\n\t\tpush(x);\n\t\tint a, b;\n\t\tif (t[t[x].l].c >= k) {\n\t\t\ttie(a, b) = split(t[x].l, k);\n\t\t\tt[x].l = b; b = x;\n\t\t} else {\n\t\t\ttie(a, b) = split(t[x].r, k-t[t[x].l].c-1);\n\t\t\tt[x].r = a; a = x;\n\t\t}\n\t\tpull(x);\n\t\tif (a) t[a].p = 0;\n\t\tif (b) t[b].p = 0;\n\t\treturn {a, b};\n\t}\n\tint rotate(int x) { // Start the cyclic tour at x.\n\t\tauto [a, b] = split(root(x), rank(x));\n\t\treturn merge(b, a);\n\t}\n\tint token() {\n\t\tint x;\n\t\tif (spare.empty()) x = sz(t), t.emplace_back();\n\t\telse x = spare.back(), spare.pop_back();\n\t\tt[x] = Node{}; t[x].y = (unsigned)rng();\n\t\treturn x;\n\t}\n\tbool connected(int u, int v) {\n\t\treturn root(u + 1) == root(v + 1);\n\t}\n\tvoid link(int u, int v) {\n\t\tassert(!connected(u, v));\n\t\tint a = rotate(u + 1), b = rotate(v + 1);\n\t\tint x = token(), y = token();\n\t\tedges[minmax(u, v)] = {x, y};\n\t\tmerge(merge(a, x), merge(b, y));\n\t}\n\tvoid cut(int u, int v) {\n\t\tauto it = edges.find(minmax(u, v));\n\t\tassert(it != edges.end());\n\t\tauto [x, y] = it->second;\n\t\tint r = rotate(x);\n\t\tauto [a, b] = split(r, rank(y));\n\t\tsplit(a, 1); split(b, 1); // Drop x and y.\n\t\tspare.push_back(x); spare.push_back(y);\n\t\tedges.erase(it);\n\t}\n\tvoid expose(int x) { // Push ancestors before point access.\n\t\tif (t[x].p) expose(t[x].p);\n\t\tpush(x);\n\t}\n\tvoid set(int u, V val) {\n\t\tint x = u + 1;\n\t\texpose(x);\n\t\tt[x].val = val;\n\t\tfor (; x; x = t[x].p) pull(x);\n\t}\n\tV get(int u) { expose(u + 1); return t[u + 1].val; }\n\tvoid componentUpdate(int u, U upd) {\n\t\tapply(root(u + 1), upd);\n\t}\n\tV componentQuery(int u) { return t[root(u+1)].agg; }\n\tint componentSize(int u) {\n\t\treturn t[root(u+1)].cnt;\n\t}\n};"
-    },
-    {
-      "id": "various/FastInput.h",
-      "name": "FastInput.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Read an integer from stdin. Usage requires your program to pipe in\ninput from file.",
-      "usage": "./a.out < input.txt",
-      "time": "About 5x as fast as cin/scanf.",
-      "memory": "",
-      "status": "tested on SPOJ INTEST, unit tested",
-      "author": "chilli",
-      "source": "Own work",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "inline char gc() { // like getchar()\n\tstatic char buf[1 << 16];\n\tstatic size_t bc, be;\n\tif (bc >= be) {\n\t\tbuf[0] = 0, bc = 0;\n\t\tbe = fread(buf, 1, sizeof(buf), stdin);\n\t}\n\treturn buf[bc++]; // returns 0 on EOF\n}\n\nint readInt() {\n\tint a, c;\n\twhile ((a = gc()) < 40);\n\tif (a == '-') return -readInt();\n\twhile ((c = gc()) >= 48) a = a * 10 + c - 480;\n\treturn a - 48;\n}"
-    },
-    {
-      "id": "various/FastKnapsack.h",
-      "name": "FastKnapsack.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Given $N$ non-negative integer weights \\texttt{w} and a non-negative target \\texttt{t},\ncomputes the maximum \\texttt{S <= t} such that \\texttt{S} is the sum of some subset of the weights.",
-      "usage": "",
-      "time": "$O(N \\max(w_i))$",
-      "memory": "",
-      "status": "Tested on kattis:eavesdropperevasion, stress-tested",
-      "author": "Mårten Wiman",
-      "source": "Pisinger 1999, \"Linear Time Algorithms for Knapsack Problems with Bounded Weights\"",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "int knapsack(vi w, int t) {\n\tint a = 0, b = 0, x;\n\twhile (b < sz(w) && a + w[b] <= t) a += w[b++];\n\tif (b == sz(w)) return a;\n\tint m = *max_element(all(w));\n\tvi u, v(2*m, -1);\n\tv[a+m-t] = b;\n\trep(i,b,sz(w)) {\n\t\tu = v;\n\t\trep(x,0,m) v[x+w[i]] = max(v[x+w[i]], u[x]);\n\t\tfor (x = 2*m; --x > m;) rep(j, max(0,u[x]), v[x])\n\t\t\tv[x-w[j]] = max(v[x-w[j]], j);\n\t}\n\tfor (a = t; v[a+m-t] < 0; a--) ;\n\treturn a;\n}"
-    },
-    {
-      "id": "various/FastMod.h",
-      "name": "FastMod.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Compute \\texttt{a \\% b} about 5 times faster than usual, where \\texttt{b} is constant but not known at compile time.\nReturns a value congruent to $a \\pmod b$ in the range $[0, 2b)$.",
-      "usage": "",
-      "time": "",
-      "memory": "",
-      "status": "proven correct, stress-tested\nMeasured as having 4 times lower latency, and 8 times higher throughput, see stress-test.",
-      "author": "Simon Lindholm",
-      "source": "https://en.wikipedia.org/wiki/Barrett_reduction",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "typedef unsigned long long ull;\nstruct FastMod {\n\tull b, m;\n\tFastMod(ull b) : b(b), m(-1ULL / b) {}\n\tull reduce(ull a) { // a % b + (0 or b)\n\t\treturn a - (ull)((__uint128_t(m) * a) >> 64) * b;\n\t}\n};"
-    },
-    {
-      "id": "various/IntervalContainer.h",
-      "name": "IntervalContainer.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Add and remove intervals from a set of disjoint intervals.\nWill merge the added interval with any overlapping intervals in the set when adding.\nIntervals are \\texttt{[inclusive, exclusive)}.",
-      "usage": "",
-      "time": "$O(\\log N)$",
-      "memory": "",
-      "status": "stress-tested",
-      "author": "Simon Lindholm",
-      "source": "",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "set<pii>::iterator addInterval(set<pii>& is, int L, int R) {\n\tif (L == R) return is.end();\n\tauto it = is.lower_bound({L, R}), before = it;\n\twhile (it != is.end() && it->first <= R) {\n\t\tR = max(R, it->second);\n\t\tbefore = it = is.erase(it);\n\t}\n\tif (it != is.begin() && (--it)->second >= L) {\n\t\tL = min(L, it->first);\n\t\tR = max(R, it->second);\n\t\tis.erase(it);\n\t}\n\treturn is.insert(before, {L,R});\n}\n\nvoid removeInterval(set<pii>& is, int L, int R) {\n\tif (L == R) return;\n\tauto it = addInterval(is, L, R);\n\tauto r2 = it->second;\n\tif (it->first == L) is.erase(it);\n\telse (int&)it->second = L;\n\tif (R != r2) is.emplace(R, r2);\n}"
-    },
-    {
-      "id": "various/IntervalCover.h",
-      "name": "IntervalCover.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Compute indices of smallest set of intervals covering another interval.\nIntervals should be \\texttt{[inclusive, exclusive)}. To support \\texttt{[inclusive, inclusive]},\nchange (A) to add \\texttt{|| R.empty()}. Returns empty set on failure (or if \\texttt{G} is empty).",
-      "usage": "",
-      "time": "$O(N \\log N)$",
-      "memory": "",
-      "status": "Tested on kattis:intervalcover",
-      "author": "Johan Sannemo",
-      "source": "",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "template<class T>\nvi cover(pair<T, T> G, vector<pair<T, T>> I) {\n\tvi S(sz(I)), R;\n\tiota(all(S), 0);\n\tsort(all(S), [&](int a, int b) { return I[a] < I[b]; });\n\tT cur = G.first;\n\tint at = 0;\n\twhile (cur < G.second) { // (A)\n\t\tpair<T, int> mx = make_pair(cur, -1);\n\t\twhile (at < sz(I) && I[S[at]].first <= cur) {\n\t\t\tmx = max(mx, make_pair(I[S[at]].second, S[at]));\n\t\t\tat++;\n\t\t}\n\t\tif (mx.second == -1) return {};\n\t\tcur = mx.first;\n\t\tR.push_back(mx.second);\n\t}\n\treturn R;\n}"
-    },
-    {
-      "id": "various/KnuthDP.h",
-      "name": "KnuthDP.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Interval DP\n$dp(i,j)=\\min_{i\\le k<j}(dp(i,k)+dp(k+1,j))+C(i,j)$.\nAny fixed offsets from $k$ work. Let $opt(i,j)$ be an\noptimal $k$. Need\n$opt(i,j-1)\\le opt(i,j)\\le opt(i+1,j)$.\nEnough if $C(b,c)\\le C(a,d)$ and quadrangle\n$C(a,c)+C(b,d)\\le C(a,d)+C(b,c)$ for\n$a\\le b\\le c\\le d$ (``wider gets worse faster'').\nUseful $C$: $C(i,j)+C(i+1,j+1)\\le C(i,j+1)+C(i+1,j)$;\n$C(i,j)=\\sum_{k=i}^j w_k$ ($w\\ge 0$);\n$C(i,j)=g(x_j-x_i)$, $x$ incr, $g$ convex nondec.;\n$C(i,j)=\\min(A_i,B_j)$ if $A$ decreasing, $B$ increasing;\n$C(i,j)=\\max(0,x_j-x_i-\\Delta)$ ($x$ incr, $\\Delta>0$).\nAlso consider LineContainer, Li Chao, monotone queues.",
-      "usage": "",
-      "time": "$O(N^2)$",
-      "memory": "",
-      "status": "stress-tested",
-      "author": "Simon Lindholm",
-      "source": "http://codeforces.com/blog/entry/8219",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "template<class F>\nll knuthDP(int N, F C) {\n\tvector<vector<ll>> dp(N, vector<ll>(N));\n\tvector<vi> opt(N, vi(N));\n\trep(i,0,N) opt[i][i] = i; // set dp[i][i] if needed\n\tfor (int i = N - 2; i >= 0; i--) {\n\t\trep(j,i+1,N) {\n\t\t\tll mn = LLONG_MAX;\n\t\t\tll cost = C(i, j);\n\t\t\tint hi = min(j - 1, opt[i + 1][j]);\n\t\t\trep(k, opt[i][j - 1], hi + 1) {\n\t\t\t\tll val = dp[i][k] + dp[k + 1][j] + cost;\n\t\t\t\tif (mn >= val) {\n\t\t\t\t\topt[i][j] = k;\n\t\t\t\t\tmn = val;\n\t\t\t\t}\n\t\t\t}\n\t\t\tdp[i][j] = mn;\n\t\t}\n\t}\n\treturn dp[0][N - 1];\n}"
-    },
-    {
-      "id": "various/LinkCutTree.h",
-      "name": "LinkCutTree.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Unrooted link-cut tree. Online link/cut.\nDefault path add + path sum.",
-      "usage": "LinkCut lc(n);\nlc.link(u, v); lc.cut(u, v);\nlc.connected(u, v); lc.query(u, v);\nlc.update(u, v, x); lc.set(u, x);",
-      "time": "amortized $O(\\log N)$",
-      "memory": "",
-      "status": "stress-tested",
-      "author": "folklore",
-      "source": "folklore",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "struct LinkCut {\n\tusing V = ll;\n\tusing U = ll;\n\tstatic constexpr V id = 0, def = 0;\n\tstatic constexpr U idU = 0;\n\tV binop(V a, V b) { return a + b; }\n\tV rev(V a) { return a; } // non-commutative: reverse\n\tV applyUpdate(U u, V v, int c) {\n\t\treturn v + u * c;\n\t}\n\tU mergeUpdate(U a, U b) { return a + b; }\n\tstruct N {\n\t\tint c[2] = {-1, -1}, p = -1, sz = 1;\n\t\tint flip = 0; // reverse; keep\n\t\tV val = def, agg = def;\n\t\tU lz = idU;\n\t};\n\tvector<N> t;\n\tLinkCut(int n) : t(n) {}\n\tbool nroot(int x) { // else p is path-parent\n\t\tint p = t[x].p;\n\t\treturn p != -1 &&\n\t\t\t(t[p].c[0] == x || t[p].c[1] == x);\n\t}\n\tV aggOf(int x) { return x<0 ? id : t[x].agg; }\n\tvoid pull(int x) { // path aggregate\n\t\tint a = t[x].c[0], b = t[x].c[1];\n\t\tt[x].sz = 1 + (a<0?0:t[a].sz) + (b<0?0:t[b].sz);\n\t\tt[x].agg = binop(binop(aggOf(a), t[x].val),\n\t\t\taggOf(b));\n\t}\n\tvoid apply(int x, U u) { // path add\n\t\tt[x].val = applyUpdate(u, t[x].val, 1);\n\t\tt[x].agg = applyUpdate(u, t[x].agg, t[x].sz);\n\t\tt[x].lz = mergeUpdate(t[x].lz, u);\n\t}\n\tvoid pushFlip(int x) { // structural; not a value tag\n\t\tif (!t[x].flip) return;\n\t\tswap(t[x].c[0], t[x].c[1]);\n\t\tt[x].agg = rev(t[x].agg);\n\t\tint a = t[x].c[0], b = t[x].c[1];\n\t\tif (a>=0) t[a].flip ^= 1, t[a].agg = rev(t[a].agg);\n\t\tif (b>=0) t[b].flip ^= 1, t[b].agg = rev(t[b].agg);\n\t\tt[x].flip = 0;\n\t}\n\tvoid pushLazy(int x) { // skip if idU\n\t\tU u = t[x].lz;\n\t\tif (u == idU) return;\n\t\tint a = t[x].c[0], b = t[x].c[1];\n\t\tif (a>=0) apply(a, u);\n\t\tif (b>=0) apply(b, u);\n\t\tt[x].lz = idU;\n\t}\n\tvoid push(int x) {\n\t\tpushFlip(x); pushLazy(x);\n\t}\n\tvoid rot(int x) {\n\t\tint y = t[x].p, z = t[y].p;\n\t\tint k = t[y].c[1] == x;\n\t\tif (nroot(y)) t[z].c[t[z].c[1]==y] = x;\n\t\tint w = t[x].c[k^1];\n\t\tt[y].c[k] = w;\n\t\tif (w>=0) t[w].p = y;\n\t\tt[x].c[k^1] = y;\n\t\tt[y].p = x; t[x].p = z;\n\t\tpull(y);\n\t}\n\tvoid splay(int x) {\n\t\tvi stk = {x};\n\t\tfor (int y = x; nroot(y); )\n\t\t\tstk.push_back(y = t[y].p);\n\t\twhile (!stk.empty())\n\t\t\tpush(stk.back()), stk.pop_back();\n\t\twhile (nroot(x)) {\n\t\t\tint y = t[x].p, z = t[y].p;\n\t\t\tif (nroot(y))\n\t\t\t\trot((t[y].c[0]==x)==(t[z].c[0]==y)?y:x);\n\t\t\trot(x);\n\t\t}\n\t\tpull(x);\n\t}\n\tvoid access(int x) { // preferred path through x\n\t\tint last = -1;\n\t\tfor (int y = x; y>=0; y = t[y].p) {\n\t\t\tsplay(y); t[y].c[1] = last;\n\t\t\tpull(y); last = y;\n\t\t}\n\t\tsplay(x);\n\t}\n\tvoid makeRoot(int x) { // evert; why this is unrooted\n\t\taccess(x); t[x].flip ^= 1;\n\t}\n\tint findRoot(int x) { // current evert; use connected\n\t\taccess(x);\n\t\tfor (;;) {\n\t\t\tpush(x);\n\t\t\tif (t[x].c[0]<0) break;\n\t\t\tx = t[x].c[0];\n\t\t}\n\t\tsplay(x);\n\t\treturn x;\n\t}\n\tvoid link(int u, int v) { // add edge (u, v)\n\t\tassert(!connected(u, v));\n\t\tmakeRoot(u); t[u].p = v;\n\t}\n\tvoid cut(int u, int v) { // remove edge (u, v)\n\t\tmakeRoot(u); access(v);\n\t\tassert(t[v].c[0]==u && t[u].c[0]<0 &&\n\t\t\tt[u].c[1]<0);\n\t\tt[v].c[0] = t[u].p = -1;\n\t\tpull(v);\n\t}\n\tbool connected(int u, int v) {\n\t\treturn findRoot(u) == findRoot(v);\n\t}\n\t// makeRoot(u); access(v); => v's splay is path u-v\n\tV query(int u, int v) {\n\t\tmakeRoot(u); access(v);\n\t\treturn t[v].agg;\n\t}\n\tvoid update(int u, int v, U x) {\n\t\tmakeRoot(u); access(v); apply(v, x);\n\t}\n\tvoid set(int u, V x) {\n\t\taccess(u); t[u].val = x; t[u].lz = idU;\n\t\tpull(u);\n\t}\n\tV get(int u) {\n\t\taccess(u); return t[u].val;\n\t}\n\tint lca(int r, int u, int v) { // wrt root r\n\t\tmakeRoot(r); access(u); access(v);\n\t\tsplay(u);\n\t\treturn t[u].p<0 ? u : t[u].p;\n\t}\n};"
-    },
-    {
-      "id": "various/LIS.h",
-      "name": "LIS.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Compute indices for the longest increasing subsequence.",
-      "usage": "",
-      "time": "$O(N \\log N)$",
-      "memory": "",
-      "status": "Tested on kattis:longincsubseq, stress-tested",
-      "author": "Johan Sannemo",
-      "source": "",
-      "dependencies": [],
-      "includedInPdf": false,
-      "code": "template<class I> vi lis(const vector<I>& S) {\n\tif (S.empty()) return {};\n\tvi prev(sz(S));\n\ttypedef pair<I, int> p;\n\tvector<p> res;\n\trep(i,0,sz(S)) {\n\t\t// change 0 -> i for longest non-decreasing subsequence\n\t\tauto it = lower_bound(all(res), p{S[i], 0});\n\t\tif (it == res.end()) res.emplace_back(), it = res.end()-1;\n\t\t*it = {S[i], i};\n\t\tprev[i] = it == res.begin() ? 0 : (it-1)->second;\n\t}\n\tint L = sz(res), cur = res.back().second;\n\tvi ans(L);\n\twhile (L--) ans[L] = cur, cur = prev[cur];\n\treturn ans;\n}"
-    },
-    {
-      "id": "various/MemoryUsage.h",
-      "name": "MemoryUsage.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Maximum RSS over the lifetime of the program so far, not current RSS. Kilobytes on Linux, bytes on macOS.",
-      "usage": "",
-      "time": "",
-      "memory": "",
-      "status": "stress-tested",
-      "author": "me",
-      "source": "me",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "#include <sys/resource.h>\n\nll getMemoryUsage() {\n\tstruct rusage usage;\n\tgetrusage(RUSAGE_SELF, &usage);\n\treturn usage.ru_maxrss;\n}"
-    },
-    {
-      "id": "various/MinPlusConvolution.h",
-      "name": "MinPlusConvolution.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Min-plus convolution with one convex or\nconcave input. SMAWK handles arbitrary/convex; the border\nalgorithm handles arbitrary/concave. Here, convex = smiley\nand concave = frowny. \\texttt{min\\_smawk(f,r,c)} returns a\nminimizing column for each row of the matrix f. Totally\nmonotone means every submatrix's leftmost row-minimum\nindices are nondecreasing. Queried through f, not stored.\nBoth \\texttt{a} and \\texttt{b} must be non-empty.",
-      "usage": "",
-      "time": "$O(N+M)$ convex, $O(N\\log M+M)$ concave",
-      "memory": "",
-      "status": "untested (no local stress test)",
-      "author": "brunodccarvalho",
-      "source": "https://github.com/caterpillow/cactl",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "// Row-minima indices for totally monotone f(x,y). O(N + M)\ntemplate<class Fn>\nvi min_smawk_rec(Fn& f, const vi& row, vi col) {\n\tint n = sz(row);\n\tif (!n) return {};\n\tvi red;\n\tfor (int c : col) {\n\t\twhile (sz(red) &&\n\t\t\tf(row[sz(red)-1], c) < f(row[sz(red)-1], red.back()))\n\t\t\tred.pop_back();\n\t\tif (sz(red) < n) red.pb(c);\n\t}\n\tcol = move(red);\n\n\tvi odd;\n\tfor (int i = 1; i < n; i += 2) odd.pb(row[i]);\n\tvi oddans = min_smawk_rec(f, odd, col), ans(n);\n\trep(i,0,sz(odd)) ans[2*i+1] = oddans[i];\n\tfor (int i = 0, j = 0; i < n; i += 2) {\n\t\tans[i] = col[j];\n\t\tint last = i+1 < n ? ans[i+1] : col.back();\n\t\twhile (col[j] != last) {\n\t\t\tj++;\n\t\t\tif (f(row[i], col[j]) < f(row[i], ans[i]))\n\t\t\t\tans[i] = col[j];\n\t\t}\n\t}\n\treturn ans;\n}\ntemplate<class Fn>\nvi min_smawk(Fn f, int r, int c) {\n\tvi row(r), col(c);\n\tiota(all(row), 0), iota(all(col), 0);\n\treturn min_smawk_rec(f, row, col);\n}\n\n// Min-plus c[k]=min_{i+j=k}(a[i]+b[j]), convex b. O(N+M)\ntemplate<class V>\nvector<V> min_plus_smawk(const vector<V>& a,\n\t\tconst vector<V>& b) {\n\tint n = sz(a), m = sz(b);\n\tassert(n && m);\n\tauto f = [&](int r, int c) -> tuple<int,V,int> {\n\t\tif (r < c) return {1, V{}, c};\n\t\tif (r-c >= m) return {1, V{}, -c};\n\t\treturn {0, a[c]+b[r-c], 0};\n\t};\n\tvi cols = min_smawk(f, n+m-1, n);\n\tvector<V> d(n+m-1);\n\trep(r,0,n+m-1) d[r] = a[cols[r]]+b[r-cols[r]];\n\treturn d;\n}\n\n// Min-plus conv for concave b. O(N log M + M)\ntemplate<class V>\nvector<V> min_plus_concave_one(const vector<V>& a,\n\t\tconst vector<V>& b) {\n\tint n = sz(a), m = sz(b), z = n+m-1;\n\tassert(n && m);\n\tvector<V> c(z, numeric_limits<V>::max());\n\tauto solve = [&](int l, int r, bool rev) {\n\t\tauto val = [&](int j, int k) {\n\t\t\tif (rev) j = n-1-j, k = z-1-k;\n\t\t\treturn a[j]+b[k-j];\n\t\t};\n#define better(i,j,k) val(i,k) <= val(j,k)\n\t\tauto improve = [&](int u, int v, int l, int r) {\n\t\t\twhile (r-l > 1) {\n\t\t\t\tint m = (l+r)/2;\n\t\t\t\t(better(u,v,m) ? r : l) = m;\n\t\t\t}\n\t\t\treturn l;\n\t\t};\n\t\tvector<array<int,2>> stk;\n\t\tfor (int i = l, k = l, s = -1; k < r; i++, k++) {\n\t\t\twhile (s >= 0 && i < n &&\n\t\t\t\t\tbetter(i, stk[s][0], stk[s][1])) {\n\t\t\t\tstk.pop_back(), s--;\n\t\t\t}\n\t\t\tif (i < n) {\n\t\t\t\tint t = s < 0 ? r-1\n\t\t\t\t\t: improve(stk[s][0], i, k-1, stk[s][1]);\n\t\t\t\tif (t >= k) stk.pb({i,t}), s++;\n\t\t\t}\n\t\t\tint out = rev ? z-1-k : k;\n\t\t\tc[out] = min(c[out], val(stk[s][0], k));\n\t\t\tif (stk[s][1] == k) stk.pop_back(), s--;\n\t\t}\n\t};\n\n\tsolve(0,m,0), solve(0,m,1);\n\tfor (int k = m; k < z-m; k += m+1)\n\t\tsolve(k+1,k+m+1,0), solve(z-k-m,z-k,1);\n#undef better\n\treturn c;\n}"
-    },
-    {
-      "id": "various/PersistentSegmentTree.h",
-      "name": "PersistentSegmentTree.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Persistent implicit segment tree with lazy\nrange updates and point set. Update/set return a new\nroot; old roots stay valid. No destructor (nodes are\nshared). Bounds inclusive. Change \\texttt{V}, \\texttt{U},\n\\texttt{id}, \\texttt{def}, \\texttt{idU}, \\texttt{binop},\n\\texttt{applyUpdate}, \\texttt{mergeUpdate}. Default is\nrange add / range max.",
-      "usage": "",
-      "time": "$O(\\log R)$",
-      "memory": "",
-      "status": "stress-tested",
-      "author": "me",
-      "source": "folklore",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "struct Node {\n\tusing V = int;\n\tusing U = int;\n\tusing T = Node;\n\tstatic constexpr V id = INT_MIN;\n\tstatic constexpr V def = 0;\n\tstatic constexpr U idU = 0;\n\tV binop(V a, V b) { return max(a, b); }\n\tV applyUpdate(U u, V v) { return v + u; }\n\tU mergeUpdate(U oldU, U nw) { return oldU + nw; }\n\tT *lt = 0, *rt = 0;\n\tV val = def;\n\tU lazy = idU;\n\tvoid updateNode(int, int, U u) {\n\t\tlazy = mergeUpdate(lazy, u);\n\t\tval = applyUpdate(u, val);\n\t}\n\tvoid push(int l, int r) {\n\t\tint mid = l + (r - l) / 2;\n\t\tlt = new T(lt ? *lt : T());\n\t\trt = new T(rt ? *rt : T());\n\t\tlt->updateNode(l, mid, lazy);\n\t\trt->updateNode(mid + 1, r, lazy);\n\t\tlazy = idU;\n\t}\n\tT* update(int l, int r, int ql, int qr, U u) {\n\t\tif (qr < l || r < ql) return this;\n\t\tT* n = new T(*this);\n\t\tif (ql <= l && r <= qr) {\n\t\t\tn->updateNode(l, r, u);\n\t\t\treturn n;\n\t\t}\n\t\tn->push(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tn->lt = n->lt->update(l, mid, ql, qr, u);\n\t\tn->rt = n->rt->update(mid + 1, r, ql, qr, u);\n\t\tn->val = binop(n->lt->val, n->rt->val);\n\t\treturn n;\n\t}\n\tT* set(int l, int r, int i, V v) {\n\t\tif (i < l || r < i) return this;\n\t\tT* n = new T(*this);\n\t\tif (l == r) { n->val = v; n->lazy = idU; return n; }\n\t\tn->push(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tif (i <= mid) n->lt = n->lt->set(l, mid, i, v);\n\t\telse n->rt = n->rt->set(mid + 1, r, i, v);\n\t\tn->val = binop(n->lt->val, n->rt->val);\n\t\treturn n;\n\t}\n\tV query(int l, int r, int ql, int qr) {\n\t\tif (qr < l || r < ql) return id;\n\t\tif (ql <= l && r <= qr) return val;\n\t\tint mid = l + (r - l) / 2;\n\t\tT a = lt ? *lt : T();\n\t\tT b = rt ? *rt : T();\n\t\ta.updateNode(l, mid, lazy);\n\t\tb.updateNode(mid + 1, r, lazy);\n\t\treturn binop(a.query(l, mid, ql, qr),\n\t\t\tb.query(mid + 1, r, ql, qr));\n\t}\n};"
-    },
-    {
-      "id": "various/Pragmas.h",
-      "name": "Pragmas.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "GCC pragmas. \\texttt{Ofast} implies\n\\texttt{-ffast-math} (can change floats).\n\\texttt{avx2} can crash on old machines.\n\\texttt{bmi,bmi2}: tzcnt/pdep/pext.\n\\texttt{lzcnt,popcnt}: hardware clz/popcount.\n\\texttt{trapv} aborts on signed overflow (slow; debug).\nDo not combine \\texttt{trapv} with \\texttt{Ofast} if you need traps.",
-      "usage": "",
-      "time": "",
-      "memory": "",
-      "status": "untested",
-      "author": "me",
-      "source": "me",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "#pragma GCC optimize(\"Ofast,unroll-loops\")\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\n// #pragma GCC optimize(\"trapv\")"
-    },
-    {
-      "id": "various/SegmentTreeBeats.h",
-      "name": "SegmentTreeBeats.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Segment tree beats. Range\n\\texttt{chmin}/\\texttt{chmax}/\\texttt{add} and range\nsum/min/max. Bounds inclusive, 0-indexed.",
-      "usage": "",
-      "time": "$O(\\log^2 N)$ amortized",
-      "memory": "",
-      "status": "stress-tested",
-      "author": "Benjamin Qi, Dustin Miao",
-      "source": "https://usaco.guide/adv/segtree-beats",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "struct SegmentTreeBeats {\n\tstatic constexpr ll INF = LLONG_MAX / 4;\n\tstruct Node {\n\t\tll sum = 0, lazy = 0;\n\t\tll mx1 = 0, mx2 = -INF, mxc = 0;\n\t\tll mn1 = 0, mn2 = INF, mnc = 0;\n\t};\n\tvector<Node> t;\n\tint n;\n\n\tSegmentTreeBeats(int n) : t(4 * n + 4), n(n) {\n\t\tbuild(1, 0, n - 1, nullptr);\n\t}\n\tSegmentTreeBeats(const vector<ll>& a) :\n\t\tt(4 * sz(a) + 4), n(sz(a)) {\n\t\tbuild(1, 0, n - 1, &a);\n\t}\n\n\tvoid pull(int i) {\n\t\tNode &u = t[i], &l = t[i << 1], &r = t[i << 1 | 1];\n\t\tu.sum = l.sum + r.sum;\n\t\tif (l.mx1 == r.mx1) {\n\t\t\tu.mx1 = l.mx1;\n\t\t\tu.mx2 = max(l.mx2, r.mx2);\n\t\t\tu.mxc = l.mxc + r.mxc;\n\t\t} else if (l.mx1 > r.mx1) {\n\t\t\tu.mx1 = l.mx1;\n\t\t\tu.mx2 = max(l.mx2, r.mx1);\n\t\t\tu.mxc = l.mxc;\n\t\t} else {\n\t\t\tu.mx1 = r.mx1;\n\t\t\tu.mx2 = max(l.mx1, r.mx2);\n\t\t\tu.mxc = r.mxc;\n\t\t}\n\t\tif (l.mn1 == r.mn1) {\n\t\t\tu.mn1 = l.mn1;\n\t\t\tu.mn2 = min(l.mn2, r.mn2);\n\t\t\tu.mnc = l.mnc + r.mnc;\n\t\t} else if (l.mn1 < r.mn1) {\n\t\t\tu.mn1 = l.mn1;\n\t\t\tu.mn2 = min(l.mn2, r.mn1);\n\t\t\tu.mnc = l.mnc;\n\t\t} else {\n\t\t\tu.mn1 = r.mn1;\n\t\t\tu.mn2 = min(l.mn1, r.mn2);\n\t\t\tu.mnc = r.mnc;\n\t\t}\n\t}\n\tvoid applyAdd(int i, int l, int r, ll v) {\n\t\tif (!v) return;\n\t\tNode& u = t[i];\n\t\tu.sum += (r - l + 1) * v;\n\t\tu.mx1 += v;\n\t\tif (u.mx2 != -INF) u.mx2 += v;\n\t\tu.mn1 += v;\n\t\tif (u.mn2 != INF) u.mn2 += v;\n\t\tu.lazy += v;\n\t}\n\tvoid applyChmin(int i, ll v, bool leaf) {\n\t\tNode& u = t[i];\n\t\tif (v >= u.mx1) return;\n\t\tu.sum -= (u.mx1 - v) * u.mxc;\n\t\tu.mx1 = v;\n\t\tif (leaf) u.mn1 = v;\n\t\telse if (v <= u.mn1) u.mn1 = v;\n\t\telse if (v < u.mn2) u.mn2 = v;\n\t}\n\tvoid applyChmax(int i, ll v, bool leaf) {\n\t\tNode& u = t[i];\n\t\tif (v <= u.mn1) return;\n\t\tu.sum += (v - u.mn1) * u.mnc;\n\t\tu.mn1 = v;\n\t\tif (leaf) u.mx1 = v;\n\t\telse if (v >= u.mx1) u.mx1 = v;\n\t\telse if (v > u.mx2) u.mx2 = v;\n\t}\n\tvoid push(int i, int l, int r) {\n\t\tif (l == r) return;\n\t\tint m = (l + r) >> 1;\n\t\tapplyAdd(i << 1, l, m, t[i].lazy);\n\t\tapplyAdd(i << 1 | 1, m + 1, r, t[i].lazy);\n\t\tt[i].lazy = 0;\n\t\tapplyChmin(i << 1, t[i].mx1, l == m);\n\t\tapplyChmin(i << 1 | 1, t[i].mx1, m + 1 == r);\n\t\tapplyChmax(i << 1, t[i].mn1, l == m);\n\t\tapplyChmax(i << 1 | 1, t[i].mn1, m + 1 == r);\n\t}\n\n\tvoid build(int i, int l, int r, const vector<ll>* a) {\n\t\tt[i].lazy = 0;\n\t\tif (l == r) {\n\t\t\tll v = a ? (*a)[l] : 0;\n\t\t\tt[i].sum = t[i].mx1 = t[i].mn1 = v;\n\t\t\tt[i].mxc = t[i].mnc = 1;\n\t\t\tt[i].mx2 = -INF;\n\t\t\tt[i].mn2 = INF;\n\t\t\treturn;\n\t\t}\n\t\tint m = (l + r) >> 1;\n\t\tbuild(i << 1, l, m, a);\n\t\tbuild(i << 1 | 1, m + 1, r, a);\n\t\tpull(i);\n\t}\n\n\tvoid add(int ql, int qr, ll v,\n\t\tint i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql) return;\n\t\tif (ql <= l && r <= qr) {\n\t\t\tapplyAdd(i, l, r, v); return;\n\t\t}\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\tadd(ql, qr, v, i << 1, l, m);\n\t\tadd(ql, qr, v, i << 1 | 1, m + 1, r);\n\t\tpull(i);\n\t}\n\tvoid chmin(int ql, int qr, ll v,\n\t\tint i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql || v >= t[i].mx1) return;\n\t\tif (ql <= l && r <= qr && v > t[i].mx2) {\n\t\t\tapplyChmin(i, v, l == r); return;\n\t\t}\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\tchmin(ql, qr, v, i << 1, l, m);\n\t\tchmin(ql, qr, v, i << 1 | 1, m + 1, r);\n\t\tpull(i);\n\t}\n\tvoid chmax(int ql, int qr, ll v,\n\t\tint i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql || v <= t[i].mn1) return;\n\t\tif (ql <= l && r <= qr && v < t[i].mn2) {\n\t\t\tapplyChmax(i, v, l == r); return;\n\t\t}\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\tchmax(ql, qr, v, i << 1, l, m);\n\t\tchmax(ql, qr, v, i << 1 | 1, m + 1, r);\n\t\tpull(i);\n\t}\n\n\tll qsum(int ql, int qr, int i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql) return 0;\n\t\tif (ql <= l && r <= qr) return t[i].sum;\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\treturn qsum(ql, qr, i << 1, l, m)\n\t\t\t+ qsum(ql, qr, i << 1 | 1, m + 1, r);\n\t}\n\tll qmax(int ql, int qr, int i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql) return -INF;\n\t\tif (ql <= l && r <= qr) return t[i].mx1;\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\treturn max(qmax(ql, qr, i << 1, l, m),\n\t\t\tqmax(ql, qr, i << 1 | 1, m + 1, r));\n\t}\n\tll qmin(int ql, int qr, int i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql) return INF;\n\t\tif (ql <= l && r <= qr) return t[i].mn1;\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\treturn min(qmin(ql, qr, i << 1, l, m),\n\t\t\tqmin(ql, qr, i << 1 | 1, m + 1, r));\n\t}\n};"
-    },
-    {
-      "id": "various/SIMD.h",
-      "name": "SIMD.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Cheat sheet of SSE/AVX intrinsics, for doing arithmetic on several numbers at once.\nCan provide a constant factor improvement of about 4, orthogonal to loop unrolling.\nOperations follow the pattern \\texttt{\"\\_mm(256)?\\_name\\_(si(128|256)|epi(8|16|32|64)|pd|ps)\"}. Not all are described here;\ngrep for \\texttt{\\_mm\\_} in \\texttt{/usr/lib/gcc/{*}/4.9/include/} for more.\nIf AVX is unsupported, try 128-bit operations, \\texttt{emmintrin.h} and \\#define \\texttt{\\_\\_SSE\\_\\_} and \\texttt{\\_\\_MMX\\_\\_} before including it.\nFor aligned memory use \\texttt{\\_mm\\_malloc(size, 32)} or \\texttt{int buf[N] alignas(32)}, but prefer loadu/storeu.",
-      "usage": "",
-      "time": "",
-      "memory": "",
-      "status": "",
-      "author": "Simon Lindholm",
-      "source": "https://software.intel.com/sites/landingpage/IntrinsicsGuide/",
-      "dependencies": [],
-      "includedInPdf": false,
-      "code": "#pragma GCC target (\"avx2\") // or sse4.1\n#include \"immintrin.h\"\n\ntypedef __m256i mi;\n#define L(x) _mm256_loadu_si256((mi*)&(x))\n\n// High-level/specific methods:\n// load(u)?_si256, store(u)?_si256, setzero_si256, _mm_malloc\n// blendv_(epi8|ps|pd) (z?y:x), movemask_epi8 (hibits of bytes)\n// i32gather_epi32(addr, x, 4): map addr[] over 32-b parts of x\n// sad_epu8: sum of absolute differences of u8, outputs 4xi64\n// maddubs_epi16: dot product of unsigned i7's, outputs 16xi15\n// madd_epi16: dot product of signed i16's, outputs 8xi32\n// extractf128_si256(, i) (256->128), cvtsi128_si32 (128->lo32)\n// permute2f128_si256(x,x,1) swaps 128-bit lanes\n// shuffle_epi32(x, 3*64+2*16+1*4+0) == x for each lane\n// shuffle_epi8(x, y) takes a vector instead of an imm\n\n// Methods that work with most data types (append e.g. _epi32):\n// set1, blend (i8?x:y), add, adds (sat.), mullo, sub, and/or,\n// andnot, abs, min, max, sign(1,x), cmp(gt|eq), unpack(lo|hi)\n\nint sumi32(mi m) { union {int v[8]; mi m;} u; u.m = m;\n\tint ret = 0; rep(i,0,8) ret += u.v[i]; return ret; }\nmi zero() { return _mm256_setzero_si256(); }\nmi one() { return _mm256_set1_epi32(-1); }\nbool all_zero(mi m) { return _mm256_testz_si256(m, m); }\nbool all_one(mi m) { return _mm256_testc_si256(m, one()); }\n\nll example_filteredDotProduct(int n, short* a, short* b) {\n\tint i = 0; ll r = 0;\n\tmi zero = _mm256_setzero_si256(), acc = zero;\n\twhile (i + 16 <= n) {\n\t\tmi va = L(a[i]), vb = L(b[i]); i += 16;\n\t\tva = _mm256_and_si256(_mm256_cmpgt_epi16(vb, va), va);\n\t\tmi vp = _mm256_madd_epi16(va, vb);\n\t\tacc = _mm256_add_epi64(_mm256_unpacklo_epi32(vp, zero),\n\t\t\t_mm256_add_epi64(acc, _mm256_unpackhi_epi32(vp, zero)));\n\t}\n\tunion {ll v[4]; mi m;} u; u.m = acc; rep(i,0,4) r += u.v[i];\n\tfor (;i<n;++i) if (a[i] < b[i]) r += a[i]*b[i]; // <- equiv\n\treturn r;\n}"
-    },
-    {
-      "id": "various/SmallPtr.h",
-      "name": "SmallPtr.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "A 32-bit pointer that points into BumpAllocator memory.",
-      "usage": "",
-      "time": "",
-      "memory": "",
-      "status": "tested",
-      "author": "Simon Lindholm",
-      "source": "me",
-      "dependencies": [
-        "various/BumpAllocator.h"
-      ],
-      "includedInPdf": true,
-      "code": "template<class T> struct ptr {\n\tunsigned ind;\n\tptr(T* p = 0) : ind(p ? unsigned((char*)p - buf) : 0) {\n\t\tassert(ind < sizeof buf);\n\t}\n\tT& operator*() const { return *(T*)(buf + ind); }\n\tT* operator->() const { return &**this; }\n\tT& operator[](int a) const { return (&**this)[a]; }\n\texplicit operator bool() const { return ind; }\n};"
-    },
-    {
-      "id": "various/SparseSegmentTree2d.h",
-      "name": "SparseSegmentTree2d.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Online sparse 2D segment tree on\n$[0,n) \\times [0,m)$. Point assignment with\n\\texttt{set(x,y,v)}, rectangle query with\n\\texttt{query(x1,x2,y1,y2)} (half-open bounds).\nUnassigned points have value \\texttt{unit}.\nChange \\texttt{V}, \\texttt{unit}, \\texttt{f} for any\ncommutative monoid. Queries allocate no nodes.",
-      "usage": "",
-      "time": "$O(\\log n \\log m)$ per operation.",
-      "memory": "$O(k \\log n \\log m)$ for $k$ distinct updated\npoints. Allocated nodes are retained until destruction.",
-      "status": "stress-tested",
-      "author": "me",
-      "source": "me",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "struct Tree2D {\n\tusing V = ll;\n\tstatic constexpr V unit = LLONG_MIN;\n\tstatic V f(V a, V b) { return max(a, b); }\n\tstruct Y {\n\t\tusing T = Y;\n\t\tT *lt = 0, *rt = 0;\n\t\tV val = unit;\n\t\tstatic V get(T* p) { return p ? p->val : unit; }\n\t\tvoid set(int l, int r, int y, V v) {\n\t\t\tif (r - l == 1) { val = v; return; }\n\t\t\tint mid = l + (r - l) / 2;\n\t\t\tT*& ch = y < mid ? lt : rt;\n\t\t\tif (!ch) ch = new T;\n\t\t\tif (y < mid) ch->set(l, mid, y, v);\n\t\t\telse ch->set(mid, r, y, v);\n\t\t\tval = f(get(lt), get(rt));\n\t\t}\n\t\tV query(int l, int r, int a, int b) const {\n\t\t\tif (b <= l || r <= a) return unit;\n\t\t\tif (a <= l && r <= b) return val;\n\t\t\tint mid = l + (r - l) / 2;\n\t\t\treturn f(lt ? lt->query(l, mid, a, b) : unit,\n\t\t\t\trt ? rt->query(mid, r, a, b) : unit);\n\t\t}\n\t\t~Y() { delete lt; delete rt; }\n\t};\n\tstruct Node {\n\t\tusing T = Node;\n\t\tT *lt = 0, *rt = 0;\n\t\tY tree;\n\t\tvoid set(int l, int r, int m, int x, int y, V v) {\n\t\t\tif (r - l > 1) {\n\t\t\t\tint mid = l + (r - l) / 2;\n\t\t\t\tT*& ch = x < mid ? lt : rt;\n\t\t\t\tif (!ch) ch = new T;\n\t\t\t\tif (x < mid) ch->set(l, mid, m, x, y, v);\n\t\t\t\telse ch->set(mid, r, m, x, y, v);\n\t\t\t\tv = f(lt ? lt->tree.query(0, m, y, y+1) : unit,\n\t\t\t\t\trt ? rt->tree.query(0, m, y, y+1) : unit);\n\t\t\t}\n\t\t\ttree.set(0, m, y, v);\n\t\t}\n\t\tV query(int l, int r, int m, int a, int b,\n\t\t\tint c, int d) const {\n\t\t\tif (b <= l || r <= a) return unit;\n\t\t\tif (a <= l && r <= b)\n\t\t\t\treturn tree.query(0, m, c, d);\n\t\t\tint mid = l + (r - l) / 2;\n\t\t\treturn f(lt ? lt->query(l,mid,m,a,b,c,d) : unit,\n\t\t\t\trt ? rt->query(mid,r,m,a,b,c,d) : unit);\n\t\t}\n\t\t~Node() { delete lt; delete rt; }\n\t} root;\n\tint n, m;\n\tTree2D(int n, int m) : n(n), m(m) {\n\t\tassert(n > 0 && m > 0);\n\t}\n\tTree2D(const Tree2D&) = delete;\n\tTree2D& operator=(const Tree2D&) = delete;\n\tvoid set(int x, int y, V v) {\n\t\tassert(0 <= x && x < n && 0 <= y && y < m);\n\t\troot.set(0, n, m, x, y, v);\n\t}\n\tV query(int x1, int x2, int y1, int y2) const {\n\t\tif (x1 >= x2 || y1 >= y2) return unit;\n\t\treturn root.query(0, n, m, x1, x2, y1, y2);\n\t}\n};"
-    },
-    {
-      "id": "various/TernarySearch.h",
-      "name": "TernarySearch.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "Find the smallest i in $[a,b]$ that maximizes $f(i)$, assuming that $f(a) < \\dots < f(i) \\ge \\dots \\ge f(b)$.\nTo reverse which of the sides allows non-strict inequalities, change the \\texttt{<} marked with (A) to \\texttt{<=}, and reverse the loop at (B).\nTo minimize $f$, change it to \\texttt{>}, also at (B).",
-      "usage": "int ind = ternSearch(0,n-1,[\\&](int i){return a[i];});",
-      "time": "$O(\\log(b-a))$",
-      "memory": "",
-      "status": "tested",
-      "author": "Simon Lindholm",
-      "source": "own work",
-      "dependencies": [],
-      "includedInPdf": true,
-      "code": "template<class F>\nint ternSearch(int a, int b, F f) {\n\tassert(a <= b);\n\twhile (b - a >= 5) {\n\t\tint mid = (a + b) / 2;\n\t\tif (f(mid) < f(mid+1)) a = mid; // (A)\n\t\telse b = mid+1;\n\t}\n\trep(i,a+1,b+1) if (f(a) < f(i)) a = i; // (B)\n\treturn a;\n}"
-    },
-    {
-      "id": "various/Unrolling.h",
-      "name": "Unrolling.h",
-      "chapter": "various",
-      "language": "cpp",
-      "description": "",
-      "usage": "",
-      "time": "",
-      "memory": "",
-      "status": "",
-      "author": "Simon Lindholm",
-      "source": "me",
-      "dependencies": [],
-      "includedInPdf": false,
-      "code": "#define F {...; ++i;}\nint i = from;\nwhile (i&3 && i < to) F // for alignment, if needed\nwhile (i + 4 <= to) { F F F F }\nwhile (i < to) F"
     },
     {
       "id": "geometry/3dHull.h",
@@ -2864,7 +2480,7 @@
       "name": "OnSegment.h",
       "chapter": "geometry",
       "language": "cpp",
-      "description": "Returns true iff \\texttt{p} lies on the line segment from \\texttt{s} to \\texttt{e}.\nUse \\texttt{(segDist(s,e,p)<=epsilon)} for an epsilon check.",
+      "description": "Returns true iff \\texttt{p} lies on the line segment from \\texttt{s} to \\texttt{e}.\nBoth segment endpoints s and e are included.\nUse \\texttt{(segDist(s,e,p)<=epsilon)} for an epsilon check.",
       "usage": "",
       "time": "",
       "memory": "",
@@ -2898,7 +2514,7 @@
       "name": "Point3D.h",
       "chapter": "geometry",
       "language": "cpp",
-      "description": "Handles points in 3D space using doubles.",
+      "description": "Handles points in 3D space using doubles.\nAngle ranges: phi in $[-\\pi,\\pi]$, theta in $[0,\\pi]$;\nboth endpoints included in each range.",
       "usage": "",
       "time": "",
       "memory": "",
@@ -3023,7 +2639,7 @@
       "name": "SegmentDistance.h",
       "chapter": "geometry",
       "language": "cpp",
-      "description": "Returns the shortest distance between point \\texttt{p} and the line segment from point \\texttt{s} to \\texttt{e}.",
+      "description": "Returns the shortest distance between point \\texttt{p} and the line segment from point \\texttt{s} to \\texttt{e}.\nBoth segment endpoints s and e are included.",
       "usage": "complex<double> a, b(2,2), p(1,1);\nbool onSegment = segDist(a,b,p) < 1e-10;",
       "time": "",
       "memory": "",
@@ -3041,7 +2657,7 @@
       "name": "SegmentIntersection.h",
       "chapter": "geometry",
       "language": "cpp",
-      "description": "If a unique intersection point between the line segments going from \\texttt{s1} to \\texttt{e1} and from \\texttt{s2} to \\texttt{e2} exists then it is returned.\nIf no intersection point exists an empty vector is returned.\nIf infinitely many exist a vector with 2 elements is returned, containing the endpoints of the common line segment.",
+      "description": "If a unique intersection point between the line segments going from \\texttt{s1} to \\texttt{e1} and from \\texttt{s2} to \\texttt{e2} exists then it is returned.\nBoth endpoints of each segment are included.\nIf no intersection point exists an empty vector is returned.\nIf infinitely many exist a vector with 2 elements is returned, containing the endpoints of the common line segment.",
       "usage": "vector<pp> inter = segInter(s1,e1,s2,e2);\nif (sz(inter)==1)\ncout << \"segments intersect at \" << inter[0] << endl;",
       "time": "",
       "memory": "",
@@ -3088,6 +2704,424 @@
       "dependencies": [],
       "includedInPdf": true,
       "code": "double sphericalDistance(double f1, double t1,\n\t\tdouble f2, double t2, double radius) {\n\tarray<double,3> a = {sin(t1)*cos(f1),\n\t\tsin(t1)*sin(f1), cos(t1)};\n\tarray<double,3> b = {sin(t2)*cos(f2),\n\t\tsin(t2)*sin(f2), cos(t2)};\n\tdouble d = 0, s = 0;\n\trep(i,0,3) {\n\t\td += (b[i]-a[i])*(b[i]-a[i]);\n\t\ts += (b[i]+a[i])*(b[i]+a[i]);\n\t}\n\treturn radius*2*atan2(sqrt(d), sqrt(s));\n}"
+    },
+    {
+      "id": "various/BigInt.h",
+      "name": "BigInt.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Unsigned integer with $N>0$ base-$10^9$\nlimbs, most significant first (up to $9N$ digits).\nArithmetic and parsing wrap modulo $10^{9N}$.\nString input must be nonempty decimal digits; output\nhas no leading zeros. Multiply/divide by an unsigned\n32-bit integer; division requires a nonzero divisor.\n\\texttt{div(b)} divides in place and returns the remainder.",
+      "usage": "Big<4> x(\"12345678901234567890\"); x.toString();",
+      "time": "$O(N)$ arithmetic, $O(N+D)$ string conversion\nfor $D$ decimal digits.",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "caterpillow, Claude, adapted locally",
+      "source": "https://github.com/caterpillow/cactl",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "using ull = unsigned long long;\ntemplate<int N> struct Big : array<unsigned, N> {\n\tstatic_assert(N > 0);\n\tstatic constexpr unsigned base = 1000000000;\n\tBig(ull x = 0) : array<unsigned, N>{} {\n\t\tfor (int i = N; i-- && x; x /= base)\n\t\t\t(*this)[i] = unsigned(x % base);\n\t}\n\texplicit Big(string_view s) : Big() {\n\t\tassert(!s.empty());\n\t\tfor (char c : s) assert('0' <= c && c <= '9');\n\t\tint end = sz(s);\n\t\tfor (int i = N; i-- && end > 0;) {\n\t\t\tint start = max(0, end-9);\n\t\t\tunsigned x = 0;\n\t\t\trep(j,start,end) x = x*10 + unsigned(s[j]-'0');\n\t\t\t(*this)[i] = x, end = start;\n\t\t}\n\t}\n\tstring toString() const {\n\t\tint i = 0;\n\t\twhile (i < N-1 && !(*this)[i]) i++;\n\t\tstring s = to_string((*this)[i]);\n\t\twhile (++i < N) {\n\t\t\tstring t = to_string((*this)[i]);\n\t\t\ts += string(9-sz(t), '0') + t;\n\t\t}\n\t\treturn s;\n\t}\n\tBig& operator+=(const Big& b) {\n\t\tunsigned carry = 0;\n\t\tfor (int i = N; i--;) {\n\t\t\tunsigned t = (*this)[i] + b[i] + carry;\n\t\t\t(*this)[i] = t % base, carry = t / base;\n\t\t}\n\t\treturn *this;\n\t}\n\tBig operator-() const {\n\t\tBig r = *this;\n\t\tfor (unsigned& x : r) x = base-1-x;\n\t\treturn r += 1;\n\t}\n\tBig& operator-=(const Big& b) { return *this += -b; }\n\tfriend Big operator+(Big a, const Big& b) { return a += b; }\n\tfriend Big operator-(Big a, const Big& b) { return a -= b; }\n\tBig& operator*=(unsigned b) {\n\t\tull carry = 0;\n\t\tfor (int i = N; i--;) {\n\t\t\tull t = ull((*this)[i]) * b + carry;\n\t\t\t(*this)[i] = unsigned(t % base), carry = t / base;\n\t\t}\n\t\treturn *this;\n\t}\n\tunsigned div(unsigned b) {\n\t\tassert(b);\n\t\tull rem = 0;\n\t\trep(i,0,N) {\n\t\t\tull t = rem * base + (*this)[i];\n\t\t\t(*this)[i] = unsigned(t / b), rem = t % b;\n\t\t}\n\t\treturn unsigned(rem);\n\t}\n\tBig& operator/=(unsigned b) { div(b); return *this; }\n\tfriend Big operator*(Big a, unsigned b) { return a *= b; }\n\tfriend Big operator*(unsigned b, Big a) { return a *= b; }\n\tfriend Big operator/(Big a, unsigned b) { return a /= b; }\n\tfriend unsigned operator%(Big a, unsigned b) {\n\t\treturn a.div(b);\n\t}\n};"
+    },
+    {
+      "id": "various/BinaryTrie.h",
+      "name": "BinaryTrie.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Binary trie on $[0,2^B)$:\n0 included, $2^B$ excluded. Set \\texttt{insert}/\n\\texttt{erase}, multiset \\texttt{insert<1>}, XOR-min/max,\ncount $x\\oplus y<k$ (\\texttt{countLG<0>}) or $>k$\n(\\texttt{countLG<1>}), lazy XOR-all, mex (set).\nBoth countLG variants exclude equality to k.\n\\texttt{count(x)} counts copies of $x$.\n\\texttt{kth(k)}: 0-indexed kth smallest (with repeats),\nrequires $0 \\le k < \\texttt{cnt}$.\nXOR queries take $xr$ (default 0). \\texttt{cnt} is the\nsize. \\texttt{each}($f$) calls $f(x,\\texttt{cnt})$. \\texttt{merge}\nis set-union (destroys $o$; safe to delete);\n\\texttt{merge<1>} adds counts. mex needs unique values.",
+      "usage": "",
+      "time": "$O(B)$ per op",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "caterpillow, me",
+      "source": "https://github.com/caterpillow/cactl Trie.h",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "// Only implement required functions\nstruct BinaryTrie {\n\tusing T = BinaryTrie;\n\tstatic const int B = 30;\n\tint cnt = 0, lazy = 0;\n\tT *c[2] = {};\n\tT*& ch(int b) {\n\t\treturn c[b] ? c[b] : c[b] = new T();\n\t}\n\tint cc(int b) { return c[b] ? c[b]->cnt : 0; }\n\tvoid push(int i) {\n\t\tif (!lazy) return;\n\t\tif (i && (lazy >> (i - 1) & 1)) swap(c[0], c[1]);\n\t\trep(b,0,2) if (c[b]) c[b]->lazy ^= lazy;\n\t\tlazy = 0;\n\t}\n\tvoid xorAll(int x) { lazy ^= x; }\n\ttemplate<int ms = 0>\n\tint insert(int x, int i = B) {\n\t\tpush(i);\n\t\tif (!i) return !ms && cnt ? 0 : (++cnt, 1);\n\t\tint b = x >> --i & 1;\n\t\tint add = ch(b)->insert<ms>(x, i);\n\t\treturn cnt += add, add;\n\t}\n\tint erase(int x, int i = B) {\n\t\tif (!cnt) return 0;\n\t\tpush(i);\n\t\tint sub = 1;\n\t\tif (i) {\n\t\t\tint b = x >> --i & 1;\n\t\t\tsub = c[b] ? c[b]->erase(x, i) : 0;\n\t\t}\n\t\treturn cnt -= sub, sub;\n\t}\n\tint count(int x, int i = B) {\n\t\tif (!i || !cnt) return cnt;\n\t\tpush(i);\n\t\tint b = x >> --i & 1;\n\t\treturn c[b] ? c[b]->count(x, i) : 0;\n\t}\n\tint kth(int k, int i = B) {\n\t\tassert(0 <= k && k < cnt);\n\t\tif (!i) return 0;\n\t\tpush(i);\n\t\tint n = cc(0), b = k >= n;\n\t\treturn c[b]->kth(k - (b ? n : 0), i - 1)\n\t\t\t| (b << (i - 1));\n\t}\n\tint minxor(int xr = 0, int i = B) {\n\t\tif (!i || !cnt) return 0;\n\t\tpush(i);\n\t\tint b = xr >> --i & 1;\n\t\treturn cc(b) ? c[b]->minxor(xr, i) :\n\t\t\tc[!b]->minxor(xr, i) | 1 << i;\n\t}\n\tint maxxor(int xr = 0, int i = B) {\n\t\tif (!i || !cnt) return 0;\n\t\tpush(i);\n\t\tint b = (xr >> --i & 1) ^ 1;\n\t\treturn cc(b) ? c[b]->maxxor(xr, i) | 1 << i :\n\t\t\tc[!b]->maxxor(xr, i);\n\t}\n\ttemplate<int sgn = 0>\n\tint countLG(int xr = 0, int k = 0, int i = B) {\n\t\tif (!i || !cnt) return 0;\n\t\tpush(i);\n\t\tint b = (xr ^ k) >> --i & 1;\n\t\treturn ((k >> i & 1) ^ sgn ? cc(!b) : 0) +\n\t\t\t(c[b] ? c[b]->countLG<sgn>(xr, k, i) : 0);\n\t}\n\tint mex(int xr = 0, int i = B) { // unique values\n\t\tif (!i) return 0;\n\t\tpush(i);\n\t\tint b = xr >> --i & 1;\n\t\tif (cc(b) == 1 << i)\n\t\t\treturn (c[!b] ? c[!b]->mex(xr, i) : 0) | 1 << i;\n\t\treturn c[b] ? c[b]->mex(xr, i) : 0;\n\t}\n\ttemplate<class F>\n\tvoid each(F f, int i = B, int x = 0) {\n\t\tif (!cnt) return;\n\t\tpush(i);\n\t\tif (!i) f(x, cnt);\n\t\telse rep(b,0,2) if (c[b])\n\t\t\tc[b]->each(f, i - 1, x | (b << (i - 1)));\n\t}\n\ttemplate<int ms = 0>\n\tvoid merge(T& o, int i = B) { // o safe to delete\n\t\tif (!o.cnt) return;\n\t\tpush(i); o.push(i);\n\t\tif (i) rep(b,0,2) {\n\t\t\tif (!c[b]) swap(c[b], o.c[b]);\n\t\t\telse if (o.c[b]) c[b]->merge<ms>(*o.c[b], i - 1);\n\t\t}\n\t\tcnt = i ? cc(0) + cc(1) : (ms ? cnt + o.cnt : 1);\n\t\to.cnt = 0;\n\t}\n\t~BinaryTrie() { delete c[0]; delete c[1]; }\n};"
+    },
+    {
+      "id": "various/BumpAllocator.h",
+      "name": "BumpAllocator.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "When you need to dynamically allocate many objects and don't care about freeing them.\n\\texttt{new X} otherwise has an overhead of something like 0.05us + 16 bytes per allocation.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "tested",
+      "author": "Simon Lindholm",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "// Either globally or in a single class:\nstatic char buf[450 << 20];\nvoid* operator new(size_t s) {\n\tstatic size_t i = sizeof buf;\n\tassert(s < i);\n\treturn (void*)&buf[i -= s];\n}\nvoid operator delete(void*) {}"
+    },
+    {
+      "id": "various/BumpAllocatorSTL.h",
+      "name": "BumpAllocatorSTL.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "BumpAllocator for STL containers.",
+      "usage": "vector<vector<int, small<int>>> ed(N);",
+      "time": "",
+      "memory": "",
+      "status": "tested",
+      "author": "Simon Lindholm",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "char buf[450 << 20] alignas(16);\nsize_t buf_ind = sizeof buf;\n\ntemplate<class T> struct small {\n\ttypedef T value_type;\n\tsmall() {}\n\ttemplate<class U> small(const U&) {}\n\tT* allocate(size_t n) {\n\t\tbuf_ind -= n * sizeof(T);\n\t\tbuf_ind &= 0 - alignof(T);\n\t\treturn (T*)(buf + buf_ind);\n\t}\n\tvoid deallocate(T*, size_t) {}\n};"
+    },
+    {
+      "id": "various/ConstantIntervals.h",
+      "name": "ConstantIntervals.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Split a monotone function on $[from,to)$\ninto a minimal set of intervals of constant value.\nfrom included, to excluded. Each callback\n\\texttt{g(lo,hi,val)} describes $[lo,hi)$:\nlo included, hi excluded.",
+      "usage": "constantIntervals(0, sz(v), [\\&](int x){return v[x];}, [\\&](int lo, int hi, T val){...});",
+      "time": "$O(k\\log\\frac{n}{k})$",
+      "memory": "",
+      "status": "tested",
+      "author": "Simon Lindholm",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "template<class F, class G, class T>\nvoid rec(int from, int to, F& f, G& g, int& i, T& p, T q) {\n\tif (p == q) return;\n\tif (from == to) {\n\t\tg(i, to, p);\n\t\ti = to; p = q;\n\t} else {\n\t\tint mid = (from + to) >> 1;\n\t\trec(from, mid, f, g, i, p, f(mid));\n\t\trec(mid+1, to, f, g, i, p, q);\n\t}\n}\ntemplate<class F, class G>\nvoid constantIntervals(int from, int to, F f, G g) {\n\tif (to <= from) return;\n\tint i = from; auto p = f(i), q = f(to-1);\n\trec(from, to-1, f, g, i, p, q);\n\tg(i, to, q);\n}"
+    },
+    {
+      "id": "various/DivideAndConquerDP.h",
+      "name": "DivideAndConquerDP.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Minimum cost to partition $[0,N)$ into\nexactly $K$ nonempty segments, where $0\\le K\\le N$.\nC(i,j) returns the cost of $[i,j)$, i included and\nj excluded; called only with $0\\le i<j\\le N$.\n$dp(g,j)=\\min_{g-1\\le k<j}(dp(g-1,k)+C(k,j))$.\nRequires the smallest optimal split k to be\nnondecreasing in j within each layer. Sufficient:\n$C(a,c)+C(b,d)\\le C(a,d)+C(b,c)$ for $a\\le b<c\\le d$.\nAll finite costs and sums must fit in ll and be\nless than LLONG\\_MAX, which denotes infinity.\nReturns infinity if $K=0<N$; returns 0 if $K=N=0$.",
+      "usage": "ll ans = partitionDP(N, K, cost);",
+      "time": "$O(KN \\log N)$ with $O(1)$ cost queries.",
+      "memory": "$O(N)$",
+      "status": "stress-tested",
+      "author": "Codex",
+      "source": "Codeforces",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "template<class F>\nll partitionDP(int N, int K, F C) {\n\tassert(0 <= K && K <= N);\n\tvector<ll> prev(N + 1, LLONG_MAX), cur(N + 1);\n\tprev[0] = 0;\n\tauto rec = [&](auto&& self, int L, int R,\n\t               int lo, int hi) -> void {\n\t\tif (L >= R) return;\n\t\tint mid = (L + R) / 2, opt = lo;\n\t\tll best = LLONG_MAX;\n\t\trep(k,lo,min(mid,hi)) if (prev[k] != LLONG_MAX) {\n\t\t\tll val = prev[k] + C(k, mid);\n\t\t\tif (val < best) best = val, opt = k;\n\t\t}\n\t\tcur[mid] = best;\n\t\tself(self, L, mid, lo, opt + 1);\n\t\tself(self, mid + 1, R, opt, hi);\n\t};\n\trep(g,1,K+1) {\n\t\tfill(all(cur), LLONG_MAX);\n\t\trec(rec, g, N + 1, g - 1, N);\n\t\tprev.swap(cur);\n\t}\n\treturn prev[N];\n}"
+    },
+    {
+      "id": "various/EulerTourTree.h",
+      "name": "EulerTourTree.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Unrooted dynamic forest, vertices $[0,N)$.\nVertex indices include 0 and exclude N.\nInitially isolated with value 0. Link requires different\ncomponents; cut requires an existing edge (either order).\nPoint set/get and component update/query/size. Each tour\nstores one token per vertex and two zero-valued tokens per\nedge.\nOnly vertex tokens contribute to sums. No path queries.\nEdge tokens are recycled. Change \\texttt{V}, \\texttt{U},\n\\texttt{id}, \\texttt{def}, \\texttt{idU}, \\texttt{binop},\n\\texttt{applyUpdate}, \\texttt{mergeUpdate}. Default is\ncomponent add/sum. \\texttt{binop} must be commutative and\nedge tokens must stay neutral. For a rooted subtree, cut\nits parent edge, operate on its component, then link back.",
+      "usage": "",
+      "time": "Expected $O(\\log N)$ per operation.",
+      "memory": "$O(N)$",
+      "status": "stress-tested",
+      "author": "OpenAI",
+      "source": "folklore",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct EulerTourTree {\n\tusing V = ll;\n\tusing U = ll;\n\tstatic constexpr V id = 0;\n\tstatic constexpr V def = 0;\n\tstatic constexpr U idU = 0;\n\tV binop(V a, V b) { return a + b; }\n\tV applyUpdate(U u, V v, int len) { return v + u * len; }\n\tU mergeUpdate(U oldU, U nw) { return oldU + nw; }\n\tstruct Node {\n\t\tint l = 0, r = 0, p = 0, c = 1;\n\t\tint own = 0, cnt = 0; // Vertex token / vertex count.\n\t\tunsigned y = 0;\n\t\tV val = id, agg = id;\n\t\tU lazy = idU;\n\t};\n\tvector<Node> t;\n\tvi spare;\n\tmap<pii, pii> edges;\n\tmt19937 rng{712367};\n\tEulerTourTree(int n) : t(n + 1) {\n\t\tt.reserve(3*n + 1); spare.reserve(2*n);\n\t\tt[0].c = 0;\n\t\trep(i,1,n+1) {\n\t\t\tt[i].y = (unsigned)rng();\n\t\t\tt[i].own = t[i].cnt = 1;\n\t\t\tt[i].val = t[i].agg = def;\n\t\t}\n\t}\n\tvoid apply(int x, U u) {\n\t\tif (!x) return;\n\t\tt[x].val = applyUpdate(u, t[x].val, t[x].own);\n\t\tt[x].agg = applyUpdate(u, t[x].agg, t[x].cnt);\n\t\tt[x].lazy = mergeUpdate(t[x].lazy, u);\n\t}\n\tvoid push(int x) {\n\t\tif (t[x].lazy == idU) return;\n\t\tapply(t[x].l, t[x].lazy);\n\t\tapply(t[x].r, t[x].lazy);\n\t\tt[x].lazy = idU;\n\t}\n\tvoid pull(int x) {\n\t\tint l = t[x].l, r = t[x].r;\n\t\tt[x].c = 1 + t[l].c + t[r].c;\n\t\tt[x].cnt = t[x].own + t[l].cnt + t[r].cnt;\n\t\tt[x].agg = binop(binop(t[l].agg, t[x].val),\n\t\t\tt[r].agg);\n\t\tif (l) t[l].p = x;\n\t\tif (r) t[r].p = x;\n\t}\n\tint root(int x) {\n\t\twhile (t[x].p) x = t[x].p;\n\t\treturn x;\n\t}\n\tint rank(int x) {\n\t\tint k = t[t[x].l].c;\n\t\tfor (int p; (p = t[x].p); x = p)\n\t\t\tif (t[p].r == x) k += t[t[p].l].c + 1;\n\t\treturn k;\n\t}\n\tint merge(int a, int b) {\n\t\tif (!a || !b) {\n\t\t\tint x = a + b;\n\t\t\tif (x) t[x].p = 0;\n\t\t\treturn x;\n\t\t}\n\t\tif (t[a].y < t[b].y) {\n\t\t\tpush(b);\n\t\t\tt[b].l = merge(a, t[b].l);\n\t\t\tpull(b); t[b].p = 0; return b;\n\t\t}\n\t\tpush(a);\n\t\tt[a].r = merge(t[a].r, b);\n\t\tpull(a); t[a].p = 0; return a;\n\t}\n\tpii split(int x, int k) { // First k tokens go left.\n\t\tif (!x) return {0, 0};\n\t\tpush(x);\n\t\tint a, b;\n\t\tif (t[t[x].l].c >= k) {\n\t\t\ttie(a, b) = split(t[x].l, k);\n\t\t\tt[x].l = b; b = x;\n\t\t} else {\n\t\t\ttie(a, b) = split(t[x].r, k-t[t[x].l].c-1);\n\t\t\tt[x].r = a; a = x;\n\t\t}\n\t\tpull(x);\n\t\tif (a) t[a].p = 0;\n\t\tif (b) t[b].p = 0;\n\t\treturn {a, b};\n\t}\n\tint rotate(int x) { // Start the cyclic tour at x.\n\t\tauto [a, b] = split(root(x), rank(x));\n\t\treturn merge(b, a);\n\t}\n\tint token() {\n\t\tint x;\n\t\tif (spare.empty()) x = sz(t), t.emplace_back();\n\t\telse x = spare.back(), spare.pop_back();\n\t\tt[x] = Node{}; t[x].y = (unsigned)rng();\n\t\treturn x;\n\t}\n\tbool connected(int u, int v) {\n\t\treturn root(u + 1) == root(v + 1);\n\t}\n\tvoid link(int u, int v) {\n\t\tassert(!connected(u, v));\n\t\tint a = rotate(u + 1), b = rotate(v + 1);\n\t\tint x = token(), y = token();\n\t\tedges[minmax(u, v)] = {x, y};\n\t\tmerge(merge(a, x), merge(b, y));\n\t}\n\tvoid cut(int u, int v) {\n\t\tauto it = edges.find(minmax(u, v));\n\t\tassert(it != edges.end());\n\t\tauto [x, y] = it->second;\n\t\tint r = rotate(x);\n\t\tauto [a, b] = split(r, rank(y));\n\t\tsplit(a, 1); split(b, 1); // Drop x and y.\n\t\tspare.push_back(x); spare.push_back(y);\n\t\tedges.erase(it);\n\t}\n\tvoid expose(int x) { // Push ancestors before point access.\n\t\tif (t[x].p) expose(t[x].p);\n\t\tpush(x);\n\t}\n\tvoid set(int u, V val) {\n\t\tint x = u + 1;\n\t\texpose(x);\n\t\tt[x].val = val;\n\t\tfor (; x; x = t[x].p) pull(x);\n\t}\n\tV get(int u) { expose(u + 1); return t[u + 1].val; }\n\tvoid componentUpdate(int u, U upd) {\n\t\tapply(root(u + 1), upd);\n\t}\n\tV componentQuery(int u) { return t[root(u+1)].agg; }\n\tint componentSize(int u) {\n\t\treturn t[root(u+1)].cnt;\n\t}\n};"
+    },
+    {
+      "id": "various/FastInput.h",
+      "name": "FastInput.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Read an integer from stdin. Usage requires your program to pipe in\ninput from file.",
+      "usage": "./a.out < input.txt",
+      "time": "About 5x as fast as cin/scanf.",
+      "memory": "",
+      "status": "tested on SPOJ INTEST, unit tested",
+      "author": "chilli",
+      "source": "Own work",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "inline char gc() { // like getchar()\n\tstatic char buf[1 << 16];\n\tstatic size_t bc, be;\n\tif (bc >= be) {\n\t\tbuf[0] = 0, bc = 0;\n\t\tbe = fread(buf, 1, sizeof(buf), stdin);\n\t}\n\treturn buf[bc++]; // returns 0 on EOF\n}\n\nint readInt() {\n\tint a, c;\n\twhile ((a = gc()) < 40);\n\tif (a == '-') return -readInt();\n\twhile ((c = gc()) >= 48) a = a * 10 + c - 480;\n\treturn a - 48;\n}"
+    },
+    {
+      "id": "various/FastKnapsack.h",
+      "name": "FastKnapsack.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Given $N$ non-negative integer weights \\texttt{w} and a non-negative target \\texttt{t},\ncomputes the maximum \\texttt{S <= t} such that \\texttt{S} is the sum of some subset of the weights.",
+      "usage": "",
+      "time": "$O(N \\max(w_i))$",
+      "memory": "",
+      "status": "Tested on kattis:eavesdropperevasion, stress-tested",
+      "author": "Mårten Wiman",
+      "source": "Pisinger 1999, \"Linear Time Algorithms for Knapsack Problems with Bounded Weights\"",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "int knapsack(vi w, int t) {\n\tint a = 0, b = 0, x;\n\twhile (b < sz(w) && a + w[b] <= t) a += w[b++];\n\tif (b == sz(w)) return a;\n\tint m = *max_element(all(w));\n\tvi u, v(2*m, -1);\n\tv[a+m-t] = b;\n\trep(i,b,sz(w)) {\n\t\tu = v;\n\t\trep(x,0,m) v[x+w[i]] = max(v[x+w[i]], u[x]);\n\t\tfor (x = 2*m; --x > m;) rep(j, max(0,u[x]), v[x])\n\t\t\tv[x-w[j]] = max(v[x-w[j]], j);\n\t}\n\tfor (a = t; v[a+m-t] < 0; a--) ;\n\treturn a;\n}"
+    },
+    {
+      "id": "various/FastMod.h",
+      "name": "FastMod.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Compute \\texttt{a \\% b} about 5 times faster than usual, where \\texttt{b} is constant but not known at compile time.\nReturns a value congruent to $a \\pmod b$ in the range $[0, 2b)$.\n0 included, $2b$ excluded.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "proven correct, stress-tested\nMeasured as having 4 times lower latency, and 8 times higher throughput, see stress-test.",
+      "author": "Simon Lindholm",
+      "source": "https://en.wikipedia.org/wiki/Barrett_reduction",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "typedef unsigned long long ull;\nstruct FastMod {\n\tull b, m;\n\tFastMod(ull b) : b(b), m(-1ULL / b) {}\n\tull reduce(ull a) { // a % b + (0 or b)\n\t\treturn a - (ull)((__uint128_t(m) * a) >> 64) * b;\n\t}\n};"
+    },
+    {
+      "id": "various/IntervalContainer.h",
+      "name": "IntervalContainer.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Add and remove intervals from a set of disjoint intervals.\nAdding merges overlapping or touching intervals.\nStored intervals and add/remove bounds are $[L,R)$:\nL included, R excluded. Empty intervals have $L=R$.",
+      "usage": "",
+      "time": "$O(\\log N)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "Simon Lindholm",
+      "source": "",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "set<pii>::iterator addInterval(set<pii>& is, int L, int R) {\n\tif (L == R) return is.end();\n\tauto it = is.lower_bound({L, R}), before = it;\n\twhile (it != is.end() && it->first <= R) {\n\t\tR = max(R, it->second);\n\t\tbefore = it = is.erase(it);\n\t}\n\tif (it != is.begin() && (--it)->second >= L) {\n\t\tL = min(L, it->first);\n\t\tR = max(R, it->second);\n\t\tis.erase(it);\n\t}\n\treturn is.insert(before, {L,R});\n}\n\nvoid removeInterval(set<pii>& is, int L, int R) {\n\tif (L == R) return;\n\tauto it = addInterval(is, L, R);\n\tauto r2 = it->second;\n\tif (it->first == L) is.erase(it);\n\telse (int&)it->second = L;\n\tif (R != r2) is.emplace(R, r2);\n}"
+    },
+    {
+      "id": "various/IntervalCover.h",
+      "name": "IntervalCover.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Compute indices of smallest set of intervals covering another interval.\nBoth target G and candidate intervals I use $[l,r)$:\nl included, r excluded. To support $[l,r]$ (both\nincluded), change (A) to add \\texttt{|| R.empty()}.\nReturns empty set on failure (or if G is empty).",
+      "usage": "",
+      "time": "$O(N \\log N)$",
+      "memory": "",
+      "status": "Tested on kattis:intervalcover",
+      "author": "Johan Sannemo",
+      "source": "",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "template<class T>\nvi cover(pair<T, T> G, vector<pair<T, T>> I) {\n\tvi S(sz(I)), R;\n\tiota(all(S), 0);\n\tsort(all(S), [&](int a, int b) { return I[a] < I[b]; });\n\tT cur = G.first;\n\tint at = 0;\n\twhile (cur < G.second) { // (A)\n\t\tpair<T, int> mx = make_pair(cur, -1);\n\t\twhile (at < sz(I) && I[S[at]].first <= cur) {\n\t\t\tmx = max(mx, make_pair(I[S[at]].second, S[at]));\n\t\t\tat++;\n\t\t}\n\t\tif (mx.second == -1) return {};\n\t\tcur = mx.first;\n\t\tR.push_back(mx.second);\n\t}\n\treturn R;\n}"
+    },
+    {
+      "id": "various/KnuthDP.h",
+      "name": "KnuthDP.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Interval DP\n$dp(i,j)=\\min_{i\\le k<j}(dp(i,k)+dp(k+1,j))+C(i,j)$.\ndp and C use $[i,j]$, both endpoints included.\nSplit candidates use $[i,j)$: i included, j excluded.\nAny fixed offsets from $k$ work. Let $opt(i,j)$ be an\noptimal $k$. Need\n$opt(i,j-1)\\le opt(i,j)\\le opt(i+1,j)$.\nEnough if $C(b,c)\\le C(a,d)$ and quadrangle\n$C(a,c)+C(b,d)\\le C(a,d)+C(b,c)$ for\n$a\\le b\\le c\\le d$ (``wider gets worse faster'').\nUseful $C$: $C(i,j)+C(i+1,j+1)\\le C(i,j+1)+C(i+1,j)$;\n$C(i,j)=\\sum_{k=i}^j w_k$ ($w\\ge 0$);\n$C(i,j)=g(x_j-x_i)$, $x$ incr, $g$ convex nondec.;\n$C(i,j)=\\min(A_i,B_j)$ if $A$ decreasing, $B$ increasing;\n$C(i,j)=\\max(0,x_j-x_i-\\Delta)$ ($x$ incr, $\\Delta>0$).\nAlso consider LineContainer, Li Chao, monotone queues.",
+      "usage": "",
+      "time": "$O(N^2)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "Simon Lindholm",
+      "source": "http://codeforces.com/blog/entry/8219",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "template<class F>\nll knuthDP(int N, F C) {\n\tvector<vector<ll>> dp(N, vector<ll>(N));\n\tvector<vi> opt(N, vi(N));\n\trep(i,0,N) opt[i][i] = i; // set dp[i][i] if needed\n\tfor (int i = N - 2; i >= 0; i--) {\n\t\trep(j,i+1,N) {\n\t\t\tll mn = LLONG_MAX;\n\t\t\tll cost = C(i, j);\n\t\t\tint hi = min(j - 1, opt[i + 1][j]);\n\t\t\trep(k, opt[i][j - 1], hi + 1) {\n\t\t\t\tll val = dp[i][k] + dp[k + 1][j] + cost;\n\t\t\t\tif (mn >= val) {\n\t\t\t\t\topt[i][j] = k;\n\t\t\t\t\tmn = val;\n\t\t\t\t}\n\t\t\t}\n\t\t\tdp[i][j] = mn;\n\t\t}\n\t}\n\treturn dp[0][N - 1];\n}"
+    },
+    {
+      "id": "various/LinkCutTree.h",
+      "name": "LinkCutTree.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Unrooted link-cut tree. Online link/cut.\nDefault path add + path sum.\n\\texttt{query(u,v)} and \\texttt{update(u,v,x)} use\nthe path including both endpoint vertices u and v.",
+      "usage": "LinkCut lc(n);\nlc.link(u, v); lc.cut(u, v);\nlc.connected(u, v); lc.query(u, v);\nlc.update(u, v, x); lc.set(u, x);",
+      "time": "amortized $O(\\log N)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "folklore",
+      "source": "folklore",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct LinkCut {\n\tusing V = ll;\n\tusing U = ll;\n\tstatic constexpr V id = 0, def = 0;\n\tstatic constexpr U idU = 0;\n\tV binop(V a, V b) { return a + b; }\n\tV rev(V a) { return a; } // non-commutative: reverse\n\tV applyUpdate(U u, V v, int c) {\n\t\treturn v + u * c;\n\t}\n\tU mergeUpdate(U a, U b) { return a + b; }\n\tstruct N {\n\t\tint c[2] = {-1, -1}, p = -1, sz = 1;\n\t\tint flip = 0; // reverse; keep\n\t\tV val = def, agg = def;\n\t\tU lz = idU;\n\t};\n\tvector<N> t;\n\tLinkCut(int n) : t(n) {}\n\tbool nroot(int x) { // else p is path-parent\n\t\tint p = t[x].p;\n\t\treturn p != -1 &&\n\t\t\t(t[p].c[0] == x || t[p].c[1] == x);\n\t}\n\tV aggOf(int x) { return x<0 ? id : t[x].agg; }\n\tvoid pull(int x) { // path aggregate\n\t\tint a = t[x].c[0], b = t[x].c[1];\n\t\tt[x].sz = 1 + (a<0?0:t[a].sz) + (b<0?0:t[b].sz);\n\t\tt[x].agg = binop(binop(aggOf(a), t[x].val),\n\t\t\taggOf(b));\n\t}\n\tvoid apply(int x, U u) { // path add\n\t\tt[x].val = applyUpdate(u, t[x].val, 1);\n\t\tt[x].agg = applyUpdate(u, t[x].agg, t[x].sz);\n\t\tt[x].lz = mergeUpdate(t[x].lz, u);\n\t}\n\tvoid pushFlip(int x) { // structural; not a value tag\n\t\tif (!t[x].flip) return;\n\t\tswap(t[x].c[0], t[x].c[1]);\n\t\tt[x].agg = rev(t[x].agg);\n\t\tint a = t[x].c[0], b = t[x].c[1];\n\t\tif (a>=0) t[a].flip ^= 1, t[a].agg = rev(t[a].agg);\n\t\tif (b>=0) t[b].flip ^= 1, t[b].agg = rev(t[b].agg);\n\t\tt[x].flip = 0;\n\t}\n\tvoid pushLazy(int x) { // skip if idU\n\t\tU u = t[x].lz;\n\t\tif (u == idU) return;\n\t\tint a = t[x].c[0], b = t[x].c[1];\n\t\tif (a>=0) apply(a, u);\n\t\tif (b>=0) apply(b, u);\n\t\tt[x].lz = idU;\n\t}\n\tvoid push(int x) {\n\t\tpushFlip(x); pushLazy(x);\n\t}\n\tvoid rot(int x) {\n\t\tint y = t[x].p, z = t[y].p;\n\t\tint k = t[y].c[1] == x;\n\t\tif (nroot(y)) t[z].c[t[z].c[1]==y] = x;\n\t\tint w = t[x].c[k^1];\n\t\tt[y].c[k] = w;\n\t\tif (w>=0) t[w].p = y;\n\t\tt[x].c[k^1] = y;\n\t\tt[y].p = x; t[x].p = z;\n\t\tpull(y);\n\t}\n\tvoid splay(int x) {\n\t\tvi stk = {x};\n\t\tfor (int y = x; nroot(y); )\n\t\t\tstk.push_back(y = t[y].p);\n\t\twhile (!stk.empty())\n\t\t\tpush(stk.back()), stk.pop_back();\n\t\twhile (nroot(x)) {\n\t\t\tint y = t[x].p, z = t[y].p;\n\t\t\tif (nroot(y))\n\t\t\t\trot((t[y].c[0]==x)==(t[z].c[0]==y)?y:x);\n\t\t\trot(x);\n\t\t}\n\t\tpull(x);\n\t}\n\tvoid access(int x) { // preferred path through x\n\t\tint last = -1;\n\t\tfor (int y = x; y>=0; y = t[y].p) {\n\t\t\tsplay(y); t[y].c[1] = last;\n\t\t\tpull(y); last = y;\n\t\t}\n\t\tsplay(x);\n\t}\n\tvoid makeRoot(int x) { // evert; why this is unrooted\n\t\taccess(x); t[x].flip ^= 1;\n\t}\n\tint findRoot(int x) { // current evert; use connected\n\t\taccess(x);\n\t\tfor (;;) {\n\t\t\tpush(x);\n\t\t\tif (t[x].c[0]<0) break;\n\t\t\tx = t[x].c[0];\n\t\t}\n\t\tsplay(x);\n\t\treturn x;\n\t}\n\tvoid link(int u, int v) { // add edge (u, v)\n\t\tassert(!connected(u, v));\n\t\tmakeRoot(u); t[u].p = v;\n\t}\n\tvoid cut(int u, int v) { // remove edge (u, v)\n\t\tmakeRoot(u); access(v);\n\t\tassert(t[v].c[0]==u && t[u].c[0]<0 &&\n\t\t\tt[u].c[1]<0);\n\t\tt[v].c[0] = t[u].p = -1;\n\t\tpull(v);\n\t}\n\tbool connected(int u, int v) {\n\t\treturn findRoot(u) == findRoot(v);\n\t}\n\t// makeRoot(u); access(v); => v's splay is path u-v\n\tV query(int u, int v) {\n\t\tmakeRoot(u); access(v);\n\t\treturn t[v].agg;\n\t}\n\tvoid update(int u, int v, U x) {\n\t\tmakeRoot(u); access(v); apply(v, x);\n\t}\n\tvoid set(int u, V x) {\n\t\taccess(u); t[u].val = x; t[u].lz = idU;\n\t\tpull(u);\n\t}\n\tV get(int u) {\n\t\taccess(u); return t[u].val;\n\t}\n\tint lca(int r, int u, int v) { // wrt root r\n\t\tmakeRoot(r); access(u); access(v);\n\t\tsplay(u);\n\t\treturn t[u].p<0 ? u : t[u].p;\n\t}\n};"
+    },
+    {
+      "id": "various/LIS.h",
+      "name": "LIS.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Compute indices for the longest increasing subsequence.",
+      "usage": "",
+      "time": "$O(N \\log N)$",
+      "memory": "",
+      "status": "Tested on kattis:longincsubseq, stress-tested",
+      "author": "Johan Sannemo",
+      "source": "",
+      "dependencies": [],
+      "includedInPdf": false,
+      "code": "template<class I> vi lis(const vector<I>& S) {\n\tif (S.empty()) return {};\n\tvi prev(sz(S));\n\ttypedef pair<I, int> p;\n\tvector<p> res;\n\trep(i,0,sz(S)) {\n\t\t// change 0 -> i for longest non-decreasing subsequence\n\t\tauto it = lower_bound(all(res), p{S[i], 0});\n\t\tif (it == res.end()) res.emplace_back(), it = res.end()-1;\n\t\t*it = {S[i], i};\n\t\tprev[i] = it == res.begin() ? 0 : (it-1)->second;\n\t}\n\tint L = sz(res), cur = res.back().second;\n\tvi ans(L);\n\twhile (L--) ans[L] = cur, cur = prev[cur];\n\treturn ans;\n}"
+    },
+    {
+      "id": "various/MemoryUsage.h",
+      "name": "MemoryUsage.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Maximum RSS over the lifetime of the program so far, not current RSS. Kilobytes on Linux, bytes on macOS.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "me",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "#include <sys/resource.h>\n\nll getMemoryUsage() {\n\tstruct rusage usage;\n\tgetrusage(RUSAGE_SELF, &usage);\n\treturn usage.ru_maxrss;\n}"
+    },
+    {
+      "id": "various/MinPlusConvolution.h",
+      "name": "MinPlusConvolution.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Min-plus convolution with one convex or\nconcave input. SMAWK handles arbitrary/convex; the border\nalgorithm handles arbitrary/concave. Here, convex = smiley\nand concave = frowny. \\texttt{min\\_smawk(f,r,c)} returns a\nminimizing column for each row of the matrix f. Totally\nmonotone means every submatrix's leftmost row-minimum\nindices are nondecreasing. Queried through f, not stored.\nBoth \\texttt{a} and \\texttt{b} must be non-empty.",
+      "usage": "",
+      "time": "$O(N+M)$ convex, $O(N\\log M+M)$ concave",
+      "memory": "",
+      "status": "untested (no local stress test)",
+      "author": "brunodccarvalho",
+      "source": "https://github.com/caterpillow/cactl",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "// Row-minima indices for totally monotone f(x,y). O(N + M)\ntemplate<class Fn>\nvi min_smawk_rec(Fn& f, const vi& row, vi col) {\n\tint n = sz(row);\n\tif (!n) return {};\n\tvi red;\n\tfor (int c : col) {\n\t\twhile (sz(red) &&\n\t\t\tf(row[sz(red)-1], c) < f(row[sz(red)-1], red.back()))\n\t\t\tred.pop_back();\n\t\tif (sz(red) < n) red.pb(c);\n\t}\n\tcol = move(red);\n\n\tvi odd;\n\tfor (int i = 1; i < n; i += 2) odd.pb(row[i]);\n\tvi oddans = min_smawk_rec(f, odd, col), ans(n);\n\trep(i,0,sz(odd)) ans[2*i+1] = oddans[i];\n\tfor (int i = 0, j = 0; i < n; i += 2) {\n\t\tans[i] = col[j];\n\t\tint last = i+1 < n ? ans[i+1] : col.back();\n\t\twhile (col[j] != last) {\n\t\t\tj++;\n\t\t\tif (f(row[i], col[j]) < f(row[i], ans[i]))\n\t\t\t\tans[i] = col[j];\n\t\t}\n\t}\n\treturn ans;\n}\ntemplate<class Fn>\nvi min_smawk(Fn f, int r, int c) {\n\tvi row(r), col(c);\n\tiota(all(row), 0), iota(all(col), 0);\n\treturn min_smawk_rec(f, row, col);\n}\n\n// Min-plus c[k]=min_{i+j=k}(a[i]+b[j]), convex b. O(N+M)\ntemplate<class V>\nvector<V> min_plus_smawk(const vector<V>& a,\n\t\tconst vector<V>& b) {\n\tint n = sz(a), m = sz(b);\n\tassert(n && m);\n\tauto f = [&](int r, int c) -> tuple<int,V,int> {\n\t\tif (r < c) return {1, V{}, c};\n\t\tif (r-c >= m) return {1, V{}, -c};\n\t\treturn {0, a[c]+b[r-c], 0};\n\t};\n\tvi cols = min_smawk(f, n+m-1, n);\n\tvector<V> d(n+m-1);\n\trep(r,0,n+m-1) d[r] = a[cols[r]]+b[r-cols[r]];\n\treturn d;\n}\n\n// Min-plus conv for concave b. O(N log M + M)\ntemplate<class V>\nvector<V> min_plus_concave_one(const vector<V>& a,\n\t\tconst vector<V>& b) {\n\tint n = sz(a), m = sz(b), z = n+m-1;\n\tassert(n && m);\n\tvector<V> c(z, numeric_limits<V>::max());\n\tauto solve = [&](int l, int r, bool rev) {\n\t\tauto val = [&](int j, int k) {\n\t\t\tif (rev) j = n-1-j, k = z-1-k;\n\t\t\treturn a[j]+b[k-j];\n\t\t};\n#define better(i,j,k) val(i,k) <= val(j,k)\n\t\tauto improve = [&](int u, int v, int l, int r) {\n\t\t\twhile (r-l > 1) {\n\t\t\t\tint m = (l+r)/2;\n\t\t\t\t(better(u,v,m) ? r : l) = m;\n\t\t\t}\n\t\t\treturn l;\n\t\t};\n\t\tvector<array<int,2>> stk;\n\t\tfor (int i = l, k = l, s = -1; k < r; i++, k++) {\n\t\t\twhile (s >= 0 && i < n &&\n\t\t\t\t\tbetter(i, stk[s][0], stk[s][1])) {\n\t\t\t\tstk.pop_back(), s--;\n\t\t\t}\n\t\t\tif (i < n) {\n\t\t\t\tint t = s < 0 ? r-1\n\t\t\t\t\t: improve(stk[s][0], i, k-1, stk[s][1]);\n\t\t\t\tif (t >= k) stk.pb({i,t}), s++;\n\t\t\t}\n\t\t\tint out = rev ? z-1-k : k;\n\t\t\tc[out] = min(c[out], val(stk[s][0], k));\n\t\t\tif (stk[s][1] == k) stk.pop_back(), s--;\n\t\t}\n\t};\n\n\tsolve(0,m,0), solve(0,m,1);\n\tfor (int k = m; k < z-m; k += m+1)\n\t\tsolve(k+1,k+m+1,0), solve(z-k-m,z-k,1);\n#undef better\n\treturn c;\n}"
+    },
+    {
+      "id": "various/PersistentSegmentTree.h",
+      "name": "PersistentSegmentTree.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Persistent implicit segment tree with lazy\nrange updates and point set. Update/set return a new\nroot; old roots stay valid. No destructor (nodes are\nshared). Node bounds $[l,r]$ and update/query bounds\n$[ql,qr]$ include both endpoints. For n elements use\n$[0,n-1]$. Change \\texttt{V}, \\texttt{U},\n\\texttt{id}, \\texttt{def}, \\texttt{idU}, \\texttt{binop},\n\\texttt{applyUpdate}, \\texttt{mergeUpdate}. Default is\nrange add / range max.",
+      "usage": "",
+      "time": "$O(\\log R)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "me",
+      "source": "folklore",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct Node {\n\tusing V = int;\n\tusing U = int;\n\tusing T = Node;\n\tstatic constexpr V id = INT_MIN;\n\tstatic constexpr V def = 0;\n\tstatic constexpr U idU = 0;\n\tV binop(V a, V b) { return max(a, b); }\n\tV applyUpdate(U u, V v) { return v + u; }\n\tU mergeUpdate(U oldU, U nw) { return oldU + nw; }\n\tT *lt = 0, *rt = 0;\n\tV val = def;\n\tU lazy = idU;\n\tvoid updateNode(int, int, U u) {\n\t\tlazy = mergeUpdate(lazy, u);\n\t\tval = applyUpdate(u, val);\n\t}\n\tvoid push(int l, int r) {\n\t\tint mid = l + (r - l) / 2;\n\t\tlt = new T(lt ? *lt : T());\n\t\trt = new T(rt ? *rt : T());\n\t\tlt->updateNode(l, mid, lazy);\n\t\trt->updateNode(mid + 1, r, lazy);\n\t\tlazy = idU;\n\t}\n\tT* update(int l, int r, int ql, int qr, U u) {\n\t\tif (qr < l || r < ql) return this;\n\t\tT* n = new T(*this);\n\t\tif (ql <= l && r <= qr) {\n\t\t\tn->updateNode(l, r, u);\n\t\t\treturn n;\n\t\t}\n\t\tn->push(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tn->lt = n->lt->update(l, mid, ql, qr, u);\n\t\tn->rt = n->rt->update(mid + 1, r, ql, qr, u);\n\t\tn->val = binop(n->lt->val, n->rt->val);\n\t\treturn n;\n\t}\n\tT* set(int l, int r, int i, V v) {\n\t\tif (i < l || r < i) return this;\n\t\tT* n = new T(*this);\n\t\tif (l == r) { n->val = v; n->lazy = idU; return n; }\n\t\tn->push(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tif (i <= mid) n->lt = n->lt->set(l, mid, i, v);\n\t\telse n->rt = n->rt->set(mid + 1, r, i, v);\n\t\tn->val = binop(n->lt->val, n->rt->val);\n\t\treturn n;\n\t}\n\tV query(int l, int r, int ql, int qr) {\n\t\tif (qr < l || r < ql) return id;\n\t\tif (ql <= l && r <= qr) return val;\n\t\tint mid = l + (r - l) / 2;\n\t\tT a = lt ? *lt : T();\n\t\tT b = rt ? *rt : T();\n\t\ta.updateNode(l, mid, lazy);\n\t\tb.updateNode(mid + 1, r, lazy);\n\t\treturn binop(a.query(l, mid, ql, qr),\n\t\t\tb.query(mid + 1, r, ql, qr));\n\t}\n};"
+    },
+    {
+      "id": "various/Pragmas.h",
+      "name": "Pragmas.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "GCC pragmas. \\texttt{Ofast} implies\n\\texttt{-ffast-math} (can change floats).\n\\texttt{avx2} can crash on old machines.\n\\texttt{bmi,bmi2}: tzcnt/pdep/pext.\n\\texttt{lzcnt,popcnt}: hardware clz/popcount.\n\\texttt{trapv} aborts on signed overflow (slow; debug).\nDo not combine \\texttt{trapv} with \\texttt{Ofast} if you need traps.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "untested",
+      "author": "me",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "#pragma GCC optimize(\"Ofast,unroll-loops\")\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\n// #pragma GCC optimize(\"trapv\")"
+    },
+    {
+      "id": "various/SegmentTreeBeats.h",
+      "name": "SegmentTreeBeats.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Segment tree beats. Range\n\\texttt{chmin}/\\texttt{chmax}/\\texttt{add} and range\nsum/min/max. All update/query bounds $[ql,qr]$\ninclude both endpoints; full range $[0,n-1]$.",
+      "usage": "",
+      "time": "$O(\\log^2 N)$ amortized",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "Benjamin Qi, Dustin Miao",
+      "source": "https://usaco.guide/adv/segtree-beats",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct SegmentTreeBeats {\n\tstatic constexpr ll INF = LLONG_MAX / 4;\n\tstruct Node {\n\t\tll sum = 0, lazy = 0;\n\t\tll mx1 = 0, mx2 = -INF, mxc = 0;\n\t\tll mn1 = 0, mn2 = INF, mnc = 0;\n\t};\n\tvector<Node> t;\n\tint n;\n\n\tSegmentTreeBeats(int n) : t(4 * n + 4), n(n) {\n\t\tbuild(1, 0, n - 1, nullptr);\n\t}\n\tSegmentTreeBeats(const vector<ll>& a) :\n\t\tt(4 * sz(a) + 4), n(sz(a)) {\n\t\tbuild(1, 0, n - 1, &a);\n\t}\n\n\tvoid pull(int i) {\n\t\tNode &u = t[i], &l = t[i << 1], &r = t[i << 1 | 1];\n\t\tu.sum = l.sum + r.sum;\n\t\tif (l.mx1 == r.mx1) {\n\t\t\tu.mx1 = l.mx1;\n\t\t\tu.mx2 = max(l.mx2, r.mx2);\n\t\t\tu.mxc = l.mxc + r.mxc;\n\t\t} else if (l.mx1 > r.mx1) {\n\t\t\tu.mx1 = l.mx1;\n\t\t\tu.mx2 = max(l.mx2, r.mx1);\n\t\t\tu.mxc = l.mxc;\n\t\t} else {\n\t\t\tu.mx1 = r.mx1;\n\t\t\tu.mx2 = max(l.mx1, r.mx2);\n\t\t\tu.mxc = r.mxc;\n\t\t}\n\t\tif (l.mn1 == r.mn1) {\n\t\t\tu.mn1 = l.mn1;\n\t\t\tu.mn2 = min(l.mn2, r.mn2);\n\t\t\tu.mnc = l.mnc + r.mnc;\n\t\t} else if (l.mn1 < r.mn1) {\n\t\t\tu.mn1 = l.mn1;\n\t\t\tu.mn2 = min(l.mn2, r.mn1);\n\t\t\tu.mnc = l.mnc;\n\t\t} else {\n\t\t\tu.mn1 = r.mn1;\n\t\t\tu.mn2 = min(l.mn1, r.mn2);\n\t\t\tu.mnc = r.mnc;\n\t\t}\n\t}\n\tvoid applyAdd(int i, int l, int r, ll v) {\n\t\tif (!v) return;\n\t\tNode& u = t[i];\n\t\tu.sum += (r - l + 1) * v;\n\t\tu.mx1 += v;\n\t\tif (u.mx2 != -INF) u.mx2 += v;\n\t\tu.mn1 += v;\n\t\tif (u.mn2 != INF) u.mn2 += v;\n\t\tu.lazy += v;\n\t}\n\tvoid applyChmin(int i, ll v, bool leaf) {\n\t\tNode& u = t[i];\n\t\tif (v >= u.mx1) return;\n\t\tu.sum -= (u.mx1 - v) * u.mxc;\n\t\tu.mx1 = v;\n\t\tif (leaf) u.mn1 = v;\n\t\telse if (v <= u.mn1) u.mn1 = v;\n\t\telse if (v < u.mn2) u.mn2 = v;\n\t}\n\tvoid applyChmax(int i, ll v, bool leaf) {\n\t\tNode& u = t[i];\n\t\tif (v <= u.mn1) return;\n\t\tu.sum += (v - u.mn1) * u.mnc;\n\t\tu.mn1 = v;\n\t\tif (leaf) u.mx1 = v;\n\t\telse if (v >= u.mx1) u.mx1 = v;\n\t\telse if (v > u.mx2) u.mx2 = v;\n\t}\n\tvoid push(int i, int l, int r) {\n\t\tif (l == r) return;\n\t\tint m = (l + r) >> 1;\n\t\tapplyAdd(i << 1, l, m, t[i].lazy);\n\t\tapplyAdd(i << 1 | 1, m + 1, r, t[i].lazy);\n\t\tt[i].lazy = 0;\n\t\tapplyChmin(i << 1, t[i].mx1, l == m);\n\t\tapplyChmin(i << 1 | 1, t[i].mx1, m + 1 == r);\n\t\tapplyChmax(i << 1, t[i].mn1, l == m);\n\t\tapplyChmax(i << 1 | 1, t[i].mn1, m + 1 == r);\n\t}\n\n\tvoid build(int i, int l, int r, const vector<ll>* a) {\n\t\tt[i].lazy = 0;\n\t\tif (l == r) {\n\t\t\tll v = a ? (*a)[l] : 0;\n\t\t\tt[i].sum = t[i].mx1 = t[i].mn1 = v;\n\t\t\tt[i].mxc = t[i].mnc = 1;\n\t\t\tt[i].mx2 = -INF;\n\t\t\tt[i].mn2 = INF;\n\t\t\treturn;\n\t\t}\n\t\tint m = (l + r) >> 1;\n\t\tbuild(i << 1, l, m, a);\n\t\tbuild(i << 1 | 1, m + 1, r, a);\n\t\tpull(i);\n\t}\n\n\tvoid add(int ql, int qr, ll v,\n\t\tint i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql) return;\n\t\tif (ql <= l && r <= qr) {\n\t\t\tapplyAdd(i, l, r, v); return;\n\t\t}\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\tadd(ql, qr, v, i << 1, l, m);\n\t\tadd(ql, qr, v, i << 1 | 1, m + 1, r);\n\t\tpull(i);\n\t}\n\tvoid chmin(int ql, int qr, ll v,\n\t\tint i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql || v >= t[i].mx1) return;\n\t\tif (ql <= l && r <= qr && v > t[i].mx2) {\n\t\t\tapplyChmin(i, v, l == r); return;\n\t\t}\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\tchmin(ql, qr, v, i << 1, l, m);\n\t\tchmin(ql, qr, v, i << 1 | 1, m + 1, r);\n\t\tpull(i);\n\t}\n\tvoid chmax(int ql, int qr, ll v,\n\t\tint i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql || v <= t[i].mn1) return;\n\t\tif (ql <= l && r <= qr && v < t[i].mn2) {\n\t\t\tapplyChmax(i, v, l == r); return;\n\t\t}\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\tchmax(ql, qr, v, i << 1, l, m);\n\t\tchmax(ql, qr, v, i << 1 | 1, m + 1, r);\n\t\tpull(i);\n\t}\n\n\tll qsum(int ql, int qr, int i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql) return 0;\n\t\tif (ql <= l && r <= qr) return t[i].sum;\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\treturn qsum(ql, qr, i << 1, l, m)\n\t\t\t+ qsum(ql, qr, i << 1 | 1, m + 1, r);\n\t}\n\tll qmax(int ql, int qr, int i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql) return -INF;\n\t\tif (ql <= l && r <= qr) return t[i].mx1;\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\treturn max(qmax(ql, qr, i << 1, l, m),\n\t\t\tqmax(ql, qr, i << 1 | 1, m + 1, r));\n\t}\n\tll qmin(int ql, int qr, int i = 1, int l = 0, int r = -1) {\n\t\tif (r == -1) r = n - 1;\n\t\tif (qr < l || r < ql) return INF;\n\t\tif (ql <= l && r <= qr) return t[i].mn1;\n\t\tpush(i, l, r);\n\t\tint m = (l + r) >> 1;\n\t\treturn min(qmin(ql, qr, i << 1, l, m),\n\t\t\tqmin(ql, qr, i << 1 | 1, m + 1, r));\n\t}\n};"
+    },
+    {
+      "id": "various/SIMD.h",
+      "name": "SIMD.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Cheat sheet of SSE/AVX intrinsics, for doing arithmetic on several numbers at once.\nCan provide a constant factor improvement of about 4, orthogonal to loop unrolling.\nOperations follow the pattern \\texttt{\"\\_mm(256)?\\_name\\_(si(128|256)|epi(8|16|32|64)|pd|ps)\"}. Not all are described here;\ngrep for \\texttt{\\_mm\\_} in \\texttt{/usr/lib/gcc/{*}/4.9/include/} for more.\nIf AVX is unsupported, try 128-bit operations, \\texttt{emmintrin.h} and \\#define \\texttt{\\_\\_SSE\\_\\_} and \\texttt{\\_\\_MMX\\_\\_} before including it.\nFor aligned memory use \\texttt{\\_mm\\_malloc(size, 32)} or \\texttt{int buf[N] alignas(32)}, but prefer loadu/storeu.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "",
+      "author": "Simon Lindholm",
+      "source": "https://software.intel.com/sites/landingpage/IntrinsicsGuide/",
+      "dependencies": [],
+      "includedInPdf": false,
+      "code": "#pragma GCC target (\"avx2\") // or sse4.1\n#include \"immintrin.h\"\n\ntypedef __m256i mi;\n#define L(x) _mm256_loadu_si256((mi*)&(x))\n\n// High-level/specific methods:\n// load(u)?_si256, store(u)?_si256, setzero_si256, _mm_malloc\n// blendv_(epi8|ps|pd) (z?y:x), movemask_epi8 (hibits of bytes)\n// i32gather_epi32(addr, x, 4): map addr[] over 32-b parts of x\n// sad_epu8: sum of absolute differences of u8, outputs 4xi64\n// maddubs_epi16: dot product of unsigned i7's, outputs 16xi15\n// madd_epi16: dot product of signed i16's, outputs 8xi32\n// extractf128_si256(, i) (256->128), cvtsi128_si32 (128->lo32)\n// permute2f128_si256(x,x,1) swaps 128-bit lanes\n// shuffle_epi32(x, 3*64+2*16+1*4+0) == x for each lane\n// shuffle_epi8(x, y) takes a vector instead of an imm\n\n// Methods that work with most data types (append e.g. _epi32):\n// set1, blend (i8?x:y), add, adds (sat.), mullo, sub, and/or,\n// andnot, abs, min, max, sign(1,x), cmp(gt|eq), unpack(lo|hi)\n\nint sumi32(mi m) { union {int v[8]; mi m;} u; u.m = m;\n\tint ret = 0; rep(i,0,8) ret += u.v[i]; return ret; }\nmi zero() { return _mm256_setzero_si256(); }\nmi one() { return _mm256_set1_epi32(-1); }\nbool all_zero(mi m) { return _mm256_testz_si256(m, m); }\nbool all_one(mi m) { return _mm256_testc_si256(m, one()); }\n\nll example_filteredDotProduct(int n, short* a, short* b) {\n\tint i = 0; ll r = 0;\n\tmi zero = _mm256_setzero_si256(), acc = zero;\n\twhile (i + 16 <= n) {\n\t\tmi va = L(a[i]), vb = L(b[i]); i += 16;\n\t\tva = _mm256_and_si256(_mm256_cmpgt_epi16(vb, va), va);\n\t\tmi vp = _mm256_madd_epi16(va, vb);\n\t\tacc = _mm256_add_epi64(_mm256_unpacklo_epi32(vp, zero),\n\t\t\t_mm256_add_epi64(acc, _mm256_unpackhi_epi32(vp, zero)));\n\t}\n\tunion {ll v[4]; mi m;} u; u.m = acc; rep(i,0,4) r += u.v[i];\n\tfor (;i<n;++i) if (a[i] < b[i]) r += a[i]*b[i]; // <- equiv\n\treturn r;\n}"
+    },
+    {
+      "id": "various/SmallPtr.h",
+      "name": "SmallPtr.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "A 32-bit pointer that points into BumpAllocator memory.",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "tested",
+      "author": "Simon Lindholm",
+      "source": "me",
+      "dependencies": [
+        "various/BumpAllocator.h"
+      ],
+      "includedInPdf": true,
+      "code": "template<class T> struct ptr {\n\tunsigned ind;\n\tptr(T* p = 0) : ind(p ? unsigned((char*)p - buf) : 0) {\n\t\tassert(ind < sizeof buf);\n\t}\n\tT& operator*() const { return *(T*)(buf + ind); }\n\tT* operator->() const { return &**this; }\n\tT& operator[](int a) const { return (&**this)[a]; }\n\texplicit operator bool() const { return ind; }\n};"
+    },
+    {
+      "id": "various/SparseLazySegmentTree.h",
+      "name": "SparseLazySegmentTree.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Implicit segment tree with lazy range updates\nand point set. Creates children on demand.\nNode bounds $[l,r]$ and update/query bounds $[ql,qr]$\ninclude both endpoints. For n elements use $[0,n-1]$.\nChange \\texttt{V}, \\texttt{U}, \\texttt{id}, \\texttt{def},\n\\texttt{idU}, \\texttt{binop}, \\texttt{applyUpdate},\n\\texttt{mergeUpdate}. Default is range add / range max.",
+      "usage": "",
+      "time": "$O(\\log R)$",
+      "memory": "",
+      "status": "stress-tested",
+      "author": "me",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct Node {\n\tusing V = int;\n\tusing U = int;\n\tusing T = Node;\n\tstatic constexpr V id = INT_MIN;\n\tstatic constexpr V def = 0;\n\tstatic constexpr U idU = 0;\n\tV binop(V a, V b) { return max(a, b); }\n\tV applyUpdate(U u, V v) { return v + u; }\n\tU mergeUpdate(U oldU, U nw) { return oldU + nw; }\n\tT *lt = 0, *rt = 0;\n\tV val = def;\n\tU lazy = idU;\n\tvoid updateNode(int, int, U u) {\n\t\tlazy = mergeUpdate(lazy, u);\n\t\tval = applyUpdate(u, val);\n\t}\n\tvoid push(int l, int r) {\n\t\tif (!lt) {\n\t\t\tlt = new T();\n\t\t\trt = new T();\n\t\t}\n\t\tint mid = l + (r - l) / 2;\n\t\tlt->updateNode(l, mid, lazy);\n\t\trt->updateNode(mid + 1, r, lazy);\n\t\tlazy = idU;\n\t}\n\tvoid update(int l, int r, int ql, int qr, U u) {\n\t\tif (qr < l || r < ql) return;\n\t\tif (ql <= l && r <= qr) {\n\t\t\tupdateNode(l, r, u);\n\t\t\treturn;\n\t\t}\n\t\tpush(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tlt->update(l, mid, ql, qr, u);\n\t\trt->update(mid + 1, r, ql, qr, u);\n\t\tval = binop(lt->val, rt->val);\n\t}\n\tvoid set(int l, int r, int i, V v) {\n\t\tif (i < l || r < i) return;\n\t\tif (l == r) { val = v; lazy = idU; return; }\n\t\tpush(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\tif (i <= mid) lt->set(l, mid, i, v);\n\t\telse rt->set(mid + 1, r, i, v);\n\t\tval = binop(lt->val, rt->val);\n\t}\n\tV query(int l, int r, int ql, int qr) {\n\t\tif (qr < l || r < ql) return id;\n\t\tif (ql <= l && r <= qr) return val;\n\t\tpush(l, r);\n\t\tint mid = l + (r - l) / 2;\n\t\treturn binop(lt->query(l, mid, ql, qr),\n\t\t\trt->query(mid + 1, r, ql, qr));\n\t}\n\t~Node() { delete lt; delete rt; }\n};"
+    },
+    {
+      "id": "various/SparseSegmentTree2d.h",
+      "name": "SparseSegmentTree2d.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Online sparse 2D segment tree on\n$[0,n) \\times [0,m)$. Point assignment with\n\\texttt{set(x,y,v)}, rectangle query with\n\\texttt{query(x1,x2,y1,y2)} uses\n$[x1,x2)\\times[y1,y2)$: lower bounds included,\nupper bounds excluded. Node bounds are half-open too.\nUnassigned points have value \\texttt{unit}.\nChange \\texttt{V}, \\texttt{unit}, \\texttt{f} for any\ncommutative monoid. Queries allocate no nodes.",
+      "usage": "",
+      "time": "$O(\\log n \\log m)$ per operation.",
+      "memory": "$O(k \\log n \\log m)$ for $k$ distinct updated\npoints. Allocated nodes are retained until destruction.",
+      "status": "stress-tested",
+      "author": "me",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "struct Tree2D {\n\tusing V = ll;\n\tstatic constexpr V unit = LLONG_MIN;\n\tstatic V f(V a, V b) { return max(a, b); }\n\tstruct Y {\n\t\tusing T = Y;\n\t\tT *lt = 0, *rt = 0;\n\t\tV val = unit;\n\t\tstatic V get(T* p) { return p ? p->val : unit; }\n\t\tvoid set(int l, int r, int y, V v) {\n\t\t\tif (r - l == 1) { val = v; return; }\n\t\t\tint mid = l + (r - l) / 2;\n\t\t\tT*& ch = y < mid ? lt : rt;\n\t\t\tif (!ch) ch = new T;\n\t\t\tif (y < mid) ch->set(l, mid, y, v);\n\t\t\telse ch->set(mid, r, y, v);\n\t\t\tval = f(get(lt), get(rt));\n\t\t}\n\t\tV query(int l, int r, int a, int b) const {\n\t\t\tif (b <= l || r <= a) return unit;\n\t\t\tif (a <= l && r <= b) return val;\n\t\t\tint mid = l + (r - l) / 2;\n\t\t\treturn f(lt ? lt->query(l, mid, a, b) : unit,\n\t\t\t\trt ? rt->query(mid, r, a, b) : unit);\n\t\t}\n\t\t~Y() { delete lt; delete rt; }\n\t};\n\tstruct Node {\n\t\tusing T = Node;\n\t\tT *lt = 0, *rt = 0;\n\t\tY tree;\n\t\tvoid set(int l, int r, int m, int x, int y, V v) {\n\t\t\tif (r - l > 1) {\n\t\t\t\tint mid = l + (r - l) / 2;\n\t\t\t\tT*& ch = x < mid ? lt : rt;\n\t\t\t\tif (!ch) ch = new T;\n\t\t\t\tif (x < mid) ch->set(l, mid, m, x, y, v);\n\t\t\t\telse ch->set(mid, r, m, x, y, v);\n\t\t\t\tv = f(lt ? lt->tree.query(0, m, y, y+1) : unit,\n\t\t\t\t\trt ? rt->tree.query(0, m, y, y+1) : unit);\n\t\t\t}\n\t\t\ttree.set(0, m, y, v);\n\t\t}\n\t\tV query(int l, int r, int m, int a, int b,\n\t\t\tint c, int d) const {\n\t\t\tif (b <= l || r <= a) return unit;\n\t\t\tif (a <= l && r <= b)\n\t\t\t\treturn tree.query(0, m, c, d);\n\t\t\tint mid = l + (r - l) / 2;\n\t\t\treturn f(lt ? lt->query(l,mid,m,a,b,c,d) : unit,\n\t\t\t\trt ? rt->query(mid,r,m,a,b,c,d) : unit);\n\t\t}\n\t\t~Node() { delete lt; delete rt; }\n\t} root;\n\tint n, m;\n\tTree2D(int n, int m) : n(n), m(m) {\n\t\tassert(n > 0 && m > 0);\n\t}\n\tTree2D(const Tree2D&) = delete;\n\tTree2D& operator=(const Tree2D&) = delete;\n\tvoid set(int x, int y, V v) {\n\t\tassert(0 <= x && x < n && 0 <= y && y < m);\n\t\troot.set(0, n, m, x, y, v);\n\t}\n\tV query(int x1, int x2, int y1, int y2) const {\n\t\tif (x1 >= x2 || y1 >= y2) return unit;\n\t\treturn root.query(0, n, m, x1, x2, y1, y2);\n\t}\n};"
+    },
+    {
+      "id": "various/TernarySearch.h",
+      "name": "TernarySearch.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "Find the smallest i in $[a,b]$ that maximizes $f(i)$, assuming that $f(a) < \\dots < f(i) \\ge \\dots \\ge f(b)$.\nBoth a and b are included; for an array use 0 and n-1.\nTo reverse which of the sides allows non-strict inequalities, change the \\texttt{<} marked with (A) to \\texttt{<=}, and reverse the loop at (B).\nTo minimize $f$, change it to \\texttt{>}, also at (B).",
+      "usage": "int ind = ternSearch(0,n-1,[\\&](int i){return a[i];});",
+      "time": "$O(\\log(b-a))$",
+      "memory": "",
+      "status": "tested",
+      "author": "Simon Lindholm",
+      "source": "own work",
+      "dependencies": [],
+      "includedInPdf": true,
+      "code": "template<class F>\nint ternSearch(int a, int b, F f) {\n\tassert(a <= b);\n\twhile (b - a >= 5) {\n\t\tint mid = (a + b) / 2;\n\t\tif (f(mid) < f(mid+1)) a = mid; // (A)\n\t\telse b = mid+1;\n\t}\n\trep(i,a+1,b+1) if (f(a) < f(i)) a = i; // (B)\n\treturn a;\n}"
+    },
+    {
+      "id": "various/Unrolling.h",
+      "name": "Unrolling.h",
+      "chapter": "various",
+      "language": "cpp",
+      "description": "",
+      "usage": "",
+      "time": "",
+      "memory": "",
+      "status": "",
+      "author": "Simon Lindholm",
+      "source": "me",
+      "dependencies": [],
+      "includedInPdf": false,
+      "code": "#define F {...; ++i;}\nint i = from;\nwhile (i&3 && i < to) F // for alignment, if needed\nwhile (i + 4 <= to) { F F F F }\nwhile (i < to) F"
     },
     {
       "id": "appendix/techniques.txt",
@@ -3188,6 +3222,21 @@
     },
     {
       "type": "heading",
+      "id": "math/h/mathematical-constants",
+      "chapter": "math",
+      "level": 2,
+      "title": "Mathematical constants",
+      "searchText": "Mathematical constants"
+    },
+    {
+      "type": "prose",
+      "id": "math/p/1",
+      "chapter": "math",
+      "latex": "\\begin{center} \\begin{tabular}{@{}lll@{}} Constant & Approximate value & C++20 name \\\\ \\hline $\\pi$ & $3.14159265358979323846$ & \\texttt{pi} \\\\ $e$ & $2.71828182845904523536$ & \\texttt{e} \\\\ $\\tau=2\\pi$ & $6.28318530717958647693$ & \\texttt{2*pi} \\\\ $\\sqrt{2}$ & $1.41421356237309504880$ & \\texttt{sqrt2} \\\\ $\\sqrt{3}$ & $1.73205080756887729353$ & \\texttt{sqrt3} \\\\ $\\ln 2$ & $0.69314718055994530942$ & \\texttt{ln2} \\\\ $\\ln 10$ & $2.30258509299404568402$ & \\texttt{ln10} \\\\ $\\phi=\\frac{1+\\sqrt{5}}{2}$ & $1.61803398874989484820$ & \\texttt{phi} \\\\ $\\gamma$ & $0.57721566490153286061$ & \\texttt{egamma} \\\\ \\end{tabular} \\end{center}\n\nWith \\texttt{\\#include <numbers>}, names above are in \\texttt{std::numbers}; e.g.\\ \\texttt{std::numbers::pi} is a \\texttt{constexpr double}. For \\texttt{long double}, use \\texttt{std::numbers::pi\\_v<long double>} (likewise \\texttt{e\\_v}, \\texttt{ln2\\_v}, etc.). For $\\tau$, multiply the chosen $\\pi$ constant by 2. Before C++20, use \\texttt{acos(-1.0)} and \\texttt{exp(1.0)} from \\texttt{<cmath>}; use \\texttt{acos(-1.0L)} and \\texttt{exp(1.0L)} for \\texttt{long double}.\n\nAngles: $180^\\circ=\\pi$ radians; multiply degrees by $\\pi/180$ or radians by $180/\\pi$. Log bases: $\\log_2 x=\\ln x/\\ln 2$, $\\log_{10}x=\\ln x/\\ln 10$. Golden ratio: $\\phi^2=\\phi+1$, $1/\\phi=\\phi-1$ (Fibonacci growth and golden-section search). Euler--Mascheroni constant: $\\gamma=\\lim_{n\\to\\infty}(H_n-\\ln n)$, where $H_n=\\sum_{k=1}^n 1/k$; for large $n$, \\[ H_n=\\ln n+\\gamma+\\frac{1}{2n}-\\frac{1}{12n^2}+O(n^{-4}). \\]",
+      "searchText": "@ lll@ Constant Approximate value C++20 name \\ 3.14159265358979323846 pi \\ e 2.71828182845904523536 e \\ =2 6.28318530717958647693 2*pi \\ 2 1.41421356237309504880 sqrt2 \\ 3 1.73205080756887729353 sqrt3 \\ 2 0.69314718055994530942 ln2 \\ 10 2.30258509299404568402 ln10 \\ = 1+ 5 2 1.61803398874989484820 phi \\ 0.57721566490153286061 egamma \\ With include <numbers> , names above are in std::numbers ; e.g. std::numbers::pi is a constexpr double . For long double , use std::numbers::pi_v<long double> (likewise e_v , ln2_v , etc.). For , multiply the chosen constant by 2. Before C++20, use acos(-1.0) and exp(1.0) from <cmath> ; use acos(-1.0L) and exp(1.0L) for long double . Angles: 180^ = radians; multiply degrees by /180 or radians by 180/ . Log bases: _2 x= x/ 2 , _ 10 x= x/ 10 . Golden ratio: ^2= +1 , 1/ = -1 (Fibonacci growth and golden-section search). Euler--Mascheroni constant: = _ n (H_n- n) , where H_n= _ k=1 ^n 1/k ; for large n , H_n= n+ + 1 2n - 1 12n^2 +O(n^ -4 )."
+    },
+    {
+      "type": "heading",
       "id": "math/h/equations",
       "chapter": "math",
       "level": 2,
@@ -3196,7 +3245,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/1",
+      "id": "math/p/2",
       "chapter": "math",
       "latex": "\\[ax^2+bx+c=0 \\Rightarrow x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}\\]\n\nThe extremum is given by $x = -b/2a$.\n\n\\[\\begin{aligned}ax+by=e\\\\cx+dy=f\\end{aligned} \\Rightarrow \\begin{aligned}x=\\dfrac{ed-bf}{ad-bc}\\\\y=\\dfrac{af-ec}{ad-bc}\\end{aligned}\\]\n\nIn general, given an equation $Ax = b$, the solution to a variable $x_i$ is given by \\[x_i = \\frac{\\det A_i'}{\\det A} \\] where $A_i'$ is $A$ with the $i$'th column replaced by $b$.",
       "searchText": "ax^2+bx+c=0 x = -b b^2-4ac 2a The extremum is given by x = -b/2a . ax+by=e +dy=f x= ed-bf ad-bc = af-ec ad-bc In general, given an equation Ax = b , the solution to a variable x_i is given by x_i = A_i' A where A_i' is A with the i 'th column replaced by b ."
@@ -3211,7 +3260,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/2",
+      "id": "math/p/3",
       "chapter": "math",
       "latex": "If $a_n = c_1 a_{n-1} + \\dots + c_k a_{n-k}$, and $r_1, \\dots, r_k$ are distinct roots of $x^k - c_1 x^{k-1} - \\dots - c_k$, there are $d_1, \\dots, d_k$ s.t. \\[a_n = d_1r_1^n + \\dots + d_kr_k^n. \\] Non-distinct roots $r$ become polynomial factors, e.g. $a_n = (d_1n + d_2)r^n$.",
       "searchText": "If a_n = c_1 a_ n-1 + + c_k a_ n-k , and r_1, , r_k are distinct roots of x^k - c_1 x^ k-1 - - c_k , there are d_1, , d_k s.t. a_n = d_1r_1^n + + d_kr_k^n. Non-distinct roots r become polynomial factors, e.g. a_n = (d_1n + d_2)r^n ."
@@ -3226,7 +3275,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/3",
+      "id": "math/p/4",
       "chapter": "math",
       "latex": "\\begin{align*} \\sin(v+w)&{}=\\sin v\\cos w+\\cos v\\sin w\\\\ \\cos(v+w)&{}=\\cos v\\cos w-\\sin v\\sin w\\\\ \\end{align*} \\begin{align*} \\tan(v+w)&{}=\\dfrac{\\tan v+\\tan w}{1-\\tan v\\tan w}\\\\ \\sin v+\\sin w&{}=2\\sin\\dfrac{v+w}{2}\\cos\\dfrac{v-w}{2}\\\\ \\cos v+\\cos w&{}=2\\cos\\dfrac{v+w}{2}\\cos\\dfrac{v-w}{2} \\end{align*} \\[ (V+W)\\tan(v-w)/2{}=(V-W)\\tan(v+w)/2 \\] where $V, W$ are lengths of sides opposite angles $v, w$. \\begin{align*} a\\cos x+b\\sin x&=r\\cos(x-\\phi)\\\\ a\\sin x+b\\cos x&=r\\sin(x+\\phi) \\end{align*} where $r=\\sqrt{a^2+b^2}, \\phi=\\operatorname{atan2}(b,a)$.",
       "searchText": "(v+w) = v w+ v w\\ (v+w) = v w- v w\\ (v+w) = v+ w 1- v w \\ v+ w =2 v+w 2 v-w 2 \\ v+ w =2 v+w 2 v-w 2 (V+W) (v-w)/2 =(V-W) (v+w)/2 where V, W are lengths of sides opposite angles v, w . a x+b x =r (x- )\\ a x+b x =r (x+ ) where r= a^2+b^2 , = atan2 (b,a) ."
@@ -3249,7 +3298,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/4",
+      "id": "math/p/5",
       "chapter": "math",
       "latex": "Side lengths: $a,b,c$\\\\ Semiperimeter: $p=\\dfrac{a+b+c}{2}$\\\\ Area: $A=\\sqrt{p(p-a)(p-b)(p-c)}$\\\\ Circumradius: $R=\\dfrac{abc}{4A}$\\\\ Inradius: $r=\\dfrac{A}{p}$\\\\ Length of median (divides triangle into two equal-area triangles): $m_a=\\tfrac{1}{2}\\sqrt{2b^2+2c^2-a^2}$\\\\ Length of bisector (divides angles in two): $s_a=\\sqrt{bc\\left[1-\\left(\\dfrac{a}{b+c}\\right)^2\\right]}$\\\\ Law of sines: $\\dfrac{\\sin\\alpha}{a}=\\dfrac{\\sin\\beta}{b}=\\dfrac{\\sin\\gamma}{c}=\\dfrac{1}{2R}$\\\\ Law of cosines: $a^2=b^2+c^2-2bc\\cos\\alpha$\\\\ Law of tangents: $\\dfrac{a+b}{a-b}=\\dfrac{\\tan\\dfrac{\\alpha+\\beta}{2}}{\\tan\\dfrac{\\alpha-\\beta}{2}}$\\\\",
       "searchText": "Side lengths: a,b,c \\ Semiperimeter: p= a+b+c 2 \\ Area: A= p(p-a)(p-b)(p-c) \\ Circumradius: R= abc 4A \\ Inradius: r= A p \\ Length of median (divides triangle into two equal-area triangles): m_a= 1 2 2b^2+2c^2-a^2 \\ Length of bisector (divides angles in two): s_a= bc [1- ( a b+c )^2 ] \\ Law of sines: a = b = c = 1 2R \\ Law of cosines: a^2=b^2+c^2-2bc \\ Law of tangents: a+b a-b = + 2 - 2 \\"
@@ -3264,7 +3313,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/5",
+      "id": "math/p/6",
       "chapter": "math",
       "latex": "With side lengths $a,b,c,d$, diagonals $e, f$, diagonals angle $\\theta$, area $A$ and magic flux $F=b^2+d^2-a^2-c^2$:\n\n\\[ 4A = 2ef \\cdot \\sin\\theta = F\\tan\\theta = \\sqrt{4e^2f^2-F^2} \\]\n\nFor cyclic quadrilaterals the sum of opposite angles is $180^\\circ$, $ef = ac + bd$, and $A = \\sqrt{(p-a)(p-b)(p-c)(p-d)}$.",
       "searchText": "With side lengths a,b,c,d , diagonals e, f , diagonals angle , area A and magic flux F=b^2+d^2-a^2-c^2 : 4A = 2ef = F = 4e^2f^2-F^2 For cyclic quadrilaterals the sum of opposite angles is 180^ , ef = ac + bd , and A = (p-a)(p-b)(p-c)(p-d) ."
@@ -3279,7 +3328,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/6",
+      "id": "math/p/7",
       "chapter": "math",
       "latex": "\\begin{center} \\includegraphics[width=25mm]{content/math/sphericalCoordinates} \\end{center} \\[\\begin{array}{cc} x = r\\sin\\theta\\cos\\phi & r = \\sqrt{x^2+y^2+z^2}\\\\ y = r\\sin\\theta\\sin\\phi & \\theta = \\texttt{acos}(z/\\sqrt{x^2+y^2+z^2})\\\\ z = r\\cos\\theta & \\phi = \\texttt{atan2}(y,x) \\end{array}\\]",
       "searchText": "cc x = r r = x^2+y^2+z^2 \\ y = r = acos (z/ x^2+y^2+z^2 )\\ z = r = atan2 (y,x)"
@@ -3294,7 +3343,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/7",
+      "id": "math/p/8",
       "chapter": "math",
       "latex": "\\begin{align*} \\dfrac{d}{dx}\\arcsin x = \\dfrac{1}{\\sqrt{1-x^2}} &&& \\dfrac{d}{dx}\\arccos x = -\\dfrac{1}{\\sqrt{1-x^2}} \\\\ \\dfrac{d}{dx}\\tan x = 1+\\tan^2 x &&& \\dfrac{d}{dx}\\arctan x = \\dfrac{1}{1+x^2} \\\\ \\int\\tan ax = -\\dfrac{\\ln|\\cos ax|}{a} &&& \\int x\\sin ax = \\dfrac{\\sin ax-ax \\cos ax}{a^2} \\\\ \\int e^{-x^2} = \\frac{\\sqrt \\pi}{2} \\text{erf}(x) &&& \\int xe^{ax}dx = \\frac{e^{ax}}{a^2}(ax-1) \\end{align*}\n\nIntegration by parts: \\[\\int_a^bf(x)g(x)dx = [F(x)g(x)]_a^b-\\int_a^bF(x)g'(x)dx\\]",
       "searchText": "d dx x = 1 1-x^2 d dx x = - 1 1-x^2 \\ d dx x = 1+ ^2 x d dx x = 1 1+x^2 \\ ax = - | ax| a x ax = ax-ax ax a^2 \\ e^ -x^2 = 2 erf (x) xe^ ax dx = e^ ax a^2 (ax-1) Integration by parts: _a^bf(x)g(x)dx = [F(x)g(x)]_a^b- _a^bF(x)g'(x)dx"
@@ -3309,7 +3358,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/8",
+      "id": "math/p/9",
       "chapter": "math",
       "latex": "\\[ c^a + c^{a+1} + \\dots + c^{b} = \\frac{c^{b+1} - c^a}{c-1}, c \\neq 1 \\] \\begin{align*} 1 + 2 + 3 + \\dots + n &= \\frac{n(n+1)}{2} \\\\ 1^2 + 2^2 + 3^2 + \\dots + n^2 &= \\frac{n(2n+1)(n+1)}{6} \\\\ 1^3 + 2^3 + 3^3 + \\dots + n^3 &= \\frac{n^2(n+1)^2}{4} \\\\ 1^4 + 2^4 + 3^4 + \\dots + n^4 &= \\frac{n(n+1)(2n+1)(3n^2 + 3n - 1)}{30} \\\\ \\end{align*}",
       "searchText": "c^a + c^ a+1 + + c^ b = c^ b+1 - c^a c-1 , c 1 1 + 2 + 3 + + n = n(n+1) 2 \\ 1^2 + 2^2 + 3^2 + + n^2 = n(2n+1)(n+1) 6 \\ 1^3 + 2^3 + 3^3 + + n^3 = n^2(n+1)^2 4 \\ 1^4 + 2^4 + 3^4 + + n^4 = n(n+1)(2n+1)(3n^2 + 3n - 1) 30 \\"
@@ -3324,7 +3373,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/9",
+      "id": "math/p/10",
       "chapter": "math",
       "latex": "$$e^x = 1+x+\\frac{x^2}{2!}+\\frac{x^3}{3!}+\\dots,\\,(-\\infty<x<\\infty)$$ $$\\ln(1+x) = x-\\frac{x^2}{2}+\\frac{x^3}{3}-\\frac{x^4}{4}+\\dots,\\,(-1<x\\leq1)$$ $$\\sqrt{1+x} = 1+\\frac{x}{2}-\\frac{x^2}{8}+\\frac{2x^3}{32}-\\frac{5x^4}{128}+\\dots,\\,(-1\\leq x\\leq1)$$ $$\\sin x = x-\\frac{x^3}{3!}+\\frac{x^5}{5!}-\\frac{x^7}{7!}+\\dots,\\,(-\\infty<x<\\infty)$$ $$\\cos x = 1-\\frac{x^2}{2!}+\\frac{x^4}{4!}-\\frac{x^6}{6!}+\\dots,\\,(-\\infty<x<\\infty)$$",
       "searchText": "e^x = 1+x+ x^2 2! + x^3 3! + ,,(- <x< ) (1+x) = x- x^2 2 + x^3 3 - x^4 4 + ,,(-1<x 1) 1+x = 1+ x 2 - x^2 8 + 2x^3 32 - 5x^4 128 + ,,(-1 x 1) x = x- x^3 3! + x^5 5! - x^7 7! + ,,(- <x< ) x = 1- x^2 2! + x^4 4! - x^6 6! + ,,(- <x< )"
@@ -3339,7 +3388,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/10",
+      "id": "math/p/11",
       "chapter": "math",
       "latex": "Let $X$ be a discrete random variable with probability $p_X(x)$ of assuming the value $x$. It will then have an expected value (mean) $\\mu=\\mathbb{E}(X)=\\sum_xxp_X(x)$ and variance $\\sigma^2=V(X)=\\mathbb{E}(X^2)-(\\mathbb{E}(X))^2=\\sum_x(x-\\mathbb{E}(X))^2p_X(x)$ where $\\sigma$ is the standard deviation. If $X$ is instead continuous it will have a probability density function $f_X(x)$ and the sums above will instead be integrals with $p_X(x)$ replaced by $f_X(x)$.\n\nExpectation is linear: \\[\\mathbb{E}(aX+bY) = a\\mathbb{E}(X)+b\\mathbb{E}(Y)\\] For independent $X$ and $Y$, \\[V(aX+bY) = a^2V(X)+b^2V(Y).\\]",
       "searchText": "Let X be a discrete random variable with probability p_X(x) of assuming the value x . It will then have an expected value (mean) = E (X)= _xxp_X(x) and variance ^2=V(X)= E (X^2)-( E (X))^2= _x(x- E (X))^2p_X(x) where is the standard deviation. If X is instead continuous it will have a probability density function f_X(x) and the sums above will instead be integrals with p_X(x) replaced by f_X(x) . Expectation is linear: E (aX+bY) = a E (X)+b E (Y) For independent X and Y , V(aX+bY) = a^2V(X)+b^2V(Y)."
@@ -3362,7 +3411,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/11",
+      "id": "math/p/12",
       "chapter": "math",
       "latex": "The number of successes in $n$ independent yes/no experiments, each which yields success with probability $p$ is $\\textrm{Bin}(n,p),\\,n=1,2,\\dots,\\, 0\\leq p\\leq1$. \\[p(k)=\\binom{n}{k}p^k(1-p)^{n-k}\\] \\[\\mu = np,\\,\\sigma^2=np(1-p)\\] $\\textrm{Bin}(n,p)$ is approximately $\\textrm{Po}(np)$ for small $p$.",
       "searchText": "The number of successes in n independent yes/no experiments, each which yields success with probability p is Bin (n,p),,n=1,2, ,, 0 p 1 . p(k)= n k p^k(1-p)^ n-k = np,, ^2=np(1-p) Bin (n,p) is approximately Po (np) for small p ."
@@ -3377,7 +3426,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/12",
+      "id": "math/p/13",
       "chapter": "math",
       "latex": "The number of trials needed to get the first success in independent yes/no experiments, each which yields success with probability $p$ is $\\textrm{Fs}(p),\\,0\\leq p\\leq1$. \\[p(k)=p(1-p)^{k-1},\\,k=1,2,\\dots\\] \\[\\mu = \\frac1p,\\,\\sigma^2=\\frac{1-p}{p^2}\\]",
       "searchText": "The number of trials needed to get the first success in independent yes/no experiments, each which yields success with probability p is Fs (p),,0 p 1 . p(k)=p(1-p)^ k-1 ,,k=1,2, = 1p,, ^2= 1-p p^2"
@@ -3392,7 +3441,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/13",
+      "id": "math/p/14",
       "chapter": "math",
       "latex": "The number of events occurring in a fixed period of time $t$ if these events occur with a known average rate $\\kappa$ and independently of the time since the last event is $\\textrm{Po}(\\lambda),\\,\\lambda=t\\kappa$. \\[p(k)=e^{-\\lambda}\\frac{\\lambda^k}{k!}, k=0,1,2,\\dots\\] \\[\\mu=\\lambda,\\,\\sigma^2=\\lambda\\]",
       "searchText": "The number of events occurring in a fixed period of time t if these events occur with a known average rate and independently of the time since the last event is Po ( ),, =t . p(k)=e^ - ^k k! , k=0,1,2, = ,, ^2="
@@ -3415,7 +3464,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/14",
+      "id": "math/p/15",
       "chapter": "math",
       "latex": "If the probability density function is constant between $a$ and $b$ and 0 elsewhere it is $\\textrm{U}(a,b),\\,a<b$. \\[f(x) = \\left\\{ \\begin{array}{cl} \\frac{1}{b-a} & a<x<b\\\\ 0 & \\textrm{otherwise} \\end{array}\\right.\\] \\[\\mu=\\frac{a+b}{2},\\,\\sigma^2=\\frac{(b-a)^2}{12}\\]",
       "searchText": "If the probability density function is constant between a and b and 0 elsewhere it is U (a,b),,a<b . f(x) = cl 1 b-a a<x<b\\ 0 otherwise . = a+b 2 ,, ^2= (b-a)^2 12"
@@ -3430,7 +3479,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/15",
+      "id": "math/p/16",
       "chapter": "math",
       "latex": "The time between events in a Poisson process is $\\textrm{Exp}(\\lambda),\\,\\lambda>0$. \\[f(x) = \\left\\{ \\begin{array}{cl} \\lambda e^{-\\lambda x} & x\\geq0\\\\ 0 & x<0 \\end{array}\\right.\\] \\[\\mu=\\frac{1}{\\lambda},\\,\\sigma^2=\\frac{1}{\\lambda^2}\\]",
       "searchText": "The time between events in a Poisson process is Exp ( ),, >0 . f(x) = cl e^ - x x 0\\ 0 x<0 . = 1 ,, ^2= 1 ^2"
@@ -3445,7 +3494,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/16",
+      "id": "math/p/17",
       "chapter": "math",
       "latex": "Most real random values with mean $\\mu$ and variance $\\sigma^2$ are well described by $\\mathcal{N}(\\mu,\\sigma^2),\\,\\sigma>0$. \\[ f(x) = \\frac{1}{\\sqrt{2\\pi\\sigma^2}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}} \\] If $X_1 \\sim \\mathcal{N}(\\mu_1,\\sigma_1^2)$ and $X_2 \\sim \\mathcal{N}(\\mu_2,\\sigma_2^2)$ then \\[ aX_1 + bX_2 + c \\sim \\mathcal{N}(\\mu_1+\\mu_2+c,a^2\\sigma_1^2+b^2\\sigma_2^2) \\]",
       "searchText": "Most real random values with mean and variance ^2 are well described by N ( , ^2),, >0 . f(x) = 1 2 ^2 e^ - (x- )^2 2 ^2 If X_1 N ( _1, _1^2) and X_2 N ( _2, _2^2) then aX_1 + bX_2 + c N ( _1+ _2+c,a^2 _1^2+b^2 _2^2)"
@@ -3460,7 +3509,7 @@
     },
     {
       "type": "prose",
-      "id": "math/p/17",
+      "id": "math/p/18",
       "chapter": "math",
       "latex": "A \\emph{Markov chain} is a discrete random process with the property that the next state depends only on the current state. Let $X_1,X_2,\\ldots$ be a sequence of random variables generated by the Markov process. Then there is a transition matrix $\\mathbf{P} = (p_{ij})$, with $p_{ij} = \\Pr(X_n = i | X_{n-1} = j)$, and $\\mathbf{p}^{(n)} = \\mathbf P^n \\mathbf p^{(0)}$ is the probability distribution for $X_n$ (i.e., $p^{(n)}_i = \\Pr(X_n = i)$), where $\\mathbf{p}^{(0)}$ is the initial distribution.\n\n$\\mathbf{\\pi}$ is a stationary distribution if $\\mathbf{\\pi} = \\mathbf{\\pi P}$. If the Markov chain is \\emph{irreducible} (it is possible to get to any state from any state), then $\\pi_i = \\frac{1}{\\mathbb{E}(T_i)}$ where $\\mathbb{E}(T_i)$  is the expected time between two visits in state $i$. $\\pi_j/\\pi_i$ is the expected number of visits in state $j$ between two visits in state $i$.\n\nFor a connected, undirected and non-bipartite graph, where the transition probability is uniform among all neighbors, $\\pi_i$ is proportional to node $i$'s degree.\n\nA Markov chain is \\emph{ergodic} if the asymptotic distribution is independent of the initial distribution. A finite Markov chain is ergodic iff it is irreducible and \\emph{aperiodic} (i.e., the gcd of cycle lengths is 1). $\\lim_{k\\rightarrow\\infty}\\mathbf{P}^k = \\mathbf{1}\\pi$.\n\nA Markov chain is an A-chain if the states can be partitioned into two sets $\\mathbf{A}$ and $\\mathbf{G}$, such that all states in $\\mathbf{A}$ are absorbing ($p_{ii}=1$), and all states in $\\mathbf{G}$ leads to an absorbing state in $\\mathbf{A}$. The probability for absorption in state $i\\in\\mathbf{A}$, when the initial state is $j$, is $a_{ij} = p_{ij}+\\sum_{k\\in\\mathbf{G}} a_{ik}p_{kj}$. The expected time until absorption, when the initial state is $i$, is $t_i = 1+\\sum_{k\\in\\mathbf{G}}p_{ki}t_k$.",
       "searchText": "A Markov chain is a discrete random process with the property that the next state depends only on the current state. Let X_1,X_2, be a sequence of random variables generated by the Markov process. Then there is a transition matrix P = (p_ ij ) , with p_ ij = (X_n = i | X_ n-1 = j) , and p ^ (n) = P^n p^ (0) is the probability distribution for X_n (i.e., p^ (n) _i = (X_n = i) ), where p ^ (0) is the initial distribution. is a stationary distribution if = P . If the Markov chain is irreducible (it is possible to get to any state from any state), then _i = 1 E (T_i) where E (T_i) is the expected time between two visits in state i . _j/ _i is the expected number of visits in state j between two visits in state i . For a connected, undirected and non-bipartite graph, where the transition probability is uniform among all neighbors, _i is proportional to node i 's degree. A Markov chain is ergodic if the asymptotic distribution is independent of the initial distribution. A finite Markov chain is ergodic iff it is irreducible and aperiodic (i.e., the gcd of cycle lengths is 1). _ k P ^k = 1 . A Markov chain is an A-chain if the states can be partitioned into two sets A and G , such that all states in A are absorbing ( p_ ii =1 ), and all states in G leads to an absorbing state in A . The probability for absorption in state i A , when the initial state is j , is a_ ij = p_ ij + _ k G a_ ik p_ kj . The expected time until absorption, when the initial state is i , is t_i = 1+ _ k G p_ ki t_k ."
@@ -3505,12 +3554,6 @@
     },
     {
       "type": "snippet",
-      "id": "data-structures/BinaryTrie.h",
-      "chapter": "data-structures",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
       "id": "data-structures/SegmentTree.h",
       "chapter": "data-structures",
       "includedInPdf": true
@@ -3518,12 +3561,6 @@
     {
       "type": "snippet",
       "id": "data-structures/LazySegmentTree.h",
-      "chapter": "data-structures",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "data-structures/SparseLazySegmentTree.h",
       "chapter": "data-structures",
       "includedInPdf": true
     },
@@ -3666,6 +3703,12 @@
     {
       "type": "snippet",
       "id": "numerical/PolyInterpolate.h",
+      "chapter": "numerical",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "numerical/Lagrange.h",
       "chapter": "numerical",
       "includedInPdf": true
     },
@@ -4622,6 +4665,12 @@
     },
     {
       "type": "snippet",
+      "id": "graph/Reroot.h",
+      "chapter": "graph",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
       "id": "graph/HLD.h",
       "chapter": "graph",
       "includedInPdf": true
@@ -4743,235 +4792,6 @@
       "id": "strings/AhoCorasick.h",
       "chapter": "strings",
       "includedInPdf": true
-    },
-    {
-      "type": "heading",
-      "id": "various/h/various",
-      "chapter": "various",
-      "level": 1,
-      "title": "Various",
-      "searchText": "Various"
-    },
-    {
-      "type": "snippet",
-      "id": "various/EulerTourTree.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/SegmentTreeBeats.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/SparseSegmentTree2d.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/PersistentSegmentTree.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/MinPlusConvolution.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/LinkCutTree.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "heading",
-      "id": "various/h/intervals",
-      "chapter": "various",
-      "level": 2,
-      "title": "Intervals",
-      "searchText": "Intervals"
-    },
-    {
-      "type": "snippet",
-      "id": "various/IntervalContainer.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/IntervalCover.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/ConstantIntervals.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "heading",
-      "id": "various/h/misc-algorithms",
-      "chapter": "various",
-      "level": 2,
-      "title": "Misc. algorithms",
-      "searchText": "Misc. algorithms"
-    },
-    {
-      "type": "snippet",
-      "id": "various/BigInt.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/TernarySearch.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/LIS.h",
-      "chapter": "various",
-      "includedInPdf": false
-    },
-    {
-      "type": "snippet",
-      "id": "various/FastKnapsack.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "heading",
-      "id": "various/h/dynamic-programming",
-      "chapter": "various",
-      "level": 2,
-      "title": "Dynamic programming",
-      "searchText": "Dynamic programming"
-    },
-    {
-      "type": "snippet",
-      "id": "various/KnuthDP.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/DivideAndConquerDP.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "heading",
-      "id": "various/h/debugging-tricks",
-      "chapter": "various",
-      "level": 2,
-      "title": "Debugging tricks",
-      "searchText": "Debugging tricks"
-    },
-    {
-      "type": "prose",
-      "id": "various/p/1",
-      "chapter": "various",
-      "latex": "\\begin{itemize} \\item \\verb@signal(SIGSEGV, [](int) { _Exit(0); });@ converts segfaults into Wrong Answers. Similarly one can catch SIGABRT (assertion failures) and SIGFPE (zero divisions). \\verb@_GLIBCXX_DEBUG@ failures generate SIGABRT (or SIGSEGV on gcc 5.4.0 apparently). \\item \\verb@feenableexcept(29);@ kills the program on NaNs (\\texttt 1), 0-divs (\\texttt 4), infinities (\\texttt 8) and denormals (\\texttt{16}). \\end{itemize}",
-      "searchText": "signal(SIGSEGV, [](int) _Exit(0); ); converts segfaults into Wrong Answers. Similarly one can catch SIGABRT (assertion failures) and SIGFPE (zero divisions). _GLIBCXX_DEBUG failures generate SIGABRT (or SIGSEGV on gcc 5.4.0 apparently). feenableexcept(29); kills the program on NaNs ( 1), 0-divs ( 4), infinities ( 8) and denormals ( 16 )."
-    },
-    {
-      "type": "snippet",
-      "id": "various/MemoryUsage.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "heading",
-      "id": "various/h/optimization-tricks",
-      "chapter": "various",
-      "level": 2,
-      "title": "Optimization tricks",
-      "searchText": "Optimization tricks"
-    },
-    {
-      "type": "prose",
-      "id": "various/p/2",
-      "chapter": "various",
-      "latex": "\\verb@__builtin_ia32_ldmxcsr(40896);@ disables denormals (which make floats 20x slower near their minimum value).",
-      "searchText": "__builtin_ia32_ldmxcsr(40896); disables denormals (which make floats 20x slower near their minimum value)."
-    },
-    {
-      "type": "heading",
-      "id": "various/h/bit-hacks",
-      "chapter": "various",
-      "level": 3,
-      "title": "Bit hacks",
-      "searchText": "Bit hacks"
-    },
-    {
-      "type": "prose",
-      "id": "various/p/3",
-      "chapter": "various",
-      "latex": "\\begin{itemize} \\item \\verb@x & -x@ is the least bit in \\texttt{x}. \\item \\verb@for (int x = m; x; ) { --x &= m; ... }@ loops over all subset masks of \\texttt{m} (except \\texttt{m} itself). \\item \\verb@c = x&-x, r = x+c; (((r^x) >> 2)/c) | r@ is the next number after \\texttt{x} with the same number of bits set. \\item \\verb@rep(b,0,K) rep(i,0,(1 << K))@ \\\\ \\verb@  if (i & 1 << b) D[i] += D[i^(1 << b)];@ computes all sums of subsets. \\item \\verb@__builtin_ctz(x)@ trailing zeros (\\texttt{int}). \\item \\verb@__builtin_clzll(x)@ leading zeros (\\texttt{ll}). \\item \\verb@__builtin_popcountll(x)@ number of ones. \\end{itemize} \\myneedspace{8\\baselineskip}",
-      "searchText": "x -x is the least bit in x . for (int x = m; x; ) --x = m; ... loops over all subset masks of m (except m itself). c = x -x, r = x+c; (((r^x) >> 2)/c) | r is the next number after x with the same number of bits set. rep(b,0,K) rep(i,0,(1 << K)) \\ if (i 1 << b) D[i] += D[i^(1 << b)]; computes all sums of subsets. __builtin_ctz(x) trailing zeros ( int ). __builtin_clzll(x) leading zeros ( ll ). __builtin_popcountll(x) number of ones. 8"
-    },
-    {
-      "type": "heading",
-      "id": "various/h/pragmas",
-      "chapter": "various",
-      "level": 3,
-      "title": "Pragmas",
-      "searchText": "Pragmas"
-    },
-    {
-      "type": "snippet",
-      "id": "various/Pragmas.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/FastMod.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/FastInput.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/BumpAllocator.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/SmallPtr.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/BumpAllocatorSTL.h",
-      "chapter": "various",
-      "includedInPdf": true
-    },
-    {
-      "type": "snippet",
-      "id": "various/Unrolling.h",
-      "chapter": "various",
-      "includedInPdf": false
-    },
-    {
-      "type": "snippet",
-      "id": "various/SIMD.h",
-      "chapter": "various",
-      "includedInPdf": false
     },
     {
       "type": "heading",
@@ -5237,6 +5057,247 @@
       "id": "geometry/sphericalDistance.h",
       "chapter": "geometry",
       "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "various/h/various",
+      "chapter": "various",
+      "level": 1,
+      "title": "Various",
+      "searchText": "Various"
+    },
+    {
+      "type": "snippet",
+      "id": "various/EulerTourTree.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/BinaryTrie.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/SegmentTreeBeats.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/SparseLazySegmentTree.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/SparseSegmentTree2d.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/PersistentSegmentTree.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/MinPlusConvolution.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/LinkCutTree.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "various/h/intervals",
+      "chapter": "various",
+      "level": 2,
+      "title": "Intervals",
+      "searchText": "Intervals"
+    },
+    {
+      "type": "snippet",
+      "id": "various/IntervalContainer.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/IntervalCover.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/ConstantIntervals.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "various/h/misc-algorithms",
+      "chapter": "various",
+      "level": 2,
+      "title": "Misc. algorithms",
+      "searchText": "Misc. algorithms"
+    },
+    {
+      "type": "snippet",
+      "id": "various/BigInt.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/TernarySearch.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/LIS.h",
+      "chapter": "various",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "various/FastKnapsack.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "various/h/dynamic-programming",
+      "chapter": "various",
+      "level": 2,
+      "title": "Dynamic programming",
+      "searchText": "Dynamic programming"
+    },
+    {
+      "type": "snippet",
+      "id": "various/KnuthDP.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/DivideAndConquerDP.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "various/h/debugging-tricks",
+      "chapter": "various",
+      "level": 2,
+      "title": "Debugging tricks",
+      "searchText": "Debugging tricks"
+    },
+    {
+      "type": "prose",
+      "id": "various/p/1",
+      "chapter": "various",
+      "latex": "\\begin{itemize} \\item \\verb@signal(SIGSEGV, [](int) { _Exit(0); });@ converts segfaults into Wrong Answers. Similarly one can catch SIGABRT (assertion failures) and SIGFPE (zero divisions). \\verb@_GLIBCXX_DEBUG@ failures generate SIGABRT (or SIGSEGV on gcc 5.4.0 apparently). \\item \\verb@feenableexcept(29);@ kills the program on NaNs (\\texttt 1), 0-divs (\\texttt 4), infinities (\\texttt 8) and denormals (\\texttt{16}). \\end{itemize}",
+      "searchText": "signal(SIGSEGV, [](int) _Exit(0); ); converts segfaults into Wrong Answers. Similarly one can catch SIGABRT (assertion failures) and SIGFPE (zero divisions). _GLIBCXX_DEBUG failures generate SIGABRT (or SIGSEGV on gcc 5.4.0 apparently). feenableexcept(29); kills the program on NaNs ( 1), 0-divs ( 4), infinities ( 8) and denormals ( 16 )."
+    },
+    {
+      "type": "snippet",
+      "id": "various/MemoryUsage.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "heading",
+      "id": "various/h/optimization-tricks",
+      "chapter": "various",
+      "level": 2,
+      "title": "Optimization tricks",
+      "searchText": "Optimization tricks"
+    },
+    {
+      "type": "prose",
+      "id": "various/p/2",
+      "chapter": "various",
+      "latex": "\\verb@__builtin_ia32_ldmxcsr(40896);@ disables denormals (which make floats 20x slower near their minimum value).",
+      "searchText": "__builtin_ia32_ldmxcsr(40896); disables denormals (which make floats 20x slower near their minimum value)."
+    },
+    {
+      "type": "heading",
+      "id": "various/h/bit-hacks",
+      "chapter": "various",
+      "level": 3,
+      "title": "Bit hacks",
+      "searchText": "Bit hacks"
+    },
+    {
+      "type": "prose",
+      "id": "various/p/3",
+      "chapter": "various",
+      "latex": "\\begin{itemize} \\item \\verb@x & -x@ is the least bit in \\texttt{x}. \\item \\verb@for (int x = m; x; ) { --x &= m; ... }@ loops over all subset masks of \\texttt{m} (except \\texttt{m} itself). \\item \\verb@c = x&-x, r = x+c; (((r^x) >> 2)/c) | r@ is the next number after \\texttt{x} with the same number of bits set. \\item \\verb@rep(b,0,K) rep(i,0,(1 << K))@ \\\\ \\verb@  if (i & 1 << b) D[i] += D[i^(1 << b)];@ computes all sums of subsets. \\item \\verb@__builtin_ctz(x)@ trailing zeros (\\texttt{int}). \\item \\verb@__builtin_clzll(x)@ leading zeros (\\texttt{ll}). \\item \\verb@__builtin_popcountll(x)@ number of ones. \\end{itemize} \\myneedspace{8\\baselineskip}",
+      "searchText": "x -x is the least bit in x . for (int x = m; x; ) --x = m; ... loops over all subset masks of m (except m itself). c = x -x, r = x+c; (((r^x) >> 2)/c) | r is the next number after x with the same number of bits set. rep(b,0,K) rep(i,0,(1 << K)) \\ if (i 1 << b) D[i] += D[i^(1 << b)]; computes all sums of subsets. __builtin_ctz(x) trailing zeros ( int ). __builtin_clzll(x) leading zeros ( ll ). __builtin_popcountll(x) number of ones. 8"
+    },
+    {
+      "type": "heading",
+      "id": "various/h/pragmas",
+      "chapter": "various",
+      "level": 3,
+      "title": "Pragmas",
+      "searchText": "Pragmas"
+    },
+    {
+      "type": "snippet",
+      "id": "various/Pragmas.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/FastMod.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/FastInput.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/BumpAllocator.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/SmallPtr.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/BumpAllocatorSTL.h",
+      "chapter": "various",
+      "includedInPdf": true
+    },
+    {
+      "type": "snippet",
+      "id": "various/Unrolling.h",
+      "chapter": "various",
+      "includedInPdf": false
+    },
+    {
+      "type": "snippet",
+      "id": "various/SIMD.h",
+      "chapter": "various",
+      "includedInPdf": false
     },
     {
       "type": "heading",

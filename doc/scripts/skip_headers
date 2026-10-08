@@ -1,7 +1,6 @@
 SolveLinear2.h
 Unrolling.h
 MinCostMaxFlow.h
-DivideAndConquerDP.h
 ModInverse.h
 Hashing-codeforces.h
 MoQueries.h

@@ -49,6 +49,39 @@ Helpers live in `stress-tests/utilities/` (`template.h`, graph generators, etc.)
 
 `old-unit-tests/` is broken and unused. Ignore it.
 
+### Apple Silicon macOS
+
+Native macOS arm64 GCC uses an 8-byte `long double` with 53 bits of mantissa,
+the same precision as `double`. [ModMulLL.h](../content/number-theory/ModMulLL.h)
+assumes x87 80-bit extended precision for its full range (moduli up to about
+`7.2e18`); with 64-bit floating point, its documented range is only below `2^52`.
+Installing Homebrew GCC fixes the Apple clang/compiler issue, but does not give
+native arm64 builds x87 precision.
+
+Known effects in `stress-tests/number-theory/`:
+
+| Test | Native Apple Silicon behavior |
+|---|---|
+| `ModMulLL.cpp` | Aborts when the large-modulus result differs from the exact `__uint128_t` reference. |
+| `MillerRabin.cpp` | Aborts on a primality mismatch; it uses `ModMulLL.h`. |
+| `Factor.cpp` | Can hang in Pollard rho on large inputs; it uses both `ModMulLL.h` and `MillerRabin.h`. |
+| `PrimitiveRoot.cpp` | Depends on the same snippets, but the current stress test uses small moduli within the reduced range. Do not assume it fails just because of that dependency. |
+
+These results were reproduced with native Homebrew GCC 15.3.0; `Factor.cpp`
+exceeded a 20-second time limit, while `PrimitiveRoot.cpp` passed.
+The former `ModSum.cpp` failure was a test bug: macOS's libc `rand()` produced a
+short progression whose correct sum differed from the assumed `to*m/2` average
+by more than the tolerance. The test now checks that input exactly and compares
+large cases with a `__uint128_t` reference using a fixed `mt19937_64` seed.
+This was unrelated to x87 precision; `ModSum.h` uses integer arithmetic.
+
+Validate the full-range number theory tests on x86-64 Linux/GCC, as in CI.
+If running `Factor.cpp` locally, use a time limit rather than waiting indefinitely.
+Do not lower test bounds or weaken assertions to make the native arm64 suite green.
+The header compile check also skips `Pragmas.h` and `SIMD.h` on non-x86 targets
+because their AVX2 target pragmas are architecture-specific; those are intentional
+skips, not stress-test failures.
+
 ## CI
 
 - [`.github/workflows/ccpp.yml`](../.github/workflows/ccpp.yml) — on push/PR to `main`: `make kactl`, `make test-preprocess`, `make test-compiles`, then stress tests (`make test-relevant` on PRs vs the base SHA, `make test` on `main`). Concurrent runs on the same ref cancel in progress.

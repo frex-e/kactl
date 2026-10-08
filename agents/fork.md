@@ -115,7 +115,7 @@ Also in chapter text (no new `.h`): Johnson’s algorithm, extra bit builtins, f
 | `content/data-structures/Treap.h` | generic aggregate and lazy update; defaults to range add/sum |
 | `content/graph/HLD.h` | uses `LazyUpdateTree`; converts half-open HLD ranges to inclusive `[l, r-1]` |
 | `content/various/KnuthDP.h` | quadrangle notes (verified patterns) + `knuthDP` implementation |
-| `content/various/DivideAndConquerDP.h` | layered recurrence + usage of `lo`/`hi`/`f`/`store` |
+| `content/various/DivideAndConquerDP.h` | callable `partitionDP(N, K, C)` for exactly K nonempty segments with half-open costs; rolling layers and initialization included |
 | `content/graph/chapter.tex` | Johnson’s notes; Dinic; centroid; demands / lower bounds; blossom; dominator tree; Steiner tree; Kőnig / path cover / Dilworth |
 | `content/combinatorial/chapter.tex` | 12-fold way table (balls/bins / functions $[n]\to[k]$) |
 | `content/number-theory/chapter.tex` | Möbius; linear sieve; moduli; highly composite; floor blocks; primitive roots |

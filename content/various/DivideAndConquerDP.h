@@ -1,48 +1,47 @@
 /**
- * Author: Simon Lindholm
+ * Author: Codex
  * License: CC0
  * Source: Codeforces
- * Description: Given \texttt{a[i]} $=\min_{\texttt{lo(i)} \le k < \texttt{hi(i)}}(\texttt{f(i, k)})$ where the (minimal)
- *  optimal $k$ increases with $i$, computes \texttt{a[i]} for \texttt{i = L..R-1}.
- *  Layered form (quadrangle on $C$ is sufficient):
- *  $\mathrm{dp}(t,j)=\min_{0\le k\le j}\mathrm{dp}(t-1,k-1)+C(k,j)$.
- *  See KnuthDP.h for quadrangle patterns.
- *  solve/rec index bounds $[L,R)$ and candidate bounds
- *  $[LO,HI)$, $[lo(i),hi(i))$ include the lower endpoint
- *  and exclude the upper. The layered cost $C(k,j)$
- *  covers $[k,j]$, both endpoints included.
- * Usage:
- *  Fill in the four hooks, then call solve(L, R) to fill
- *  a[L..R-1].
- *  lo(i), hi(i): allowed k is the half-open range [lo(i), hi(i)).
- *  f(i, k): cost of choosing k at index i.
- *  store(i, k, v): save a[i] = v (argmin k).
- *  rec(L, R, LO, HI) solves i in [L, R), knowing the
- *  optimal k lies in [LO, HI).
- *  solve(L, R) = rec(L, R, -inf, +inf).
- *  For the layered DP above: lo(j)=0, hi(j)=j+1,
- *  f(j,k)=(k ? dpbefore[k-1] : 0)+C(k,j),
- *  store into dpafter[j], then swap layers.
- * Time: O((N + (hi-lo)) \log N)
- * Status: tested on http://codeforces.com/contest/321/problem/E
+ * Description: Minimum cost to partition $[0,N)$ into
+ *  exactly $K$ nonempty segments, where $0\le K\le N$.
+ *  C(i,j) returns the cost of $[i,j)$, i included and
+ *  j excluded; called only with $0\le i<j\le N$.
+ *  $dp(g,j)=\min_{g-1\le k<j}(dp(g-1,k)+C(k,j))$.
+ *  Requires the smallest optimal split k to be
+ *  nondecreasing in j within each layer. Sufficient:
+ *  $C(a,c)+C(b,d)\le C(a,d)+C(b,c)$ for $a\le b<c\le d$.
+ *  All finite costs and sums must fit in ll and be
+ *  less than LLONG\_MAX, which denotes infinity.
+ *  Returns infinity if $K=0<N$; returns 0 if $K=N=0$.
+ * Usage: ll ans = partitionDP(N, K, cost);
+ * Time: O(KN \log N) with O(1) cost queries.
+ * Memory: O(N)
+ * Status: stress-tested
  */
 #pragma once
 
-struct DP { // Modify at will:
-	int lo(int ind) { return 0; }
-	int hi(int ind) { return ind; }
-	ll f(int ind, int k) { return dp[ind][k]; }
-	void store(int ind, int k, ll v) { res[ind] = pii(k, v); }
-
-	void rec(int L, int R, int LO, int HI) {
+template<class F>
+ll partitionDP(int N, int K, F C) {
+	assert(0 <= K && K <= N);
+	vector<ll> prev(N + 1, LLONG_MAX), cur(N + 1);
+	prev[0] = 0;
+	auto rec = [&](auto&& self, int L, int R,
+	               int lo, int hi) -> void {
 		if (L >= R) return;
-		int mid = (L + R) >> 1;
-		pair<ll, int> best(LLONG_MAX, LO);
-		rep(k, max(LO,lo(mid)), min(HI,hi(mid)))
-			best = min(best, make_pair(f(mid, k), k));
-		store(mid, best.second, best.first);
-		rec(L, mid, LO, best.second+1);
-		rec(mid+1, R, best.second, HI);
+		int mid = (L + R) / 2, opt = lo;
+		ll best = LLONG_MAX;
+		rep(k,lo,min(mid,hi)) if (prev[k] != LLONG_MAX) {
+			ll val = prev[k] + C(k, mid);
+			if (val < best) best = val, opt = k;
+		}
+		cur[mid] = best;
+		self(self, L, mid, lo, opt + 1);
+		self(self, mid + 1, R, opt, hi);
+	};
+	rep(g,1,K+1) {
+		fill(all(cur), LLONG_MAX);
+		rec(rec, g, N + 1, g - 1, N);
+		prev.swap(cur);
 	}
-	void solve(int L, int R) { rec(L, R, INT_MIN, INT_MAX); }
-};
+	return prev[N];
+}
